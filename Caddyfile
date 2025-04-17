@@ -1,0 +1,20 @@
+{
+    # Global options block to disable automatic HTTPS redirects
+    auto_https disable_redirects
+    # Optional: Disable HTTP port completely
+    http_port 0
+}
+localhost:3030 {
+    tls internal
+    reverse_proxy localhost:8080 {
+        # If localhost:8080 is not responding retry every second for
+        # 30 seconds. This stops deployments from breaking SSE connections.
+        lb_try_duration 30s
+        lb_try_interval 1s
+    }
+    log {
+        output stderr
+        format console
+        level INFO
+    }
+}

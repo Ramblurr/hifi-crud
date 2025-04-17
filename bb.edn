@@ -1,0 +1,20 @@
+{:paths ["scripts"]
+ :tasks {:requires      ([clojure.string :as str]
+                         [babashka.tasks :refer [shell]])
+         repl           {:override-builtin true
+                         :doc              "Run the dev REPL"
+                         :task             (shell "clojure -M:repl/cider:dev")}
+         fmt            (shell "cljfmt check")
+         fmt:fix        (shell "cljfmt fix .")
+         lint           (shell "clj-kondo --lint src --fail-level error")
+         sync-clj-kondo {:doc  "Sync clj-kondo configs"
+                         :task (do
+                                 (let [cp (-> (shell {:out :string} "clj" "-A:test:dev" "-Spath") :out str/trim)]
+                                   (shell (str "clj-kondo --lint " cp " --copy-configs --skip-lint"))
+                                   (shell (str "clj-kondo --lint " cp "  --dependencies --parallel"))))}
+         clean          {:override-builtin true
+                         :doc              "Clean build artifacts"
+                         :task             (shell "clojure -T:build clean")}
+         uberjar        {:override-builtin true
+                         :doc              "Build an uberjar"
+                         :task             (shell "clojure -T:build uber")}}}
