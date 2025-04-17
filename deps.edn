@@ -1,8 +1,15 @@
-{:paths   ["src" "resources"]
- :deps    {org.clojure/clojure {:mvn/version "1.12.0"}
-           hyperlith/hyperlith {:local/root "../../../hyperlith"}
-           datalevin/datalevin {:mvn/version "0.9.22"}}
- :aliases {:dev   {:jvm-opts
+{:paths ["src" "resources"]
+ :deps  {;; Hyperlith is for Immediate CRUD (HIFICRUD)
+         org.clojure/clojure         {:mvn/version "1.12.0"}
+         hyperlith/hyperlith         {:local/root "../hyperlith" :exclusions [http-kit/http-kit]}
+         http-kit/http-kit           {:mvn/version "2.9.0-beta1"}
+         org.xerial/sqlite-jdbc      {:mvn/version "3.49.1.0"}
+         io.replikativ/datahike      {:mvn/version "0.6.1595"}
+         io.replikativ/datahike-jdbc {:mvn/version "0.3.49" :exclusions [io.replikativ/datahike]}}
+
+ :aliases {:dev   {:extra-paths ["dev"]
+                   :extra-deps  {djblue/portal {:mvn/version "0.59.0"}}
+                   :jvm-opts
                    ["-Duser.timezone=UTC"
                     "-XX:+UseZGC"
                     ;; ZGenerational will be the default in future
