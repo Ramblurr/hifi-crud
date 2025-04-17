@@ -17,4 +17,7 @@
                          :task             (shell "clojure -T:build clean")}
          uberjar        {:override-builtin true
                          :doc              "Build an uberjar"
-                         :task             (shell "clojure -T:build uber")}}}
+                         :task             (shell "clojure -T:build uber")}
+         css            (shell "tailwindcss -i resources/public/main.css -o resources/public/compiled.css")
+         watch-css      (shell "tailwindcss --watch --input resources/public/main.css --output resources/public/compiled.css")
+         prod-css       (shell "tailwindcss --minify --input resources/public/main.css --output resources/public/compiled.css")}}

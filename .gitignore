@@ -7,3 +7,4 @@
 !.clj-kondo/app/*
 !.env.edn
 target
+resources/public/compiled.css
