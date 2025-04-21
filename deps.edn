@@ -1,7 +1,10 @@
 {:paths ["src" "resources"]
  :deps  {;; Hyperlith is for Immediate CRUD (HIFICRUD)
          org.clojure/clojure         {:mvn/version "1.12.0"}
-         hyperlith/hyperlith         {:local/root "../hyperlith" :exclusions [http-kit/http-kit]}
+         hyperlith/hyperlith         {:git/url    "https://github.com/ramblurr/hyperlith"
+                                      :git/sha    "676c2b57cc8b9114859646ea09cb2578f902b2ec"
+                                      ;; :local/root "../hyperlith"
+                                      :exclusions [http-kit/http-kit]}
          http-kit/http-kit           {:mvn/version "2.9.0-beta1"}
          org.xerial/sqlite-jdbc      {:mvn/version "3.49.1.0"}
          io.replikativ/datahike      {:mvn/version "0.6.1595"}
