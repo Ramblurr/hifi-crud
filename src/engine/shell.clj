@@ -18,7 +18,7 @@
 
 (def default-registry
   {:engine/registry {:commands     {}
-                     :effects      {:dispatch fx/dispatch-fx}
+                     :effects      {::fx/dispatch fx/dispatch-fx}
                      :inputs       {}
                      :interceptors {:unhandled-error-interceptor int/unhandled-error-interceptor
                                     :do-fx-interceptor           int/do-fx-interceptor}}})
@@ -38,6 +38,7 @@
 
   sequential: adds all of the items in the seq to the registry, they should be one of the above
   map: assumes it is a another env map and merges the args into it
+  fn: assumes it is a 0-arity thunk and invokes it to retrieve more operations
   "
   ([item-or-items]
    (register default-registry item-or-items))
@@ -51,13 +52,16 @@
      (sequential? item-or-items-or-env)
      (reduce register env item-or-items-or-env)
 
+     (fn? item-or-items-or-env)
+     (reduce register env (item-or-items-or-env))
+
      :else
      (throw (ex-info "Invalid type to register" {:args item-or-items-or-env})))))
 
 (defn dispatch-sync
   "Synchronously (immediately) process command, returns a CompleteableFuture that resolves to the result.
 
-  `command` is a vector whose first element is a keyword identifying the event, the rest are the optional command data."
+  `command` is a map containing at least a :command/kind keyword identifying the command type"
   ([env command]
    (dispatch-sync env command default-opts))
   ([env command opts]

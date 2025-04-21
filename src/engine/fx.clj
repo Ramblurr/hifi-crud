@@ -3,8 +3,10 @@
   (:require
    [promesa.exec.csp :as sp]))
 
+(defn dispatch-command [ctx command]
+  (sp/put! (:engine.impl/chan ctx) command)
+  :dispatched)
+
 (def dispatch-fx
-  {:effect/kind    :dispatch
-   :effect/handler (fn dispatch-effect [ctx command]
-                     (sp/put (:engine.impl/chan ctx) command)
-                     :dispatched)})
+  {:effect/kind    ::dispatch
+   :effect/handler dispatch-command})

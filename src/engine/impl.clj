@@ -6,6 +6,15 @@
    [promesa.core :as pr]
    [exoscale.interceptor :as i]))
 
+(defn assert-handler-return [result command]
+  ;; command handlers can return
+  ;; - nil
+  ;; - a map
+  (if (or (nil? result) (map? result))
+    result
+    (throw (context/ex ::invalid-handler-return {:result  result
+                                                 :command command}))))
+
 (def cmd-handler-interceptor
   {:interceptor/name :cmd-handler-interceptor
    :doc              "Applies the command handler to the inputs and puts the outcome in the context"
@@ -18,16 +27,18 @@
                          (if (some? handler)
                            (assoc ctx :outcome
                                   (-> (handler inputs data)
+                                      (assert-handler-return command)
                                       (assoc :outcome/command-id (:command/id command))))
                            (throw (context/ex ::no-cmd-handler {:command command
                                                                 :ctx     ctx})))))})
 
 (defn input-interceptors [env command]
-  (for [[input-kind v] (context/get-command-inputs env (:command/kind command))]
+  (for [[input-kind data] (context/get-command-inputs env (:command/kind command))]
+
     (if-let [handler (context/get-input-handler env input-kind)]
       {:interceptor/name input-kind
        :enter            (fn [ctx]
-                           (update ctx :inputs handler v))}
+                           (update ctx :inputs (partial handler ctx) data))}
       (throw (context/ex ::no-input {:command    command
                                      :input-kind input-kind})))))
 
@@ -48,15 +59,15 @@
   (let [head   (:interceptors opts)
         middle (input-interceptors env command)
         tail   [cmd-handler-interceptor]]
-    (i/enqueue env (resolve-interceptors env (concat head middle tail)))))
+    (i/enqueue env
+               (resolve-interceptors env (concat head middle tail)))))
 
-(defn prepare-ctx [env [command-kind & args] opts]
-  (let [command {:command/kind command-kind
+(defn prepare-ctx [env command opts]
+  (let [command {:command/kind (:command/kind command)
                  :command/id   (random-uuid)
                  :command/time (System/currentTimeMillis)
-                 :command/data args}]
+                 :command/data command}]
     (-> env
-        (select-keys [:engine/registry ::chan])
         (with-interceptors command opts)
         (assoc :command command))))
 
@@ -76,13 +87,13 @@
 
 (defn compile-item [kind x]
   (case kind
-    :command/kind (update x :command/inputs #(map (fn [input]
-                                                    (if (keyword? input)
-                                                      [input nil]
-                                                      input)) %))
-    :effect/kind  x
-    :input/kind   x
-    :interceptor/name))
+    :command/kind     (update x :command/inputs #(map (fn [input]
+                                                        (if (keyword? input)
+                                                          [input nil]
+                                                          input)) %))
+    :effect/kind      x
+    :input/kind       x
+    :interceptor/name x))
 
 (defn register-kind [env kind cmd-or-fx]
   (assoc-in env [:engine/registry (kind kinds) (kind cmd-or-fx)]
@@ -94,7 +105,7 @@
     (-> env
         (prepare-ctx command opts)
         ip/execute)
-    (fn dispatch-results [ctx error]
+    (fn handle-results [ctx error]
       (if error
         (throw error)
         ctx

@@ -5,7 +5,12 @@
          http-kit/http-kit           {:mvn/version "2.9.0-beta1"}
          org.xerial/sqlite-jdbc      {:mvn/version "3.49.1.0"}
          io.replikativ/datahike      {:mvn/version "0.6.1595"}
-         io.replikativ/datahike-jdbc {:mvn/version "0.3.49" :exclusions [io.replikativ/datahike]}
+         io.replikativ/datahike-jdbc {:mvn/version "0.3.49" :exclusions [io.replikativ/datahike
+                                                                         com.taoensso/timbre]}
+         org.flatland/ordered        {:mvn/version "1.15.12"}
+         metosin/malli               {:mvn/version "0.17.0"}
+         exoscale/cloak              {:mvn/version "0.1.10"}
+         jarohen/chime               {:mvn/version "0.3.3"}
          ;; Imperative Shell as the Engine of Application State (ISAEOAS)
          exoscale/interceptor        {:mvn/version "0.1.17"}
          funcool/promesa             {:mvn/version "11.0.678"}}

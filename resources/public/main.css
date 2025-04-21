@@ -1,3 +1,89 @@
 @import "tailwindcss" source(none);
 @source "./main.css";
+@source "../../src/app";
 
+/* this makes dark only active when html has .dark class */
+/* we need to fully support dark mode everywhere before removing this */
+@custom-variant dark (&:where(.dark, .dark *));
+
+@layer base {
+  button:not(:disabled),
+  [role="button"]:not(:disabled) {
+    cursor: pointer;
+  }
+}
+
+@utility cloak {
+  display: none;
+}
+
+@view-transition {
+  navigation: auto;
+}
+
+html {
+  @apply h-full bg-gray-50;
+}
+body {
+  @apply h-full;
+}
+
+.btn > .spinner {
+  @apply opacity-0 absolute inset-0 m-auto flex items-center justify-center size-5;
+}
+.btn.spinning > .spinner {
+  @apply opacity-100 pointer-events-auto;
+}
+.btn.spinning > :not(:first-child) {
+  /* all other children except the .spinner should be hidden */
+  @apply opacity-0 pointer-events-none;
+}
+
+.notification-transition {
+  view-transition-name: notification;
+}
+
+@keyframes notification-enter {
+  from {
+    opacity: 0;
+    transform: translateY(calc(var(--spacing) * 2));
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes notification-exit {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+::view-transition-old(notification) {
+  animation: notification-exit 100ms ease-in forwards;
+}
+
+::view-transition-new(notification) {
+  animation: notification-enter 300ms ease-out forwards;
+}
+
+@media (min-width: 640px) {
+  @keyframes notification-enter-sm {
+    from {
+      opacity: 0;
+      transform: translateX(calc(var(--spacing) * 2));
+    }
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+
+  ::view-transition-new(notification) {
+    animation: notification-enter-sm 300ms ease-out forwards;
+  }
+}

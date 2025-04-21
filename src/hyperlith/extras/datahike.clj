@@ -2,6 +2,7 @@
   "Datahike wrapper for hyperlith. Requires datalevin as a dependency."
   (:require [hyperlith.core :as h]
             [datahike-jdbc.core]
+            [datahike.core :as dc]
             [datahike.api :as d]))
 
 (def default-schema
@@ -17,13 +18,13 @@
 
    #:user
    {:id {:db/unique      :db.unique/identity
-         :db/valueType   :db.type/string
+         :db/valueType   :db.type/uuid
          :db/index       true
          :db/cardinality :db.cardinality/one}}
 
    #:error
    {:id    {:db/unique      :db.unique/identity
-            :db/valueType   :db.type/string
+            :db/valueType   :db.type/uuid
             :db/index       true
             :db/cardinality :db.cardinality/one}
     :cause {:db/valueType   :db.type/string
@@ -51,7 +52,9 @@
             (conj schema (assoc attr-map :db/ident attr-id))) [] schema))
 
 (def q d/q)
+(def db d/db)
 (def tx! d/transact!)
+(def squuid dc/squuid)
 
 (defn create-and-connect [db-path]
   (let [cfg {:store              {:backend :jdbc
@@ -61,17 +64,22 @@
              :heep-history?      true
              :initial-tx         {:tx-data (schema->tx-data default-schema)}}]
     (when-not (d/database-exists? cfg)
-      (d/create-database cfg))
+      (d/create-database cfg :initial-tx {:tx-data (schema->tx-data default-schema)}))
     (d/connect cfg)))
 
-(defn ctx-start [ctx store]
-  (let [conn (create-and-connect store)]
+(defn ctx-start [ctx db-path]
+  (let [conn (create-and-connect db-path)]
+    (assert (some? conn))
     (d/listen conn :refresh-on-change
               (fn [_] (h/refresh-all!)))
-    (merge ctx {:conn conn})))
+    (assoc ctx :conn conn)))
 
 (defn ctx-stop [{:keys [conn] :as _ctx}]
-  (d/unlisten conn :refresh-on-change))
+  (try
+    (d/unlisten conn :refresh-on-change)
+    (d/release conn)
+    (catch Exception e
+      (tap> e))))
 
 (comment
 
@@ -113,3 +121,46 @@
            (mapcat (fn [i v] (tuples (conj parent i) v)) (range) x)
 
            :else [(conj parent x)]))))
+
+(defn find-all
+  "Returns a list of all entities having attr"
+  [db attr pattern]
+  (d/q '[:find (pull ?e pattern)
+         :in $ ?attr pattern
+         :where
+         [?e ?attr ?v]]
+       db attr pattern))
+
+(defn count-all
+  "Returns the number of entities having attr"
+  [db attr]
+  (let [result
+        (ffirst (d/q '[:find (count ?e)
+                       :in $ ?attr
+                       :where [?e ?attr ?v]]
+                     db attr))]
+    (if (nil? result)
+      0
+      result)))
+
+(defn count-by
+  "Count the number of entities possessing attribute attr"
+  [db attr]
+  (->> (d/q '[:find (count ?e)
+              :in $ ?attr
+              :where [?e ?attr]]
+            db attr)
+       ffirst))
+
+(defn find-all-by
+  "Returns the entities having attr and val"
+  [db attr attr-val pattern]
+  (d/q '[:find (pull ?e pattern)
+         :in $ ?attr ?val pattern
+         :where [?e ?attr ?val]]
+       db attr attr-val pattern))
+
+(defn find-by
+  "Returns the unique entity identified by attr and val."
+  [db attr attr-val pattern]
+  (ffirst (find-all-by db attr attr-val pattern)))
