@@ -54,8 +54,7 @@
    [:div {:id "notification-container" :class "flex w-full flex-col items-center space-y-4 sm:items-end"}
     (for [notif notifications]
       (let [{:keys [id title text]} notif]
-        (notification id title text)))
-    #_(notification "notif-saved" "Succesfully saved!" "Anyone with a link can now view this file.")]])
+        (notification id title text)))]])
 
 (defn render-home-logged-out [{:keys [url-for] :as req}]
   (let [link-cls "text-sm font-medium text-teal-600 underline"]

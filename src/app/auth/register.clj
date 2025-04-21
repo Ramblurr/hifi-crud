@@ -46,11 +46,15 @@
       (unique-conflict-error data)
       (unhandled-tx-error e data))))
 
-(defn validate-command [cofx {:keys [signals]}]
+(defn validate-command
+  "Handle registration form interactive validation"
+  [cofx {:keys [signals]}]
   {:outcome/effects
    [(forms/validate-form (RegisterForm cofx) signals)]})
 
-(defn submit-command [cofx {:keys [signals]}]
+(defn submit-command
+  "Handle registration form submission"
+  [cofx {:keys [signals]}]
   (let [errors (forms/validate-form (RegisterForm cofx) signals :clear? false)]
     (if false
       {:outcome/effects [errors]}

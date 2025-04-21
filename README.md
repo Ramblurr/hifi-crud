@@ -31,6 +31,11 @@ There are no "partials" or "components" in the traditional sense. On every chang
 
 Of course views are just functions calling functions, so you can pull common functionality (dialogs, forms, buttons, etc) into functions accessible from a shared namespace.
 
+Here is the view in the demo application that renders the registration page:
+
+https://github.com/Ramblurr/hifi-crud/blob/2f4fdfee36b8155d9e80338ad74569647f8271e5/src/app/auth/register.clj#L68-L114
+
+
 ## The State
 
 There are two sources of backend state:
