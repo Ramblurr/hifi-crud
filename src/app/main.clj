@@ -46,7 +46,8 @@
   (-main))
 
 (defn stop []
-  (((h/get-app) :stop)))
+  (when-let [ctx (h/get-app)]
+    ((ctx :stop))))
 
 (h/refresh-all!)
 
