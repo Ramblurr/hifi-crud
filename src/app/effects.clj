@@ -74,7 +74,6 @@
 (def root-public-keychain-input
   {:input/kind    :app/root-public-keychain
    :input/handler (fn root-public-keychain [ctx inputs _]
-                    (tap> [:root-public-keychain ctx])
                     (assoc inputs :app/root-public-keychain
                            (:app/root-public-keychain ctx)))})
 
