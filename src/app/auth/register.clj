@@ -89,7 +89,7 @@
          "Create an account"]]
        [:div {:class "mt-10 sm:mx-auto sm:w-full sm:max-w-[480px]"}
         [:div {:class "bg-white px-6 py-12 shadow-sm sm:rounded-lg sm:px-12"}
-         [::form/form {:form/form form}
+         [::form/form {:form/form form :data-indicator "inflight"}
           [:div.space-y-6
            [::form/input {:form/label       "Email"
                           :form/form        form
@@ -110,7 +110,9 @@
                           :name         :password2}]
            [::form/errors {:form/form form}]
            [:div {:data-signals-spinning "false"}
-            [::ui/button {:btn/priority :primary :type "submit" :class "w-full"}
+            [::ui/button {:btn/priority       :primary :type "submit" :class "w-full"
+                          :data-attr-disabled "$inflight"
+                          :data-class         (format "{'spinning': $%s}" "inflight")}
              "Sign up"]]]]]
 
         [:p {:class "mt-10 text-center text-sm/6 text-gray-500"}
