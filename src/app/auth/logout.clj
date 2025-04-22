@@ -18,7 +18,7 @@
 
 (defn render-logout [_]
   (h/html
-    [:main#morph.main
-     [:div {:data-on-load (uic/dispatch :logout/submit)}]]))
+   [:main#morph.main
+    [:div {:data-on-load (uic/dispatch :logout/submit)}]]))
 
 (h/refresh-all!)

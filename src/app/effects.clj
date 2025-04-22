@@ -70,6 +70,14 @@
    :input/handler (fn db-input [{:keys [conn] :as _ctx} inputs _]
                     (assert (some? conn) "No connection to Datahike")
                     (assoc inputs :db (d/db conn)))})
+
+(def root-public-keychain-input
+  {:input/kind    :app/root-public-keychain
+   :input/handler (fn root-public-keychain [ctx inputs _]
+                    (tap> [:root-public-keychain ctx])
+                    (assoc inputs :app/root-public-keychain
+                           (:app/root-public-keychain ctx)))})
+
 (defn current-user
   ([{:keys [sid conn]}]
    (current-user sid conn))
@@ -134,6 +142,7 @@
                   current-user-input
                   restrict-roles-input
                   squuid-input
+                  root-public-keychain-input
                   db-input
                   tab-state-input])
 

@@ -1,6 +1,7 @@
 (ns app.auth.register
   (:require
    [exoscale.cloak :as cloak]
+   [app.crypto :as crypto]
    [app.malli :as s]
    [app.forms :as forms]
    [app.ui.form :as form]
@@ -36,9 +37,10 @@
 
 (defn signals->tx [cofx signals]
   (let [{:keys [email password]} (forms/values-from-signals (RegisterForm nil) signals)]
-    [{:user/id            (:new-user-id cofx)
-      :user/email         email
-      :user/password-hash (cloak/unmask password)}]))
+    [{:user/id       (:new-user-id cofx)
+      :user/email    email
+      :user/keychain (crypto/create-user-keychain (:app/root-public-keychain cofx) password) ;; this is technically a side effect since it generates keys, but a good example of when to break the rules
+      }]))
 
 (defn tx-error->errors [e]
   (let [data (-> e Throwable->map :data)]
@@ -71,50 +73,49 @@
 
 (defn render-register [{:keys [url-for]}]
   (h/html
-    (let [form {:form/key         :register
-                :submit-command   :register/submit
-                :validate-command :register/validate
-                :fields           {:email     ""
-                                   :password  ""
-                                   :password2 ""}}]
-      [:main#morph.main
-       [:div {:class "flex min-h-full flex-col justify-center py-12 sm:px-6 lg:px-8"}
-        [:div {:class "sm:mx-auto sm:w-full sm:max-w-md"}
-         [:a {:href (url-for :home)}
-          [::ui/icon {:ico/icon :rocket :class "mx-auto h-12 w-auto text-teal-600 fill-teal-900"
-                      :alt      "Your Company"}]]
-         [:h2 {:class "mt-6 text-center text-2xl/9 font-bold tracking-tight text-gray-900"}
-          "Create an account"]]
-        [:div {:class "mt-10 sm:mx-auto sm:w-full sm:max-w-[480px]"}
-         [:div {:class "bg-white px-6 py-12 shadow-sm sm:rounded-lg sm:px-12"}
-          [::form/form {:form/form form}
-           [:div.space-y-6
-            [::form/input {:form/label       "Email"
-                           :form/form        form
-                           :form/description "Use any email, no email confirmations are sent."
-                           :type             :email
-                           :autocomplete     "email"
-                           :placeholder      "name@company.com"
-                           :name             :email}]
-            [::form/input {:form/label       "Password"
-                           :form/form        form
-                           :form/description [:p.text-sm [:span.text-red-600 "Warning!"] " Password is not hashed in this demo. Recommend using: 123"]
-                           :type             :password
-                           :autocomplete     "new-password"
-                           :name             :password}]
-            [::form/input {:form/label   "Confirm Password"
-                           :form/form    form
-                           :type         :password
-                           :autocomplete "new-password"
-                           :name         :password2}]
-            [::form/errors {:form/form form}]
-            [:div {:data-signals-spinning "false"}
-             [::ui/button {:btn/priority :primary :type "submit" :class "w-full"}
-              "Sign up"]]]]]
+   (let [form {:form/key         :register
+               :submit-command   :register/submit
+               :validate-command :register/validate
+               :fields           {:email     ""
+                                  :password  ""
+                                  :password2 ""}}]
+     [:main#morph.main
+      [:div {:class "flex min-h-full flex-col justify-center py-12 sm:px-6 lg:px-8"}
+       [:div {:class "sm:mx-auto sm:w-full sm:max-w-md"}
+        [:a {:href (url-for :home)}
+         [::ui/icon {:ico/icon :rocket :class "mx-auto h-12 w-auto text-teal-600 fill-teal-900"
+                     :alt      "Your Company"}]]
+        [:h2 {:class "mt-6 text-center text-2xl/9 font-bold tracking-tight text-gray-900"}
+         "Create an account"]]
+       [:div {:class "mt-10 sm:mx-auto sm:w-full sm:max-w-[480px]"}
+        [:div {:class "bg-white px-6 py-12 shadow-sm sm:rounded-lg sm:px-12"}
+         [::form/form {:form/form form}
+          [:div.space-y-6
+           [::form/input {:form/label       "Email"
+                          :form/form        form
+                          :form/description "Demo note: Use any email, no email confirmations are sent."
+                          :type             :email
+                          :autocomplete     "email"
+                          :placeholder      "name@company.com"
+                          :name             :email}]
+           [::form/input {:form/label   "Password"
+                          :form/form    form
+                          :type         :password
+                          :autocomplete "new-password"
+                          :name         :password}]
+           [::form/input {:form/label   "Confirm Password"
+                          :form/form    form
+                          :type         :password
+                          :autocomplete "new-password"
+                          :name         :password2}]
+           [::form/errors {:form/form form}]
+           [:div {:data-signals-spinning "false"}
+            [::ui/button {:btn/priority :primary :type "submit" :class "w-full"}
+             "Sign up"]]]]]
 
-         [:p {:class "mt-10 text-center text-sm/6 text-gray-500"}
-          "Already have an account? "
-          [:a {:href (url-for :login) :class "font-semibold text-teal-600 hover:text-teal-500"}
-           "Sign in"]]]]])))
+        [:p {:class "mt-10 text-center text-sm/6 text-gray-500"}
+         "Already have an account? "
+         [:a {:href (url-for :login) :class "font-semibold text-teal-600 hover:text-teal-500"}
+          "Sign in"]]]]])))
 
 (h/refresh-all!)

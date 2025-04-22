@@ -27,7 +27,7 @@
 
 (def register-submit-command
   {:command/kind      :register/submit
-   :command/inputs    [:app/db [:db/squuid :new-user-id]]
+   :command/inputs    [:app/db [:db/squuid :new-user-id] :app/root-public-keychain]
    :command/handler   #'register/submit-command
    :app/cloak-signals #{[:register :password]
                         [:register :password2]}})

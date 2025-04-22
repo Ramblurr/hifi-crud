@@ -73,32 +73,32 @@
 
 (defn render-home [{:app/keys [current-user tab-state] :as req}]
   (h/html
-    (if (nil? current-user)
-      (render-home-logged-out req)
-      [:main#morph.main {:data-signals-tab-id__case.kebab (format "'%s'" (:app/tab-id req))}
-       [:div {:class "mx-auto max-w-3xl px-4 py-12 sm:px-6 lg:px-8"}
-        [:div {:class "divide-y divide-gray-200 overflow-hidden rounded-lg bg-white shadow-sm"}
-         [:div {:class "px-4 py-5 sm:px-6"}
-          [:div {:class "sm:flex sm:items-center sm:justify-between"}
-           [:div {:class "sm:flex sm:space-x-5"}
-            [:div {:class "mt-4 text-center sm:mt-0 sm:pt-1 sm:text-left"}
-             [:p {:class "text-sm font-medium text-gray-600"} "Welcome back,"]
-             [:p
-              {:class "text-xl font-bold text-gray-900 sm:text-2xl"}
-              (:user/email current-user)]]]
-           [:div {:class "mt-5 flex justify-center sm:mt-0"}
-            [::ui/button {:btn/priority  :secondary-destructive
-                          :data-on-click (uic/dispatch :logout/submit)}
-             "Logout"]]]]
-         (when current-user
-           [:div {:class "px-4 py-5 sm:p-6"}
-            [:p "You are logged in. You can take the following actions:"]
-            [:div {:class "py-5 flex items-center gap-2 justify-end"}
-             [::ui/button {:data-on-click (uic/dispatch :home/admin)}
-              "Admin Action"]
-             [::ui/button {:btn/priority :primary :data-on-click (uic/dispatch :home/hello)}
-              "Hello Action"]]])]]
-       (notification-region
-        (vals (:notifications tab-state)))])))
+   (if (nil? current-user)
+     (render-home-logged-out req)
+     [:main#morph.main {:data-signals-tab-id__case.kebab (format "'%s'" (:app/tab-id req))}
+      [:div {:class "mx-auto max-w-3xl px-4 py-12 sm:px-6 lg:px-8"}
+       [:div {:class "divide-y divide-gray-200 overflow-hidden rounded-lg bg-white shadow-sm"}
+        [:div {:class "px-4 py-5 sm:px-6"}
+         [:div {:class "sm:flex sm:items-center sm:justify-between"}
+          [:div {:class "sm:flex sm:space-x-5"}
+           [:div {:class "mt-4 text-center sm:mt-0 sm:pt-1 sm:text-left"}
+            [:p {:class "text-sm font-medium text-gray-600"} "Welcome back,"]
+            [:p
+             {:class "text-xl font-bold text-gray-900 sm:text-2xl"}
+             (:user/email current-user)]]]
+          [:div {:class "mt-5 flex justify-center sm:mt-0"}
+           [::ui/button {:btn/priority  :secondary-destructive
+                         :data-on-click (uic/dispatch :logout/submit)}
+            "Logout"]]]]
+        (when current-user
+          [:div {:class "px-4 py-5 sm:p-6"}
+           [:p "You are logged in. You can take the following actions:"]
+           [:div {:class "py-5 flex items-center gap-2 justify-end"}
+            [::ui/button {:data-on-click (uic/dispatch :home/admin)}
+             "Admin Action"]
+            [::ui/button {:btn/priority :primary :data-on-click (uic/dispatch :home/hello)}
+             "Hello Action"]]])]]
+      (notification-region
+       (vals (:notifications tab-state)))])))
 
 (h/refresh-all!)

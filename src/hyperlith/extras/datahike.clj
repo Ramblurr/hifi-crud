@@ -1,50 +1,50 @@
 (ns hyperlith.extras.datahike
   "Datahike wrapper for hyperlith. Requires datalevin as a dependency."
   (:require [hyperlith.core :as h]
-            [datahike-jdbc.core]
+            [datahike-sqlite.core]
             [datahike.core :as dc]
             [datahike.api :as d]))
 
 (def default-schema
   (merge
    #:session
-   {:id   {:db/unique      :db.unique/identity
-           :db/valueType   :db.type/string
-           :db/index       true
-           :db/cardinality :db.cardinality/one}
-    :user {:db/valueType   :db.type/ref
-           :db/index       true
-           :db/cardinality :db.cardinality/one}}
-
-   #:user
-   {:id {:db/unique      :db.unique/identity
-         :db/valueType   :db.type/uuid
-         :db/index       true
-         :db/cardinality :db.cardinality/one}}
-
-   #:error
-   {:id    {:db/unique      :db.unique/identity
-            :db/valueType   :db.type/uuid
+    {:id   {:db/unique      :db.unique/identity
+            :db/valueType   :db.type/string
             :db/index       true
             :db/cardinality :db.cardinality/one}
-    :cause {:db/valueType   :db.type/string
-            :db/cardinality :db.cardinality/one}
-    :trace {:db/valueType   :db.type/bytes
-            :db/cardinality :db.cardinality/one}
-    :type  {:db/valueType   :db.type/string
+     :user {:db/valueType   :db.type/ref
             :db/index       true
-            :db/cardinality :db.cardinality/one}
-    :data  {:db/valueType   :db.type/bytes
             :db/cardinality :db.cardinality/one}}
 
+   #:user
+    {:id {:db/unique      :db.unique/identity
+          :db/valueType   :db.type/uuid
+          :db/index       true
+          :db/cardinality :db.cardinality/one}}
+
+   #:error
+    {:id    {:db/unique      :db.unique/identity
+             :db/valueType   :db.type/uuid
+             :db/index       true
+             :db/cardinality :db.cardinality/one}
+     :cause {:db/valueType   :db.type/string
+             :db/cardinality :db.cardinality/one}
+     :trace {:db/valueType   :db.type/bytes
+             :db/cardinality :db.cardinality/one}
+     :type  {:db/valueType   :db.type/string
+             :db/index       true
+             :db/cardinality :db.cardinality/one}
+     :data  {:db/valueType   :db.type/bytes
+             :db/cardinality :db.cardinality/one}}
+
    #:error-event
-   {;; Reified join so we get the date of when it happened
-    :session {:db/valueType   :db.type/ref
-              :db/index       true
-              :db/cardinality :db.cardinality/one}
-    :error   {:db/valueType   :db.type/ref
-              :db/index       true
-              :db/cardinality :db.cardinality/one}}))
+    {;; Reified join so we get the date of when it happened
+     :session {:db/valueType   :db.type/ref
+               :db/index       true
+               :db/cardinality :db.cardinality/one}
+     :error   {:db/valueType   :db.type/ref
+               :db/index       true
+               :db/cardinality :db.cardinality/one}}))
 
 (defn schema->tx-data
   [schema]
@@ -57,9 +57,10 @@
 (def squuid dc/squuid)
 
 (defn create-and-connect [db-path]
-  (let [cfg {:store              {:backend :jdbc
-                                  :dbtype  "sqlite"
-                                  :dbname  db-path}
+  (let [cfg {:store              {:backend      :sqlite
+                                  :journal_mode "WAL"
+                                  :synchronous  "NORMAL"
+                                  :dbname       db-path}
              :schema-flexibility :write
              :heep-history?      true
              :initial-tx         {:tx-data (schema->tx-data default-schema)}}]
@@ -112,7 +113,7 @@
     "Returns the set of tuples that represent a nested map/vector. Lets you
   use datalog query engines to query json/edn data."
     ([root] {:pre [(or (map? root) (vector? root))]}
-     (tuples [] root))
+            (tuples [] root))
     ([parent x]
      (cond (map? x)
            (mapcat (fn [[k v]] (tuples (conj parent k) v)) x)

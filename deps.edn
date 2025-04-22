@@ -1,27 +1,30 @@
 {:paths ["src" "resources"]
  :deps  {;; Hyperlith is for Immediate CRUD (HIFICRUD)
-         org.clojure/clojure         {:mvn/version "1.12.0"}
-         hyperlith/hyperlith         {:git/url    "https://github.com/ramblurr/hyperlith"
-                                      :git/sha    "676c2b57cc8b9114859646ea09cb2578f902b2ec"
-                                      ;; :local/root "../hyperlith"
-                                      :exclusions [http-kit/http-kit]}
-         http-kit/http-kit           {:mvn/version "2.9.0-beta1"}
-         org.xerial/sqlite-jdbc      {:mvn/version "3.49.1.0"}
-         io.replikativ/datahike      {:mvn/version "0.6.1595"}
-         io.replikativ/datahike-jdbc {:mvn/version "0.3.49" :exclusions [io.replikativ/datahike
-                                                                         com.taoensso/timbre]}
-         org.flatland/ordered        {:mvn/version "1.15.12"}
-         metosin/malli               {:mvn/version "0.17.0"}
-         exoscale/cloak              {:mvn/version "0.1.10"}
-         jarohen/chime               {:mvn/version "0.3.3"}
+         org.clojure/clojure           {:mvn/version "1.12.0"}
+         hyperlith/hyperlith           {:git/url    "https://github.com/ramblurr/hyperlith"
+                                        :git/sha    "676c2b57cc8b9114859646ea09cb2578f902b2ec"
+                                        ;; :local/root "../hyperlith"
+                                        :exclusions [http-kit/http-kit]}
+         http-kit/http-kit             {:mvn/version "2.9.0-beta1"}
+         org.xerial/sqlite-jdbc        {:mvn/version "3.49.1.0"}
+         io.replikativ/datahike        {:mvn/version "0.6.1596"}
+         io.replikativ/datahike-sqlite {:git/url "https://github.com/ramblurr/datahike-sqlite"
+                                        :git/sha "0626e8cdab400f895f8c2fba3ada108263107ea8"}
+         org.flatland/ordered          {:mvn/version "1.15.12"}
+         metosin/malli                 {:mvn/version "0.17.0"}
+         exoscale/cloak                {:mvn/version "0.1.10"}
+         jarohen/chime                 {:mvn/version "0.3.3"}
+         com.taoensso/tempel           {:mvn/version "1.0.0-RC1"}
+         com.lambdaworks/scrypt        {:mvn/version "1.4.0"}
          ;; Imperative Shell as the Engine of Application State (ISAEOAS)
-         exoscale/interceptor        {:mvn/version "0.1.17"}
-         funcool/promesa             {:mvn/version "11.0.678"}}
+         exoscale/interceptor          {:mvn/version "0.1.17"}
+         funcool/promesa               {:mvn/version "11.0.678"}}
 
  :aliases {:dev   {:extra-paths ["dev"]
                    :extra-deps  {djblue/portal {:mvn/version "0.59.0"}}
                    :jvm-opts
-                   ["-Duser.timezone=UTC"
+                   ["-Djdk.attach.allowAttachSelf"  ;; https://nrepl.org/nrepl/installation.html#jvmti
+                    "-Duser.timezone=UTC"
                     "-XX:+UseZGC"
                     ;; ZGenerational will be the default in future
                     ;; so this won't need to be specified

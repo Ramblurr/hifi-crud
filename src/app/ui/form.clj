@@ -54,7 +54,7 @@
   [_ {:form/keys [left right] :as args}]
   (cc/compile
    [:div {:class "py-5 flex justify-between items-center"
-          #_     "mt-6 flex items-center justify-end gap-x-6"}
+          #_"mt-6 flex items-center justify-end gap-x-6"}
     [:div {:class "flex items-center space-x-3 space-x-4"}
      left]
     [:div {:class "flex justify-end space-x-4"}

@@ -10,10 +10,14 @@
    [hyperlith.core :as h]
    [hyperlith.extras.datahike :as d]))
 
+(def ctx-to-engine-keys
+  "Keys in the app context that should be injected into the engine's environment"
+  [:conn :app/root-public-keychain])
+
 (defn prepare-engine [ctx]
   (let [env   (shell/register
                [effects/effects commands/commands])
-        extra (select-keys ctx [:conn])]
+        extra (select-keys ctx ctx-to-engine-keys)]
     (assert (some? (:conn extra)))
     (assoc ctx :engine
            (merge env extra))))
@@ -55,6 +59,8 @@
   (def conn (-> (h/get-app)
                 :ctx
                 :conn))
+  (-> (h/get-app)
+      :ctx)
 
   (d/q '[:find (pull ?u [*])
          :in $ ?sid
@@ -62,6 +68,8 @@
          [?s :session/user ?u]]
        @conn "dh6ezrhvsz5t7vcbmRHUAt9GHM8")
   (d/find-by @conn :session/id "dh6ezrhvsz5t7vcbmRHUAt9GHM8" '[:session/id {:session/user [:user/email]}])
-  (d/find-all @conn :session/id '[*])
+  (d/find-all @conn :user/id '[*])
+  1
+  ;;
   ;;
   )

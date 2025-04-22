@@ -5,26 +5,60 @@
    [app.forms :as forms]
    [app.ui.form :as form]
    [app.ui :as ui]
-   [hyperlith.core :as h]))
+   [hyperlith.core :as h]
+   [taoensso.tempel :as tempel]))
 
-(defn hash [v]
-  ;; TODO In a real app you would want to hash passwords
-  v)
+(defonce password-rate-limiter
+  ;; Basic in-memory rate limiter to help protect against brute-force
+  ;; attacks from the same user-id. In real applications you'll likely
+  ;; want a persistent rate limiter for user-id, IP, etc.
+  (tempel/rate-limiter
+   {"1 attempt/s per 5 sec/s" [1        5000]
+    "2 attempt/s per 1 min/s" [2 (* 1 60000)]
+    "5 attempt/s per 5 min/s" [5 (* 5 60000)]}))
+
+(defn user-keychain [db user-email]
+  (:user/keychain
+   (d/find-by db :user/email user-email [:user/keychain])))
+
+(defn user-log-in
+  "Attempts to log user in.
+
+  Returns user's unencrypted secret `KeyChain` on success, or throws."
+  [db user-email user-password]
+
+  ;; Ensure a minimum runtime to help protect against timing attacks,
+  ;; Ref. <https://en.wikipedia.org/wiki/Timing_attack>.
+  (tempel/with-min-runtime 2000
+    (if-let [rate-limited (password-rate-limiter user-email)]
+      {:error :rate-limited :limit-info rate-limited}
+      (let [encrypted-keychain (user-keychain db user-email)
+            decrypted-keychain (when encrypted-keychain (tempel/keychain-decrypt encrypted-keychain
+                                                                                 {:password (cloak/unmask user-password)}))]
+        (if decrypted-keychain
+          (do
+            (password-rate-limiter :rl/reset user-email) ; Reset rate limiter
+            {:ok       true
+             :keychain decrypted-keychain})
+          {:error :bad-login})))))
 
 (defn submit-login-command [{:keys [db] :as _cofx} {:keys [sid signals url-for]}]
-  (let [values                    (forms/values-from-signals [:email :password] :login signals)
-        {actual-pw-hash :user/password-hash
-         user-id        :user/id} (d/find-by db :user/email (:email values) [:user/password-hash :user/id])]
-    (if (= actual-pw-hash  (hash (-> values :password cloak/unmask)))
-      {:outcome/effects [{:effect/kind :db/transact
-                          :effect/data {:tx-data    [{:session/id   sid
-                                                      :session/user [:user/id user-id]}]
-                                        :on-success {:command/kind :login/tx-success
-                                                     :redirect-to  (url-for :home)}
-                                        :on-error   {:command/kind :login/tx-error
-                                                     :signals      signals}}}]}
+  (let [{:keys [email password]} (forms/values-from-signals [:email :password] :login signals)
+        {:keys [error]}          (user-log-in db email password)]
+    (if error
       {:outcome/effects [(forms/merge-errors signals :login
-                                             {:_top "Invalid email or password"})]})))
+                                             {:_top
+                                              (if (= error :rate-limited)
+                                                "Too many attempts, please try again later"
+                                                "Invalid email or password")})]}
+      (let [{user-id :user/id} (d/find-by db :user/email email [:user/id])]
+        {:outcome/effects [{:effect/kind :db/transact
+                            :effect/data {:tx-data    [{:session/id   sid
+                                                        :session/user [:user/id user-id]}]
+                                          :on-success {:command/kind :login/tx-success
+                                                       :redirect-to  (url-for :home)}
+                                          :on-error   {:command/kind :login/tx-error
+                                                       :signals      signals}}}]}))))
 
 (defn tx-success-command [_cofx data]
   {:outcome/effects [{:effect/kind :d*/redirect
