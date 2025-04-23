@@ -35,11 +35,48 @@
      :handler #(((load-css) :handler) %)}
     static-css))
 
+(def js-src
+  (map (fn [r]
+         (let [asset (h/static-asset
+                      {:body         (:resource r)
+                       :content-type "text/javascript"
+                       :compress?    false})]
+
+           (assoc r :asset
+                  (cond-> asset
+                    (:path r) (assoc :path (:path r))
+                    ;; TODO reloadable during dev
+                    ))))
+       [{:resource (h/load-resource "public/@floating-ui/floating-ui-core@1.6.9.js")
+         :type     :umd}
+        {:resource (h/load-resource "public/@floating-ui/floating-ui-dom@1.6.13.js")
+         :type     :umd}
+        {:resource         (h/load-resource "public/widgets/popover.js")
+         :path             "/widgets/popover.js"
+         :omit-script-tag? true
+         :type             :esm}
+        {:resource (h/load-resource "public/app.js")
+         :type     :esm}]))
+
+(defn asset-routes []
+  (merge
+   (->> js-src
+        (map :asset)
+        (reduce
+         (fn [acc asset]
+           (assoc acc
+                  [:get (asset :path)]
+                  (asset :handler))) {}))
+   {[:get ((css-thunk) :path)] ((css-thunk) :handler)}))
+
 (def default-shim-handler
   (h/shim-handler
    {:head
     (h/html
-     [:link#css {:rel "stylesheet" :type "text/css" :href (:path (css-thunk))}])
+     [:link#css {:rel "stylesheet" :type "text/css" :href (:path (css-thunk))}]
+     (map (fn [{:keys [type omit-script-tag? asset]}]
+            (when-not omit-script-tag?
+              [:script {:src (asset :path) :defer true :type (when (= :esm type) :module)}])) js-src))
     :body-post
     (h/html
      [:svg {:style "display: none"}
@@ -91,6 +128,6 @@
 
 (def router
   (h/router
-   (merge {[:get ((css-thunk) :path)] ((css-thunk) :handler)
-           [:post "/cmd"]             (h/action-handler #'action-dispatch-command)}
+   (merge {[:post "/cmd"] (h/action-handler #'action-dispatch-command)}
+          (asset-routes)
           (pages->routes pages))))
