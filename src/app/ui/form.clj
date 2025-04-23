@@ -9,7 +9,8 @@
 
 ;; HACK(hyperlith): shouldn't depend on the hyperlith.impl.json ns
 
-(def NameAttribute [:name {:error/message "is required. All form fields require a name attribute as a string or keyword."} [:or :string :keyword]])
+(def NameAttribute [:name {:doc           "the name html attribute, required for all form fields"
+                           :error/message "is required. All form fields require a name attribute as a string or keyword."} [:or :string :keyword]])
 (def FormSchema
   {:form/key         :keyword
    :submit-command   :keyword
@@ -19,7 +20,7 @@
 (defn data-class [m]
   (str "{"
        (->> m
-            (map (fn [[expr classes]]
+            (map (fn data-class [[expr classes]]
                    (format "\"%s\": %s" classes expr)))
             (str/join ","))
        "}"))
@@ -34,14 +35,24 @@
        (str top-ns ".error." field-name-str)
        (str top-ns ".touched." field-name-str)])))
 
-(def Form
-  (with-meta
-    [:map
-     [:form/form (l/schema FormSchema)]]
-    {:name ::form}))
+(def doc-form
+  {:examples ["[form/Form {::form/form {::form/key :my-form :submit-command :submit-form :fields {:name \"Example\"}}} [...]]"]
+   :ns       *ns*
+   :name     'Form
+   :desc     "An HTML <form> that manages datastar signals"
+   :alias    ::form
+   :schema
+   [:map {}
+    [::form {:doc "Form configuration"} (l/schema FormSchema)]]})
+
+(def ^{:doc (uic/generate-docstring doc-form)}
+  Form
+  ::form)
+
 (defmethod c/resolve-alias ::form
-  [_ {:form/keys [form] :as attrs} children]
-  (uic/validate-opts! Form attrs)
+  [_ {::keys [form] :as attrs} children]
+  (uic/validate-opts! doc-form attrs)
+  (assert form)
   (cc/compile
    [:form (uic/merge-attrs attrs
                            :data-signals__ifmissing (j/edn->json
@@ -54,16 +65,28 @@
                            :data-on-submit (uic/dispatch (:submit-command form)))
     children]))
 
-(def FormActions
-  (with-meta
-    [:map
-     [:form/left {:optional true} :any]
-     [:form/right {:optional true} :any]]
-    {:name ::actions}))
+(def doc-form-actions
+  {:examples ["[form/Actions {::form/left [:div \"Cancel\"] ::form/right [:div \"Submit\"]}]"]
+   :ns       *ns*
+   :name     'Actions
+   :desc     "Form actions container for form buttons"
+   :alias    ::actions
+   :schema
+   [:map {}
+    [::left {:optional true
+             :doc      "Content for the left side of the actions row"}
+     :any]
+    [::right {:optional true
+              :doc      "Content for the right side of the actions row"}
+     :any]]})
+
+(def ^{:doc (uic/generate-docstring doc-form-actions)}
+  Actions
+  ::actions)
 
 (defmethod c/resolve-alias  ::actions
-  [_ {:form/keys [left right] :as attrs} _children]
-  (uic/validate-opts! FormActions attrs)
+  [_ {::keys [left right] :as attrs} _children]
+  (uic/validate-opts! doc-form-actions attrs)
   (cc/compile
    [:div {:class "py-5 flex justify-between items-center"
           #_     "mt-6 flex items-center justify-end gap-x-6"}
@@ -72,16 +95,30 @@
     [:div {:class "flex justify-end space-x-4"}
      right]]))
 
-(def FormErrors
-  (with-meta
-    {:form/title (l/optional :string)
-     :form/form  FormSchema}
-    {:name ::errors}))
+(def doc-root-errors
+  {:examples ["[form/RootErrors {::form/title \"Errors\" ::form/form form-config}]"]
+   :ns       *ns*
+   :require  "(require '[app.ui.form :refer [RootErrors]])"
+   :name     'RootErrors
+   :desc     "Displays top-level form errors (errors not associated with a specific field)"
+   :alias    ::errors
+   :schema
+   [:map {}
+    [::title {:optional true
+              :doc      "Title for the error section"}
+     :string]
+    [::form {:doc "Form configuration"}
+     (l/schema FormSchema)]]})
+
+(def ^{:doc (uic/generate-docstring doc-root-errors)}
+  RootErrors
+  ::errors)
 
 ;; Renders top-level form errors
 (defmethod c/resolve-alias ::errors
-  [_ {:form/keys [form title] :as attrs} children]
-  (uic/validate-opts! FormErrors attrs)
+  [_ {::keys [form title] :as attrs} children]
+  (uic/validate-opts! doc-root-errors attrs)
+  (assert form)
   (let [$top-error-signal (str "$" (clojure.core/name (:form/key form)) ".error._top")]
     (cc/compile
      [:div (uic/merge-attrs attrs :class (uic/cs "hidden mt-1 text-red-700")
@@ -93,17 +130,34 @@
       [:div {:class (uic/cs "")}
        children]])))
 
-(def FormSection
-  (with-meta
-    {:section/title    (l/optional :any)
-     :section/subtitle (l/optional :any)
-     :section/narrow?  (l/optional :boolean)
-     :section/compact? (l/optional :boolean)}
-    {:name ::section}))
+(def doc-form-section
+  {:examples ["[form/Section {::form/title \"Contact Info\" ::form/subtitle \"Tell us about yourself\"}]"]
+   :ns       *ns*
+   :name     'Section
+   :desc     "A section within a form with optional title and subtitle"
+   :alias    ::section
+   :schema
+   [:map {}
+    [::title {:optional true
+              :doc      "Section title"}
+     :any]
+    [::subtitle {:optional true
+                 :doc      "Section subtitle or description"}
+     :any]
+    [::narrow? {:optional true
+                :doc      "When true, uses a narrower grid layout"}
+     :boolean]
+    [::compact? {:optional true
+                 :doc      "When true, uses more compact spacing"}
+     :boolean]]})
+
+(def ^{:doc (uic/generate-docstring doc-form-section)}
+  Section
+  ::section)
 
 (defmethod c/resolve-alias ::section
-  [_ {:section/keys [title subtitle compact? narrow?] :as attrs} children]
-  (uic/validate-opts! FormSection attrs)
+  [_ {::keys [title subtitle compact? narrow?] :as attrs} children]
+  (uic/validate-opts! doc-form-section attrs)
   (cc/compile
    [:div (uic/merge-attrs attrs :class (uic/cs
                                         "border-b border-gray-900/10"
@@ -121,10 +175,10 @@
   [attrs input-fn]
   (cc/compile
    (let [class                                (:class attrs)
-         {:keys      [id name]
-          :form/keys [form label  required? description error variant error-icon?]
-          :or        {required?   true
-                      error-icon? false}}     attrs
+         {:keys  [id name]
+          ::keys [form label  required? description error variant error-icon?]
+          :or    {required?   true
+                  error-icon? false}}        attrs
          id                                   (or id (str "form-control" (:form/key form) name))
          description-id                       (str "_" id "-description")
          required-id                          (str "_" id "-required")
@@ -176,16 +230,23 @@
            :data-show $error-signal
            :data-text $error-signal}]])))
 
-(def HiddenInput
-  (with-meta
-    [:map
-     [:form/form (l/schema FormSchema)]
-     NameAttribute]
-    {:name ::hidden}))
+(def doc-hidden-input
+  {:examples ["[form/HiddenInput {::form/form form-config :name \"secret-value\"}]"]
+   :ns       *ns*
+   :name     'HiddenInput
+   :desc     "A hidden form input that is not visible to users"
+   :alias    ::hidden
+   :schema
+   [:map {}
+    [::form {:doc "Form configuration"} (l/schema FormSchema)]
+    NameAttribute]})
+
+(def ^{:doc (uic/generate-docstring doc-hidden-input)} HiddenInput
+  ::hidden)
 
 (defmethod c/resolve-alias ::hidden
-  [_ {:keys [id name] :form/keys [form] :as attrs} _]
-  (uic/validate-opts! HiddenInput attrs)
+  [_ {:keys [id name] ::keys [form] :as attrs} _]
+  (uic/validate-opts! doc-hidden-input attrs)
   (let [id            (or id (str "form-control" (:form/key form) name))
         [signal _]    (field-signal-name form name)
         default-value (get-in form [:fields name])]
@@ -195,24 +256,43 @@
                              :value     default-value
                              :data-bind signal)]))
 
-(def FormInput
-  (with-meta
-    [:map
-     [:form/label :string]
-     [:form/form (l/schema FormSchema)]
-     [:form/error {:optional true} :string]
-     [:form/description {:optional true} :string]
-     [:form/suffix {:optional true} :any]
-     [:form/required? {:optional true} :boolean]
-     NameAttribute]
-    {:name ::input}))
+(def doc-form-input
+  {:examples ["[form/Input {::form/form form-config ::form/label \"Username\" :name \"username\"}]"]
+   :ns       *ns*
+   :name     'Input
+   :desc     "A standard text input for forms with label, description and error handling"
+   :alias    ::input
+   :schema
+   [:map {}
+    [::label {:doc "Label text for the input"}
+     :string]
+    [::form {:doc "Form configuration"}
+     (l/schema FormSchema)]
+    [::error {:optional true
+              :doc      "Error message to display"}
+     :string]
+    [::description {:optional true
+                    :doc      "Description or help text"}
+     :string]
+    [::suffix {:optional true
+               :doc      "Content to display after the input"}
+     :any]
+    [::required? {:optional true
+                  :default  true
+                  :doc      "Whether the field is required"}
+     :boolean]
+    NameAttribute]})
+
+(def ^{:doc (uic/generate-docstring doc-form-input)}
+  Input
+  ::input)
 
 (defmethod c/resolve-alias ::input
   [_ attrs _]
-  (uic/validate-opts! FormInput attrs)
+  (uic/validate-opts! doc-form-input attrs)
   (cc/compile
    (control attrs
-            (fn [attrs {:keys [required? $error-signal]}]
+            (fn input-inner [attrs {:keys [required? $error-signal]}]
               [:input (uic/merge-attrs attrs
                                        :required required?
                                        :class (uic/cs "block w-full rounded-md bg-white py-1.5 text-base outline-1 -outline-offset-1 focus:outline-2 focus:-outline-offset-2 sm:text-sm/6")

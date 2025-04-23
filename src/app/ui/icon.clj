@@ -30,15 +30,25 @@
      (get-in iconsets [iconset (keyword (name ico-name))])
      (get-in iconsets [*default-iconset* (keyword ico-name)]))))
 
-(def Icon
-  (with-meta
-    {:ico/name (l/optional :keyword)}
-    {:name :app.ui/icon}))
+(def doc-icon
+  {:examples ["[icon/Icon {::icon/name :cloud-thin}]"
+              "[icon/Icon {::icon/name :phosphor/cloud-thin :class \"text-teal-500 size-5\"}]"]
+   :ns       *ns*
+   :name     'Icon
+   :desc     "Renders an icon from the available icon collections"
+   :alias    ::icon
+   :schema
+   [:map {}
+    [::name {:doc "The name of the icon to display. Can be namespaced with iconset (e.g. :phosphor/cloud-thin) or just the icon name (e.g. :cloud-thin)"}
+     :keyword]]})
 
-(defmethod c/resolve-alias :app.ui/icon
-  [_ {:ico/keys [name]
-      :as       attrs} _children]
-  (uic/validate-opts! Icon attrs)
+(def ^{:doc (uic/generate-docstring doc-icon)} Icon
+  ::icon)
+
+(defmethod c/resolve-alias ::icon
+  [_ {::keys [name]
+      :as    attrs} _children]
+  (uic/validate-opts! doc-icon attrs)
   (cc/compile
    (update-in (ico name) [1]
               uic/merge-attrs* attrs)))

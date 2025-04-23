@@ -2,8 +2,7 @@
   (:require
    [app.ui.core :as uic]
    [dev.onionpancakes.chassis.compiler :as cc]
-   [dev.onionpancakes.chassis.core :as c]
-   [malli.experimental.lite :as l]))
+   [dev.onionpancakes.chassis.core :as c]))
 
 (def button-sizes
   {:xxsmall {:classes   "rounded-sm px-2 py-1 text-xs"
@@ -22,7 +21,7 @@
              :gap       "gap-x-2"
              :icon-size "size-5"}})
 
-(def button-priorities
+(def button-intents
   {:primary               {:classes       "bg-teal-600 text-white shadow-xs hover:bg-teal-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-600"
                            :dark          "dark:bg-teal-500 dark:hover:bg-teal-400 dark:focus-visible:outline-teal-500"
                            :spinner-color "text-white"}
@@ -46,46 +45,76 @@
                       :spinner-color "text-red-600"
                       :no-border     true}})
 
-(def Button
-  (with-meta
-    {:btn/size          (l/optional [:enum :xxsmall :xsmall :small :normal :large])
-     :btn/priority      (l/optional [:enum :primary :secondary :secondary-destructive :link :link-success :link-destructive])
-     :btn/disabled?     (l/optional :boolean)
-     :btn/loading?      (l/optional :boolean)
-     :btn/icon          (l/optional fn?)
-     :btn/icon-trailing (l/optional fn?)}
-    {:name :app.ui/button}))
+(def doc-button
+  {:examples ["[btn/Button {::btn/intent :primary :id :some-id} \"Click me!\"]"
+              "[btn/Button {::btn/size :large ::btn/icon :star :aria-foo \"bar\"} \"Star Button\"]"]
+   :ns       *ns*
+   :as       'btn
+   :name     'Button
+   :desc     "A button, it's for making things happen"
+   :alias    ::button
+   :schema
+   [:map {}
+    [::size {:optional true
+             :default  :normal
+             :doc      "Button size"}
+     [:enum :xxsmall :xsmall :small :normal :large]]
+    [::intent {:optional true
+               :default  :secondary
+               :doc      "Button intent"}
+     [:enum :primary :secondary :secondary-destructive :link :link-success :link-destructive]]
+    [::disabled? {:optional true
+                  :doc      "When true, disables button interaction"}
+     :boolean]
+    [::loading? {:optional true
+                 :doc      "When true, shows a spinner"}
+     :boolean]
+    [::icon {:optional true
+             :doc      "A leading icon. See :app.ui/icon"}
+     :keyword]
+    [::icon-trailing {:optional true
+                      :doc      "A trailing icon. See :app.ui/icon"}
+     :keyword]]})
 
-(defmethod c/resolve-alias :app.ui/button
-  [_ {:btn/keys
-      [size priority disabled? loading? icon icon-trailing href]
+(def ^{:doc (uic/generate-docstring doc-button)} Button
+  ::button)
+
+(tap>
+ (with-meta
+   [:portal.viewer/code (uic/generate-docstring doc-button)]
+   {:portal.viewer/default :portal.viewer/hiccup}))
+
+(defmethod c/resolve-alias ::button
+  [_ {::keys
+      [size intent disabled? loading? icon icon-trailing href]
       :keys            [type]
       :or
       {type     :button
        size     :normal
-       priority :secondary
+       intent   :secondary
        loading? false} :as attrs} children]
-  (uic/validate-opts! Button attrs)
-  (let [anchor?       (some? href)
-        size-data     (get button-sizes size)
-        priority-data (get button-priorities priority)
-        classes       (uic/cs
-                       "btn font-semibold relative min-w-fit transition-all relative"
-                       (:classes size-data)
-                       (:classes priority-data)
-                       (:dark priority-data)
-                       (when loading? "spinning")
-                       (when (or icon icon-trailing loading?) "inline-flex items-center")
-                       (when (or icon icon-trailing) (:gap size-data))
-                       (when disabled? "opacity-50 cursor-not-allowed")
-                       "disabled:opacity-50 disabled:cursor-not-allowed")]
+  (uic/validate-opts! doc-button attrs)
+  (let [anchor?     (some? href)
+        size-data   (get button-sizes size)
+        intent-data (get button-intents intent)
+        classes     (uic/cs
+                     "btn font-semibold relative min-w-fit transition-all relative"
+                     (:classes size-data)
+                     (:classes intent-data)
+                     (:dark intent-data)
+                     (when loading? "spinning")
+                     (when (or icon icon-trailing loading?) "inline-flex items-center")
+                     (when (or icon icon-trailing) (:gap size-data))
+                     (when disabled? "opacity-50 cursor-not-allowed")
+                     "disabled:opacity-50 disabled:cursor-not-allowed")]
+
     (cc/compile
      [:button  (uic/merge-attrs attrs
                                 :type type
                                 :class classes)
       [:svg {:class (uic/cs "spinner animate-spin"
                             (:icon-size size-data)
-                            (:spinner-color priority-data))}
+                            (:spinner-color intent-data))}
        [:use {:href "#svg-sprite-spinner"}]]
       (when (and icon (not loading?))
         [:app.ui/icon  {:ico/name icon :class (uic/cs "button-icon" (:icon-size size-data) "-ml-0.5") :aria-hidden true}])
