@@ -70,11 +70,11 @@
                                          {:_top "Login failed. Please try again later."})]})
 
 (defn render-login [{:keys [url-for]}]
-  (h/html
-    (let [form {:form/key       :login
-                :submit-command :login/submit
-                :fields         {:email    ""
-                                 :password ""}}]
+  (let [form {:form/key       :login
+              :submit-command :login/submit
+              :fields         {:email    ""
+                               :password ""}}]
+    (h/html
       [:main#morph.main
        [:div {:class "flex min-h-full flex-col justify-center py-12 sm:px-6 lg:px-8"}
         [:div {:class "sm:mx-auto sm:w-full sm:max-w-md"}
@@ -92,7 +92,8 @@
                            :form/form    form
                            :type         :email
                            :autocomplete "email"
-                           :name         :email}]
+                           ;; :name         :email <-- name attribute forgotten
+                           }]
             [::form/input {:form/label   "Password"
                            :form/form    form
                            :type         :password
