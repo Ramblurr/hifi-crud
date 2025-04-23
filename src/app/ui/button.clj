@@ -46,12 +46,15 @@
                       :spinner-color "text-red-600"
                       :no-border     true}})
 
-(def opts {:btn/size          (l/optional [:enum :xxsmall :xsmall :small :normal :large])
-           :btn/priority      (l/optional [:enum :primary :secondary :secondary-destructive :link :link-success :link-destructive])
-           :btn/disabled?     (l/optional :boolean)
-           :btn/loading?      (l/optional :boolean)
-           :btn/icon          (l/optional fn?)
-           :btn/icon-trailing (l/optional fn?)})
+(def Button
+  (with-meta
+    {:btn/size          (l/optional [:enum :xxsmall :xsmall :small :normal :large])
+     :btn/priority      (l/optional [:enum :primary :secondary :secondary-destructive :link :link-success :link-destructive])
+     :btn/disabled?     (l/optional :boolean)
+     :btn/loading?      (l/optional :boolean)
+     :btn/icon          (l/optional fn?)
+     :btn/icon-trailing (l/optional fn?)}
+    {:name :app.ui/button}))
 
 (defmethod c/resolve-alias :app.ui/button
   [_ {:btn/keys
@@ -62,23 +65,24 @@
        size     :normal
        priority :secondary
        loading? false} :as attrs} children]
-  (cc/compile
-   (let [anchor?       (some? href)
-         size-data     (get button-sizes size)
-         priority-data (get button-priorities priority)
-         classes       (uic/cs
-                        "btn font-semibold relative min-w-fit transition-all relative"
-                        (:classes size-data)
-                        (:classes priority-data)
-                        (:dark priority-data)
-                        (when loading? "spinning")
-                        (when (or icon icon-trailing loading?) "inline-flex items-center")
-                        (when (or icon icon-trailing) (:gap size-data))
-                        (when disabled? "opacity-50 cursor-not-allowed")
-                        "disabled:opacity-50 disabled:cursor-not-allowed")]
-     [(if anchor? :a :button) (uic/merge-attrs attrs
-                                               :type type
-                                               :class classes)
+  (uic/validate-opts! Button attrs)
+  (let [anchor?       (some? href)
+        size-data     (get button-sizes size)
+        priority-data (get button-priorities priority)
+        classes       (uic/cs
+                       "btn font-semibold relative min-w-fit transition-all relative"
+                       (:classes size-data)
+                       (:classes priority-data)
+                       (:dark priority-data)
+                       (when loading? "spinning")
+                       (when (or icon icon-trailing loading?) "inline-flex items-center")
+                       (when (or icon icon-trailing) (:gap size-data))
+                       (when disabled? "opacity-50 cursor-not-allowed")
+                       "disabled:opacity-50 disabled:cursor-not-allowed")]
+    (cc/compile
+     [:button  (uic/merge-attrs attrs
+                                :type type
+                                :class classes)
       [:svg {:class (uic/cs "spinner animate-spin"
                             (:icon-size size-data)
                             (:spinner-color priority-data))}

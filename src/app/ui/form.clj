@@ -54,7 +54,7 @@
   [_ {:form/keys [left right] :as args}]
   (cc/compile
    [:div {:class "py-5 flex justify-between items-center"
-          #_"mt-6 flex items-center justify-end gap-x-6"}
+          #_     "mt-6 flex items-center justify-end gap-x-6"}
     [:div {:class "flex items-center space-x-3 space-x-4"}
      left]
     [:div {:class "flex justify-end space-x-4"}
@@ -153,20 +153,19 @@
            :data-show $error-signal
            :data-text $error-signal}]])))
 
-(defn hidden
-  {:opts {:form FormSchema}}
-  [& args]
-  (let [[opts attrs _children] (uic/extract #'hidden args)
-        name                   (:name attrs)
-        form                   (:form opts)
-        id                     (or (:id attrs) (str "form-control" (:form/key form) name))
-        [signal _]             (field-signal-name form name)
-        default-value          (get-in form [:fields name])]
-    (assert name "hidden control requires a :name")
-    [:input (uic/merge-attrs attrs {:type      "hidden"
-                                    :id        id
-                                    :value     default-value
-                                    :data-bind signal})]))
+#_(defn hidden
+    {:opts {:form FormSchema}}
+    [& args]
+    (let [name          (:name attrs)
+          form          (:form opts)
+          id            (or (:id attrs) (str "form-control" (:form/key form) name))
+          [signal _]    (field-signal-name form name)
+          default-value (get-in form [:fields name])]
+      (assert name "hidden control requires a :name")
+      [:input (uic/merge-attrs attrs {:type      "hidden"
+                                      :id        id
+                                      :value     default-value
+                                      :data-bind signal})]))
 
 (defmethod c/resolve-alias ::input
   #_{:opts {:label       :string

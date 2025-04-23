@@ -21,19 +21,10 @@
 (ns app.util.error
   (:require
    [medley.core :as medley]
-   [clojure.main :as clojure.main]
    [clojure.string :as str])
   (:import
    [clojure.lang Compiler]
    [java.io Writer]))
-
-(def demunge-csl-xf
-  (map (fn [stack-element-data]
-         (update stack-element-data 0 (comp clojure.main/demunge str)))))
-
-(def demunge-anonymous-functions-xf
-  (map (fn [stack-element-data]
-         (update stack-element-data 0 str/replace #"(/[^/]+)--\d+" "$1"))))
 
 (def ignored-cls-re
   (re-pattern
@@ -47,32 +38,13 @@
                    "java.util.concurrent.FutureTask"
                    "java.util.concurrent.ThreadPoolExecutor"
                    "java.util.concurrent.ThreadPoolExecutor/Worker"
+                   "java.lang.VirtualThread"
                    "java.lang.Thread"])
         ").*")))
 
 (def remove-ignored-cls-xf
   ;; We don't care about var indirection
-  (remove (fn [[cls _ _ _]] (re-find ignored-cls-re cls))))
-
-(def not-our-cls-xf
-  (drop-while (fn [[cls _ _ _]] (not (str/starts-with? cls "app")))))
-
-(defn clean-trace [trace]
-  (into []
-        (comp demunge-csl-xf
-              not-our-cls-xf
-              remove-ignored-cls-xf
-              demunge-anonymous-functions-xf
-              (medley/dedupe-by first)
-              (take 15))
-        trace))
-
-(defn clean-throwable [t]
-  (let [m (Throwable->map t)]
-    (-> m
-        (update :cause str/replace #"\"" "'")
-        (update :trace clean-trace)
-        (assoc :type (-> m :via peek :type str)))))
+  (remove (fn [{:keys [cls]}] (re-find ignored-cls-re cls))))
 
 (defn trace-element [^StackTraceElement el]
   (let [file     (.getFileName el)
@@ -103,9 +75,18 @@
     {:element   el
      :file      (if (= "NO_SOURCE_FILE" file) nil file)
      :line      line
+     :cls       cls
      :ns        ns
      :separator separator
      :method    method}))
+
+(defn clean-trace [trace]
+  (into []
+        (comp
+         (map trace-element)
+         remove-ignored-cls-xf
+         (medley/dedupe-by (juxt :ns :method)))
+        trace))
 
 (defmacro write [w & args]
   (list* 'do

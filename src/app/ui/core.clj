@@ -1,13 +1,12 @@
 (ns app.ui.core
   (:require
-   [dev.onionpancakes.chassis.core]
    [app.util.error :as u.error]
+   [clojure.string :as str]
+   [dev.onionpancakes.chassis.core]
    [flatland.ordered.map :refer [ordered-map]]
    [malli.core :as m]
-   [malli.experimental.lite :as l]
    [malli.error :as me]
-   [clojure.string :as str]
-   [clojure.set :as set]))
+   [malli.experimental.lite :as l]))
 
 (defn cs [& names]
   (str/join " " (filter identity names)))
@@ -41,24 +40,15 @@
     (tap> (with-meta  [(str (:label callout-opts) "\n" message)] {:ansi/color true}))
     ((requiring-resolve 'bling.core/callout) callout-opts message)))
 
-(defn fqns-sym
-  [m]
-  (symbol (str (:ns m)
-               "/"
-               (str/replace (name (:name m))
-                            #"\*$" ""))))
-
 (defn warning-header
-  [{:keys [m opt value]}]
-  (let [component                     (fqns-sym m)
-        {:keys [_file _line _column]} m]
-    (apply (requiring-resolve 'bling.core/bling)
-           (concat
-            [[:italic "component: "] [:bold component]
-             "\n\n"
-             [:italic "option:    "] [:bold opt]
-             "\n\n"
-             [:italic "invalid:   "] [:bold value]]))))
+  [{:keys [component opt value]}]
+  (apply (requiring-resolve 'bling.core/bling)
+         (concat
+          [[:italic "component: "] [:bold (:name component)]
+           "\n\n"
+           [:italic "option:    "] [:bold opt]
+           "\n\n"
+           [:italic "invalid:   "] [:bold value]])))
 
 (defn strip-should-be [msg]
   (if (re-find #"^(?i)should be" msg)
@@ -67,9 +57,8 @@
 
 (defn warning-body
   [{:keys [opt msg trace]}]
-  (let [short-trace (reverse (take 10 (drop 3 trace)))
-        w           (java.io.StringWriter.)]
-    (u.error/print-trace short-trace w)
+  (let [w (java.io.StringWriter.)]
+    (u.error/print-trace trace w)
     (str
      ((requiring-resolve 'bling.core/bling)
       "Value for the "
@@ -77,7 +66,7 @@
       " "
       msg
       "\n\n"
-      [:italic "Stacktrace preview:"] "\n")
+      [:italic "Compacted stacktrace"] "\n")
      w)))
 
 (defn enable-opts-validation! []
@@ -86,110 +75,55 @@
 (defn disable-opts-validation! []
   (alter-var-root #'*validate-opts* (constantly false)))
 
-(defn error->bling-opts [trace cvar explain]
+(defn error->bling-opts [trace component explain]
   (map (fn [[k error]]
-         (let [opt (str ":-" (name k))]
-           {:point-of-interest-opts {:header (warning-header {:opt   opt
-                                                              :value (get-in explain [:value k])
-                                                              :m     (meta cvar)})
+         (let [opt k]
+           {:point-of-interest-opts {:header (warning-header {:opt       opt
+                                                              :value     (get-in explain [:value k])
+                                                              :component component})
 
                                      :body (warning-body {:opt   opt
                                                           :trace trace
                                                           :msg   (str/join "; " error)})}
 
             :callout-opts {:type  :warning
-                           :label "WARNING​ Invalid option value"}}))
+                           :label "WARNING​ Invalid ui option"}}))
 
        (me/humanize explain)))
 
-(defn stack-traces []
+(defn stack-traces2 []
   (->> (.getStackTrace (Thread/currentThread))
-       (map StackTraceElement->vec)
-       (u.error/clean-trace)))
+       (u.error/clean-trace)
+       (drop 2)
+       (reverse)))
 
-(defn validate-opts [cvar opts]
+(defn validate-opts [schema opts]
+  (let [s (l/schema schema)]
+    (when-let [problem (m/explain s opts)]
+      (let [trace (stack-traces2)]
+        (doseq [bling-opts (error->bling-opts trace (meta schema) problem)]
+          (bad-opt-value-callout bling-opts))))))
+
+(defn validate-opts! [schema attrs]
   (when *validate-opts*
-    (when-let [opt-defs (:opts (meta cvar))]
-      (let [s (l/schema opt-defs)]
-        (when-let [problem (m/explain s opts)]
-          (let [trace (stack-traces)]
-            (doseq [bling-opts (error->bling-opts trace cvar problem)]
-              (bad-opt-value-callout bling-opts)))
+    (validate-opts schema attrs)))
 
-          #_(throw (ex-info (str "Invalid options passed to" cvar) {:error problem
-                                                                    :human (me/humanize problem)})))))))
-
-(defn warn-on-attr-collision [cvar attrs]
-  (when *validate-opts*
-
-    (when-let [opt-defs (:opts (meta cvar))]
-      (doseq [k (set/intersection (set (keys opt-defs)) (set (keys attrs)))]
-        (let [opt-k          (str ":-" (name k))
-              component-name (fqns-sym (meta cvar))
-              msg            (str component-name " called with html attribute " k " that is also an option, did you mean " opt-k " ?")]
-          ((requiring-resolve 'bling.core/callout) {:type :warning} msg))))))
-
-(defn attr+children [coll]
-  (when (coll? coll)
-    (let [[a & xs] coll
-          attr     (when (map? a) a)]
-      [attr (if attr xs coll)])))
-
-(defn user-attr? [x]
-  (and (keyword? x)
-       (->> x name (re-find #"^-[^\s\d]+"))))
-
-(defn unwrapped-children [children]
-  (let [fc (nth children 0 nil)]
-    (if (and
-         (seq? children)
-         (= 1 (count children))
-         (seq? fc)
-         (seq fc))
-      fc
-      children)))
-
-(defn extract
-  "Extracts component options from normal html attributes and children elements.
-
-  Returns a vector of [options html-attributes children]"
-  ;; it is important that we preserve the type of the attr map
-  ;; in case the user has supplied an array-map because the order of their attributes is important
-  [cvar args]
-  (when (coll? args)
-    (let [[attr* children] (attr+children args)
-          user-ks          (some->> attr*
-                                    keys
-                                    (filter user-attr?)
-                                    (into #{}))
-          ;; Calling dissoc on an array map always yields an array map
-          attr             (apply dissoc attr* user-ks)
-          opts             (select-keys attr* (into [] user-ks))
-          supplied-opts    (->> opts
-                                (map (fn [[k v]]
-                                       [(-> k name (subs 1) keyword) v]))
-                                (into {}))]
-
-      (when *validate-opts*
-        (validate-opts cvar supplied-opts)
-        (warn-on-attr-collision cvar attr))
-
-      [supplied-opts
-       attr
-       (->> children
-            (remove nil?)
-            unwrapped-children)])))
-
-(defn merge-attrs [orig-map & {:as extra}]
+(defn merge-attrs*
+  ^clojure.lang.IPersistentMap [orig-map & {:as extra}]
   (reduce (fn [acc [k v]]
             (case k
               :class (update acc :class #(str v " " %))
               (assoc acc k v))) orig-map extra))
 
-(defn easy-extract [comp args class]
-  (let [[opts attrs children] (extract comp args)]
-    [opts
-     (merge-attrs attrs :class class) children]))
+(defmacro merge-attrs
+  "Intelligently merges HTML attributes returning a map that is unamiguous to chassis.
+
+  Intelligent means:
+    - :class strings are concatenated
+    - everything else is assoced like a normal merge
+  "
+  [& args]
+  `^clojure.lang.IPersistentMap (merge-attrs* ~@args))
 
 (defn norm
   "Normalizes the hiccup element to a vector of [tag attrs & children]"
@@ -203,7 +137,7 @@
   "Assoc attributes to the hiccup element"
   [hiccup & {:as args}]
   (update-in (norm hiccup) [1]
-             merge-attrs
+             merge-attrs*
              args))
 
 (assoc-attr [:input "Coolbeans"] :class "mt-3" :type :text)

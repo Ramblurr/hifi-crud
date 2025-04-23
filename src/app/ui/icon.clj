@@ -34,7 +34,7 @@
       :as       attrs} _children]
   (cc/compile
    (update-in (ico icon) [1]
-              uic/merge-attrs attrs)))
+              uic/merge-attrs* attrs)))
 
 (ico :cloud-thin)
 (ico :phosphor/cloud-thin)

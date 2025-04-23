@@ -5,6 +5,7 @@
    [app.malli :as s]
    [app.forms :as forms]
    [app.ui.form :as form]
+   [app.ui.core :as uic]
    [app.ui :as ui]
    [hyperlith.core :as h]))
 
@@ -72,13 +73,13 @@
                                          {:only :touched})]})
 
 (defn render-register [{:keys [url-for]}]
-  (h/html
-   (let [form {:form/key         :register
-               :submit-command   :register/submit
-               :validate-command :register/validate
-               :fields           {:email     ""
-                                  :password  ""
-                                  :password2 ""}}]
+  (let [form {:form/key         :register
+              :submit-command   :register/submit
+              :validate-command :register/validate
+              :fields           {:email     ""
+                                 :password  ""
+                                 :password2 ""}}]
+    (h/html
      [:main#morph.main
       [:div {:class "flex min-h-full flex-col justify-center py-12 sm:px-6 lg:px-8"}
        [:div {:class "sm:mx-auto sm:w-full sm:max-w-md"}
