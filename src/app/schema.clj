@@ -1,5 +1,7 @@
 (ns app.schema
   (:require
+   [clojure.edn :as edn]
+   [clojure.java.io :as io]
    [app.crypto :as crypto]
    [taoensso.tempel :as tempel]
    [hyperlith.core :as h]
@@ -9,15 +11,21 @@
   (d/schema->tx-data
    (merge
     #:user
-     {:email    {:db/unique      :db.unique/value
-                 :db/valueType   :db.type/string
-                 :db/index       true
-                 :db/cardinality :db.cardinality/one}
-      :keychain {:db/valueType   :db.type/bytes
-                 :db/cardinality :db.cardinality/one}})))
+    {:email    {:db/unique      :db.unique/value
+                :db/valueType   :db.type/string
+                :db/index       true
+                :db/cardinality :db.cardinality/one}
+     :keychain {:db/valueType   :db.type/bytes
+                :db/cardinality :db.cardinality/one}})))
+
+(defn ecommerce-schema []
+  (d/schema->tx-data
+   (apply merge
+          (edn/read-string (slurp (io/resource "app/schema/ecommerce.edn"))))))
 
 (defn install-schema! [conn]
-  @(d/tx! conn {:tx-data schema}))
+  @(d/tx! conn {:tx-data schema})
+  @(d/tx! conn {:tx-data (ecommerce-schema)}))
 
 (defn create-root!
   "Create the root user"

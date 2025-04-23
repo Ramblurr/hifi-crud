@@ -8,3 +8,4 @@
 !.env.edn
 target
 resources/public/compiled.css
+extra/

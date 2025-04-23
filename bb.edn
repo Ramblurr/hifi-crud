@@ -6,7 +6,10 @@
                          :task             (shell "clojure -M:repl/cider:dev")}
          fmt            (shell "cljfmt check")
          fmt:fix        (shell "cljfmt fix .")
-         lint           (shell "clj-kondo --lint src --fail-level error")
+         lint           (shell (str "clj-kondo" " --fail-level error"
+                                    (if (seq *command-line-args*)
+                                      (str " --lint " (first *command-line-args*))
+                                      " --lint src --lint test")))
          sync-clj-kondo {:doc  "Sync clj-kondo configs"
                          :task (do
                                  (let [cp (-> (shell {:out :string} "clj" "-A:test:dev" "-Spath") :out str/trim)]

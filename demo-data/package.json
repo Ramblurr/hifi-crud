@@ -1,0 +1,8 @@
+{
+  "dependencies": {
+    "data-generator-retail": "^4.8.0"
+  },
+  "devDependencies": {
+    "nbb": "^1.3.196"
+  }
+}

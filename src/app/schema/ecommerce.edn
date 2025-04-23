@@ -1,0 +1,283 @@
+[;; Category
+ #:category {:id
+             {:db/index       true
+              :db/valueType   :db.type/uuid
+              :db/unique      :db.unique/identity
+              :db/cardinality :db.cardinality/one}
+
+             :name
+             {:db/valueType   :db.type/string
+              :db/cardinality :db.cardinality/one}}
+
+ ;; Customer
+ #:customer {:id
+             {:db/valueType   :db.type/uuid
+              :db/index       true
+              :db/unique      :db.unique/identity
+              :db/cardinality :db.cardinality/one}
+
+             :first-name
+             {:db/valueType   :db.type/string
+              :db/cardinality :db.cardinality/one}
+
+             :last-name
+             {:db/valueType   :db.type/string
+              :db/cardinality :db.cardinality/one}
+
+             :email
+             {:db/valueType   :db.type/string
+              :db/unique      :db.unique/value
+              :db/cardinality :db.cardinality/one}
+
+             :address
+             {:db/valueType   :db.type/string
+              :db/cardinality :db.cardinality/one}
+
+             :zipcode
+             {:db/valueType   :db.type/string
+              :db/cardinality :db.cardinality/one}
+
+             :city
+             {:db/valueType   :db.type/string
+              :db/cardinality :db.cardinality/one}
+
+             :state-abbr
+             {:db/valueType   :db.type/string
+              :db/cardinality :db.cardinality/one}
+
+             :avatar
+             {:db/valueType   :db.type/string
+              :db/cardinality :db.cardinality/one}
+
+             :birthday
+             {:db/valueType   :db.type/string
+              :db/cardinality :db.cardinality/one}
+
+             :first-seen
+             {:db/valueType   :db.type/instant
+              :db/cardinality :db.cardinality/one}
+
+             :last-seen
+             {:db/valueType   :db.type/instant
+              :db/cardinality :db.cardinality/one}
+
+             :has-ordered
+             {:db/valueType   :db.type/boolean
+              :db/cardinality :db.cardinality/one}
+
+             :latest-purchase
+             {:db/valueType   :db.type/instant
+              :db/cardinality :db.cardinality/one}
+
+             :has-newsletter
+             {:db/valueType   :db.type/boolean
+              :db/cardinality :db.cardinality/one}
+
+             :groups
+             {:db/valueType   :db.type/string
+              :db/cardinality :db.cardinality/many}
+
+             :total-spent
+             {:db/valueType   :db.type/bigdec
+              :db/cardinality :db.cardinality/one}}
+
+ ;; Invoice
+ #:invoice {:id
+            {:db/valueType   :db.type/uuid
+             :db/index       true
+             :db/unique      :db.unique/identity
+             :db/cardinality :db.cardinality/one}
+
+            :date
+            {:db/valueType   :db.type/instant
+             :db/cardinality :db.cardinality/one}
+
+            :order
+            {:db/valueType   :db.type/ref
+             :db/cardinality :db.cardinality/one}
+
+            :customer
+            {:db/valueType   :db.type/ref
+             :db/cardinality :db.cardinality/one}
+
+            :total-ex-taxes
+            {:db/valueType   :db.type/bigdec
+             :db/cardinality :db.cardinality/one}
+
+            :delivery-fees
+            {:db/valueType   :db.type/bigdec
+             :db/cardinality :db.cardinality/one}
+
+            :tax-rate
+            {:db/valueType   :db.type/bigdec
+             :db/cardinality :db.cardinality/one}
+
+            :taxes
+            {:db/valueType   :db.type/bigdec
+             :db/cardinality :db.cardinality/one}
+
+            :total
+            {:db/valueType   :db.type/bigdec
+             :db/cardinality :db.cardinality/one}}
+
+ ;; Order Status Enum
+ #:order-status {:ordered   {}
+                 :delivered {}
+                 :cancelled {}}
+
+ ;; Basket Item Schema
+ #:basket-item {:id
+                {:db/valueType :db.type/uuid
+
+                 :db/index       true
+                 :db/unique      :db.unique/identity
+                 :db/cardinality :db.cardinality/one}
+
+                :product
+                {:db/valueType   :db.type/ref
+                 :db/cardinality :db.cardinality/one}
+
+                :quantity
+                {:db/valueType   :db.type/long
+                 :db/cardinality :db.cardinality/one}}
+
+ ;; Order Schema
+ #:order {:id
+          {:db/valueType :db.type/uuid
+
+           :db/index       true
+           :db/unique      :db.unique/identity
+           :db/cardinality :db.cardinality/one}
+
+          :reference
+          {:db/valueType   :db.type/string
+           :db/cardinality :db.cardinality/one}
+
+          :date
+          {:db/valueType   :db.type/instant
+           :db/cardinality :db.cardinality/one}
+
+          :customer
+          {:db/valueType   :db.type/ref
+           :db/cardinality :db.cardinality/one}
+
+          :basket-items
+          {:db/valueType   :db.type/ref
+           :db/isComponent true
+           :db/cardinality :db.cardinality/many}
+
+          :total-ex-taxes
+          {:db/valueType   :db.type/bigdec
+           :db/cardinality :db.cardinality/one}
+
+          :delivery-fees
+          {:db/valueType   :db.type/bigdec
+           :db/cardinality :db.cardinality/one}
+
+          :tax-rate
+          {:db/valueType   :db.type/bigdec
+           :db/cardinality :db.cardinality/one}
+
+          :taxes
+          {:db/valueType   :db.type/bigdec
+           :db/cardinality :db.cardinality/one}
+
+          :total
+          {:db/valueType   :db.type/bigdec
+           :db/cardinality :db.cardinality/one}
+
+          :status
+          {:db/valueType   :db.type/ref
+           :db/cardinality :db.cardinality/one}
+
+          :returned
+          {:db/valueType   :db.type/boolean
+           :db/cardinality :db.cardinality/one}}
+
+ #:product {:id
+            {:db/valueType :db.type/uuid
+
+             :db/index       true
+             :db/unique      :db.unique/identity
+             :db/cardinality :db.cardinality/one}
+
+            :category
+            {:db/valueType   :db.type/ref
+             :db/cardinality :db.cardinality/one}
+
+            :reference
+            {:db/valueType   :db.type/string
+             :db/cardinality :db.cardinality/one}
+
+            :width
+            {:db/valueType   :db.type/long
+             :db/cardinality :db.cardinality/one}
+
+            :height
+            {:db/valueType   :db.type/long
+             :db/cardinality :db.cardinality/one}
+
+            :price
+            {:db/valueType   :db.type/bigdec
+             :db/cardinality :db.cardinality/one}
+
+            :thumbnail
+            {:db/valueType   :db.type/string
+             :db/cardinality :db.cardinality/one}
+
+            :image
+            {:db/valueType   :db.type/string
+             :db/cardinality :db.cardinality/one}
+
+            :description
+            {:db/valueType   :db.type/string
+             :db/cardinality :db.cardinality/one}
+
+            :stock
+            {:db/valueType   :db.type/long
+             :db/cardinality :db.cardinality/one}
+
+            :sales
+            {:db/valueType   :db.type/long
+             :db/cardinality :db.cardinality/one}}
+
+ ;; Review Status Enum
+ #:review-status {:accepted {}
+                  :rejected {}
+                  :pending  {}}
+
+ ;; Review Schema
+ #:review {:id
+           {:db/valueType :db.type/uuid
+
+            :db/index       true
+            :db/unique      :db.unique/identity
+            :db/cardinality :db.cardinality/one}
+
+           :date
+           {:db/valueType   :db.type/instant
+            :db/cardinality :db.cardinality/one}
+
+           :status
+           {:db/valueType   :db.type/ref
+            :db/cardinality :db.cardinality/one}
+
+           :order
+           {:db/valueType   :db.type/ref
+            :db/cardinality :db.cardinality/one}
+
+           :product
+           {:db/valueType   :db.type/ref
+            :db/cardinality :db.cardinality/one}
+
+           :customer
+           {:db/valueType   :db.type/ref
+            :db/cardinality :db.cardinality/one}
+
+           :rating
+           {:db/valueType   :db.type/long
+            :db/cardinality :db.cardinality/one}
+
+           :comment
+           {:db/valueType   :db.type/string
+            :db/cardinality :db.cardinality/one}}]

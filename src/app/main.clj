@@ -63,14 +63,12 @@
   (-> (h/get-app)
       :ctx)
 
-  (d/q '[:find (pull ?u [*])
-         :in $ ?sid
-         :where [?s :session/id ?sid]
-         [?s :session/user ?u]]
-       @conn "dh6ezrhvsz5t7vcbmRHUAt9GHM8")
-  (d/find-by @conn :session/id "dh6ezrhvsz5t7vcbmRHUAt9GHM8" '[:session/id {:session/user [:user/email]}])
+  ;; Suck in demo data
+  @(d/tx! conn
+          (read-string (slurp "extra/data.tx")))
+
+  (d/find-all @conn :invoice/id '[* {:invoice/customer [*]}])
+
   (d/find-all @conn :user/id '[*])
-  1
-  ;;
   ;;
   )
