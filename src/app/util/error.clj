@@ -80,13 +80,32 @@
      :separator separator
      :method    method}))
 
-(defn clean-trace [trace]
-  (into []
-        (comp
-         (map trace-element)
-         remove-ignored-cls-xf
-         (medley/dedupe-by (juxt :ns :method)))
-        trace))
+(let [v {:ns "wtf.omg.cool"}]
+  (first (filter #(str/starts-with? (:ns v) (str %)) #{'wtf})))
+
+(let [v {:ns "wtf.omg.cool"}]
+  (first (filter #(str/starts-with? (:ns v) (str %)) #{'wtf})))
+
+(defn compact-trace-xf
+  "Dedupes consecutive stack trace elements whose :ns are a prefix of the ns in ns-set"
+  [ns-set]
+  (medley/dedupe-by (fn [v]
+                      (let [matches (filter #(str/starts-with? (:ns v) (str %)) ns-set)]
+                        (if (empty? matches)
+                          v
+                          matches)))))
+
+(defn clean-trace
+  ([trace]
+   (clean-trace nil trace))
+  ([opts trace]
+   (into []
+         (comp
+          (map trace-element)
+          remove-ignored-cls-xf
+          (medley/dedupe-by (juxt :ns :method))
+          (compact-trace-xf (:compact opts)))
+         trace)))
 
 (defmacro write [w & args]
   (list* 'do

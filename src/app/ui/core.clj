@@ -44,9 +44,9 @@
   [{:keys [component opt value]}]
   (apply (requiring-resolve 'bling.core/bling)
          (concat
-          [[:italic "component: "] [:bold (:name component)]
+          [[:italic "component: "] [:bold.blue (:name component)]
            "\n\n"
-           [:italic "option:    "] [:bold opt]
+           [:italic "option:    "] [:bold.warning opt]
            "\n\n"
            [:italic "invalid:   "] [:bold (if (nil? value)
                                             "nil"
@@ -64,7 +64,7 @@
     (str
      ((requiring-resolve 'bling.core/bling)
       "Value for the attribute "
-      [:bold opt]
+      [:bold.warning opt]
       " "
       msg
       "\n\n"
@@ -89,6 +89,7 @@
                                                           :msg   (str/join "; " error)})}
 
             :callout-opts {:type  :warning
+                           :theme :gutter
                            :label "WARNING​ Invalid ui attribute"}}))
 
        (me/humanize explain
@@ -99,7 +100,7 @@
 
 (defn stack-trace []
   (->> (.getStackTrace (Thread/currentThread))
-       (u.error/clean-trace)
+       (u.error/clean-trace {:compact #{'dev.onionpancakes.chassis}})
        (drop 2)
        (reverse)))
 
