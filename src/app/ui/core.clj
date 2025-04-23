@@ -48,7 +48,9 @@
            "\n\n"
            [:italic "option:    "] [:bold opt]
            "\n\n"
-           [:italic "invalid:   "] [:bold value]])))
+           [:italic "invalid:   "] [:bold (if (nil? value)
+                                            "nil"
+                                            value)]])))
 
 (defn strip-should-be [msg]
   (if (re-find #"^(?i)should be" msg)
@@ -61,7 +63,7 @@
     (u.error/print-trace trace w)
     (str
      ((requiring-resolve 'bling.core/bling)
-      "Value for the "
+      "Value for the attribute "
       [:bold opt]
       " "
       msg
@@ -87,20 +89,26 @@
                                                           :msg   (str/join "; " error)})}
 
             :callout-opts {:type  :warning
-                           :label "WARNING​ Invalid ui option"}}))
+                           :label "WARNING​ Invalid ui attribute"}}))
 
-       (me/humanize explain)))
+       (me/humanize explain
+                    {:resolve me/-resolve-root-error
+                     :errors  (-> me/default-errors
+                                  (assoc ::m/missing-key {:error/fn (fn [_ _]
+                                                                      "is missing")}))})))
 
-(defn stack-traces2 []
+(defn stack-trace []
   (->> (.getStackTrace (Thread/currentThread))
        (u.error/clean-trace)
        (drop 2)
        (reverse)))
 
 (defn validate-opts [schema opts]
-  (let [s (l/schema schema)]
+  (let [s (if (map? schema)
+            (l/schema schema)
+            schema)]
     (when-let [problem (m/explain s opts)]
-      (let [trace (stack-traces2)]
+      (let [trace (stack-trace)]
         (doseq [bling-opts (error->bling-opts trace (meta schema) problem)]
           (bad-opt-value-callout bling-opts))))))
 

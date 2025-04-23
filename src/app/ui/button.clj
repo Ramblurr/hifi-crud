@@ -88,7 +88,7 @@
                             (:spinner-color priority-data))}
        [:use {:href "#svg-sprite-spinner"}]]
       (when (and icon (not loading?))
-        [:app.ui/icon  {:ico/icon icon :class (uic/cs "button-icon" (:icon-size size-data) "-ml-0.5") :aria-hidden true}])
+        [:app.ui/icon  {:ico/name icon :class (uic/cs "button-icon" (:icon-size size-data) "-ml-0.5") :aria-hidden true}])
       (uic/wrap-text-node :span children)
       (when icon-trailing
         (icon-trailing {:class (uic/cs "button-icon" (:icon-size size-data) "-mr-0.5") :aria-hidden true}))])))

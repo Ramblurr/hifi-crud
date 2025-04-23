@@ -71,43 +71,43 @@
 
 (defn render-login [{:keys [url-for]}]
   (h/html
-   (let [form {:form/key       :login
-               :submit-command :login/submit
-               :fields         {:email    ""
-                                :password ""}}]
-     [:main#morph.main
-      [:div {:class "flex min-h-full flex-col justify-center py-12 sm:px-6 lg:px-8"}
-       [:div {:class "sm:mx-auto sm:w-full sm:max-w-md"}
-        [:a {:href (url-for :home)}
-         [::ui/icon {:ico/icon :rocket :class "mx-auto h-12 w-auto text-teal-600 fill-teal-900"
-                     :alt      "Your Company"}]]
-        [:h2 {:class "mt-6 text-center text-2xl/9 font-bold tracking-tight text-gray-900"}
-         "Sign in to your account"]]
-       [:div {:class "mt-10 sm:mx-auto sm:w-full sm:max-w-[480px]"}
-        [:div {:class "bg-white px-6 py-12 shadow-sm sm:rounded-lg sm:px-12"}
-         [::form/form {:form/form      form
-                       :data-indicator "inflight"}
-          [:div.space-y-6
-           [::form/input {:form/label   "Email"
-                          :form/form    form
-                          :type         :email
-                          :autocomplete "email"
-                          :name         :email}]
-           [::form/input {:form/label   "Password"
-                          :form/form    form
-                          :type         :password
-                          :autocomplete "current-password"
-                          :name         :password}]
+    (let [form {:form/key       :login
+                :submit-command :login/submit
+                :fields         {:email    ""
+                                 :password ""}}]
+      [:main#morph.main
+       [:div {:class "flex min-h-full flex-col justify-center py-12 sm:px-6 lg:px-8"}
+        [:div {:class "sm:mx-auto sm:w-full sm:max-w-md"}
+         [:a {:href (url-for :home)}
+          [::ui/icon {:ico/name :rocket :class "mx-auto h-12 w-auto text-teal-600 fill-teal-900"
+                      :alt      "Your Company"}]]
+         [:h2 {:class "mt-6 text-center text-2xl/9 font-bold tracking-tight text-gray-900"}
+          "Sign in to your account"]]
+        [:div {:class "mt-10 sm:mx-auto sm:w-full sm:max-w-[480px]"}
+         [:div {:class "bg-white px-6 py-12 shadow-sm sm:rounded-lg sm:px-12"}
+          [::form/form {:form/form      form
+                        :data-indicator "inflight"}
+           [:div.space-y-6
+            [::form/input {:form/label   "Email"
+                           :form/form    form
+                           :type         :email
+                           :autocomplete "email"
+                           :name         :email}]
+            [::form/input {:form/label   "Password"
+                           :form/form    form
+                           :type         :password
+                           :autocomplete "current-password"
+                           :name         :password}]
 
-           [::form/errors {:form/form form}]
-           [:div {:data-signals-spinning "false"}
-            [::ui/button {:btn/priority       :primary :type "submit" :class "w-full"
-                          :data-attr-disabled "$inflight"
-                          :data-class         (format "{'spinning': $%s}" "inflight")}
-             "Sign in"]]]]]
-        [:p {:class "mt-10 text-center text-sm/6 text-gray-500"}
-         "Not onboard yet? "
-         [:a {:href (url-for :register) :class "font-semibold text-teal-600 hover:text-teal-500"}
-          "Sign up"]]]]])))
+            [::form/errors {:form/form form}]
+            [:div {:data-signals-spinning "false"}
+             [::ui/button {:btn/priority       :primary :type "submit" :class "w-full"
+                           :data-attr-disabled "$inflight"
+                           :data-class         (format "{'spinning': $%s}" "inflight")}
+              "Sign in"]]]]]
+         [:p {:class "mt-10 text-center text-sm/6 text-gray-500"}
+          "Not onboard yet? "
+          [:a {:href (url-for :register) :class "font-semibold text-teal-600 hover:text-teal-500"}
+           "Sign up"]]]]])))
 
 (h/refresh-all!)

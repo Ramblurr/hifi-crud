@@ -9,10 +9,11 @@
 
 ;; HACK(hyperlith): shouldn't depend on the hyperlith.impl.json ns
 
+(def NameAttribute [:name {:error/message "is required. All form fields require a name attribute as a string or keyword."} [:or :string :keyword]])
 (def FormSchema
   {:form/key         :keyword
    :submit-command   :keyword
-   :validate-command :keyword
+   :validate-command (l/optional :keyword)
    :fields           :map})
 
 (defn data-class [m]
@@ -33,9 +34,14 @@
        (str top-ns ".error." field-name-str)
        (str top-ns ".touched." field-name-str)])))
 
-#_{:opts {:form FormSchema}}
+(def Form
+  (with-meta
+    [:map
+     [:form/form (l/schema FormSchema)]]
+    {:name ::form}))
 (defmethod c/resolve-alias ::form
   [_ {:form/keys [form] :as attrs} children]
+  (uic/validate-opts! Form attrs)
   (cc/compile
    [:form (uic/merge-attrs attrs
                            :data-signals__ifmissing (j/edn->json
@@ -48,10 +54,16 @@
                            :data-on-submit (uic/dispatch (:submit-command form)))
     children]))
 
-#_{:opts {:left  (l/optional :any)
-          :right (l/optional :any)}}
+(def FormActions
+  (with-meta
+    [:map
+     [:form/left {:optional true} :any]
+     [:form/right {:optional true} :any]]
+    {:name ::actions}))
+
 (defmethod c/resolve-alias  ::actions
-  [_ {:form/keys [left right] :as args}]
+  [_ {:form/keys [left right] :as attrs} _children]
+  (uic/validate-opts! FormActions attrs)
   (cc/compile
    [:div {:class "py-5 flex justify-between items-center"
           #_     "mt-6 flex items-center justify-end gap-x-6"}
@@ -60,27 +72,38 @@
     [:div {:class "flex justify-end space-x-4"}
      right]]))
 
-#_{:opts {:title (l/optional :string)
-          :form  FormSchema}}
-;; Renders top-level form errors, should be avoided when possible
+(def FormErrors
+  (with-meta
+    {:form/title (l/optional :string)
+     :form/form  FormSchema}
+    {:name ::errors}))
+
+;; Renders top-level form errors
 (defmethod c/resolve-alias ::errors
   [_ {:form/keys [form title] :as attrs} children]
+  (uic/validate-opts! FormErrors attrs)
   (let [$top-error-signal (str "$" (clojure.core/name (:form/key form)) ".error._top")]
-    [:div (uic/merge-attrs attrs :class (uic/cs "hidden mt-1 text-red-700")
-                           :data-class-hidden (str "!" $top-error-signal))
-     (when title
-       [:h3 {:class "text-sm font-semibold text-red-700"} title])
-     [:p {:class     "mt-1 text-sm/6 text-sm text-red-600"
-          :data-text $top-error-signal}]
-     [:div {:class (uic/cs "")}
-      children]]))
+    (cc/compile
+     [:div (uic/merge-attrs attrs :class (uic/cs "hidden mt-1 text-red-700")
+                            :data-class-hidden (str "!" $top-error-signal))
+      (when title
+        [:h3 {:class "text-sm font-semibold text-red-700"} title])
+      [:p {:class     "mt-1 text-sm/6 text-sm text-red-600"
+           :data-text $top-error-signal}]
+      [:div {:class (uic/cs "")}
+       children]])))
+
+(def FormSection
+  (with-meta
+    {:section/title    (l/optional :any)
+     :section/subtitle (l/optional :any)
+     :section/narrow?  (l/optional :boolean)
+     :section/compact? (l/optional :boolean)}
+    {:name ::section}))
 
 (defmethod c/resolve-alias ::section
-  #_{:opts {:title    (l/optional :any)
-            :subtitle (l/optional :any)
-            :narrow?  (l/optional :boolean)
-            :compact? (l/optional :boolean)}}
   [_ {:section/keys [title subtitle compact? narrow?] :as attrs} children]
+  (uic/validate-opts! FormSection attrs)
   (cc/compile
    [:div (uic/merge-attrs attrs :class (uic/cs
                                         "border-b border-gray-900/10"
@@ -140,7 +163,7 @@
                   :description-id description-id
                   :error          error})
        (when error-icon?
-         [:app.ui/icon {:ico/icon    :warning-circle-bold
+         [:app.ui/icon {:ico/name    :warning-circle-bold
                         :class       "pointer-events-none col-start-1 row-start-1 mr-3 size-5 self-center justify-self-end text-red-500 sm:size-4"
                         :aria-hidden "true"
                         :data-show   $error-signal}])]
@@ -153,28 +176,40 @@
            :data-show $error-signal
            :data-text $error-signal}]])))
 
-#_(defn hidden
-    {:opts {:form FormSchema}}
-    [& args]
-    (let [name          (:name attrs)
-          form          (:form opts)
-          id            (or (:id attrs) (str "form-control" (:form/key form) name))
-          [signal _]    (field-signal-name form name)
-          default-value (get-in form [:fields name])]
-      (assert name "hidden control requires a :name")
-      [:input (uic/merge-attrs attrs {:type      "hidden"
-                                      :id        id
-                                      :value     default-value
-                                      :data-bind signal})]))
+(def HiddenInput
+  (with-meta
+    [:map
+     [:form/form (l/schema FormSchema)]
+     NameAttribute]
+    {:name ::hidden}))
+
+(defmethod c/resolve-alias ::hidden
+  [_ {:keys [id name] :form/keys [form] :as attrs} _]
+  (uic/validate-opts! HiddenInput attrs)
+  (let [id            (or id (str "form-control" (:form/key form) name))
+        [signal _]    (field-signal-name form name)
+        default-value (get-in form [:fields name])]
+    [:input (uic/merge-attrs attrs
+                             :type      "hidden"
+                             :id        id
+                             :value     default-value
+                             :data-bind signal)]))
+
+(def FormInput
+  (with-meta
+    [:map
+     [:form/label :string]
+     [:form/form (l/schema FormSchema)]
+     [:form/error {:optional true} :string]
+     [:form/description {:optional true} :string]
+     [:form/suffix {:optional true} :any]
+     [:form/required? {:optional true} :boolean]
+     NameAttribute]
+    {:name ::input}))
 
 (defmethod c/resolve-alias ::input
-  #_{:opts {:label       :string
-            :form        FormSchema
-            :error       (l/optional :string)
-            :description (l/optional :string)
-            :suffix      (l/optional :any)
-            :required?   (l/optional :boolean)}}
   [_ attrs _]
+  (uic/validate-opts! FormInput attrs)
   (cc/compile
    (control attrs
             (fn [attrs {:keys [required? $error-signal]}]

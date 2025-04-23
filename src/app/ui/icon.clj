@@ -1,5 +1,6 @@
 (ns app.ui.icon
   (:require
+   [malli.experimental.lite :as l]
    [app.ui.core :as uic]
    [clojure.java.io :as io]
    [dev.onionpancakes.chassis.compiler :as cc]
@@ -29,11 +30,17 @@
      (get-in iconsets [iconset (keyword (name ico-name))])
      (get-in iconsets [*default-iconset* (keyword ico-name)]))))
 
+(def Icon
+  (with-meta
+    {:ico/name (l/optional :keyword)}
+    {:name :app.ui/icon}))
+
 (defmethod c/resolve-alias :app.ui/icon
-  [_ {:ico/keys [icon]
+  [_ {:ico/keys [name]
       :as       attrs} _children]
+  (uic/validate-opts! Icon attrs)
   (cc/compile
-   (update-in (ico icon) [1]
+   (update-in (ico name) [1]
               uic/merge-attrs* attrs)))
 
 (ico :cloud-thin)

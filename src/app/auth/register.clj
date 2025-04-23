@@ -80,45 +80,45 @@
                                  :password  ""
                                  :password2 ""}}]
     (h/html
-     [:main#morph.main
-      [:div {:class "flex min-h-full flex-col justify-center py-12 sm:px-6 lg:px-8"}
-       [:div {:class "sm:mx-auto sm:w-full sm:max-w-md"}
-        [:a {:href (url-for :home)}
-         [::ui/icon {:ico/icon :rocket :class "mx-auto h-12 w-auto text-teal-600 fill-teal-900"
-                     :alt      "Your Company"}]]
-        [:h2 {:class "mt-6 text-center text-2xl/9 font-bold tracking-tight text-gray-900"}
-         "Create an account"]]
-       [:div {:class "mt-10 sm:mx-auto sm:w-full sm:max-w-[480px]"}
-        [:div {:class "bg-white px-6 py-12 shadow-sm sm:rounded-lg sm:px-12"}
-         [::form/form {:form/form form :data-indicator "inflight"}
-          [:div.space-y-6
-           [::form/input {:form/label       "Email"
-                          :form/form        form
-                          :form/description "Demo note: Use any email, no email confirmations are sent."
-                          :type             :email
-                          :autocomplete     "email"
-                          :placeholder      "name@company.com"
-                          :name             :email}]
-           [::form/input {:form/label   "Password"
-                          :form/form    form
-                          :type         :password
-                          :autocomplete "new-password"
-                          :name         :password}]
-           [::form/input {:form/label   "Confirm Password"
-                          :form/form    form
-                          :type         :password
-                          :autocomplete "new-password"
-                          :name         :password2}]
-           [::form/errors {:form/form form}]
-           [:div {:data-signals-spinning "false"}
-            [::ui/button {:btn/priority       :primary :type "submit" :class "w-full"
-                          :data-attr-disabled "$inflight"
-                          :data-class         (format "{'spinning': $%s}" "inflight")}
-             "Sign up"]]]]]
+      [:main#morph.main
+       [:div {:class "flex min-h-full flex-col justify-center py-12 sm:px-6 lg:px-8"}
+        [:div {:class "sm:mx-auto sm:w-full sm:max-w-md"}
+         [:a {:href (url-for :home)}
+          [::ui/icon {:ico/name :rocket :class "mx-auto h-12 w-auto text-teal-600 fill-teal-900"
+                      :alt      "Your Company"}]]
+         [:h2 {:class "mt-6 text-center text-2xl/9 font-bold tracking-tight text-gray-900"}
+          "Create an account"]]
+        [:div {:class "mt-10 sm:mx-auto sm:w-full sm:max-w-[480px]"}
+         [:div {:class "bg-white px-6 py-12 shadow-sm sm:rounded-lg sm:px-12"}
+          [::form/form {:form/form form :data-indicator "inflight"}
+           [:div.space-y-6
+            [::form/input {:form/label       "Email"
+                           :form/form        form
+                           :form/description "Demo note: Use any email, no email confirmations are sent."
+                           :type             :email
+                           :autocomplete     "email"
+                           :placeholder      "name@company.com"
+                           :name             :email}]
+            [::form/input {:form/label   "Password"
+                           :form/form    form
+                           :type         :password
+                           :autocomplete "new-password"
+                           :name         :password}]
+            [::form/input {:form/label   "Confirm Password"
+                           :form/form    form
+                           :type         :password
+                           :autocomplete "new-password"
+                           :name         :password2}]
+            [::form/errors {:form/form form}]
+            [:div {:data-signals-spinning "false"}
+             [::ui/button {:btn/priority       :primary :type "submit" :class "w-full"
+                           :data-attr-disabled "$inflight"
+                           :data-class         (format "{'spinning': $%s}" "inflight")}
+              "Sign up"]]]]]
 
-        [:p {:class "mt-10 text-center text-sm/6 text-gray-500"}
-         "Already have an account? "
-         [:a {:href (url-for :login) :class "font-semibold text-teal-600 hover:text-teal-500"}
-          "Sign in"]]]]])))
+         [:p {:class "mt-10 text-center text-sm/6 text-gray-500"}
+          "Already have an account? "
+          [:a {:href (url-for :login) :class "font-semibold text-teal-600 hover:text-teal-500"}
+           "Sign in"]]]]])))
 
 (h/refresh-all!)

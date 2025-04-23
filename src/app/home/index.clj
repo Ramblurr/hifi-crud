@@ -35,7 +35,7 @@
    [:div {:class "p-4"}
     [:div {:class "flex items-start"}
      [:div {:class "shrink-0"}
-      [::ui/icon {:ico/icon :check-circle :class "size-6 text-green-400"}]]
+      [::ui/icon {:ico/name :check-circle :class "size-6 text-green-400"}]]
      [:div {:class "ml-3 w-0 flex-1 pt-0.5"}
       [:p {:class "text-sm font-medium text-gray-900"}
        title]
@@ -45,7 +45,7 @@
       [:button {:type          "button" :class "inline-flex rounded-md bg-white text-gray-400 hover:text-gray-500 focus:ring-2 focus:ring-teal-500 focus:ring-offset-2 focus:outline-hidden"
                 :data-on-click (format "$notification-id = '%s'; %s" id (uic/dispatch :home/clear-notification))}
        [:span {:class "sr-only"} "Close"]
-       [::ui/icon {:ico/icon :x :class "size-5"}]]]]]])
+       [::ui/icon {:ico/name :x :class "size-5"}]]]]]])
 
 (defn notification-region [notifications]
   [:div {:aria-live               "assertive"
