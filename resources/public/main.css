@@ -87,3 +87,134 @@ body {
     animation: notification-enter-sm 300ms ease-out forwards;
   }
 }
+
+/*--------- Popover Action Menu widget animation ---------*/
+@keyframes entry {
+  0% {
+    filter: blur(4px);
+    opacity: 0;
+  }
+}
+.animate-entry {
+  --speed: 0.18s;
+  --easing: linear(
+    0 0%,
+    0.0027 3.64%,
+    0.0106 7.29%,
+    0.0425 14.58%,
+    0.0957 21.87%,
+    0.1701 29.16%,
+    0.2477 35.19%,
+    0.3401 41.23%,
+    0.5982 55.18%,
+    0.7044 61.56%,
+    0.7987 68.28%,
+    0.875 75%,
+    0.9297 81.25%,
+    0.9687 87.5%,
+    0.9922 93.75%,
+    1 100%
+  );
+  animation: entry var(--speed) both var(--easing);
+}
+
+/*--------- Sidebar Expand/Collapse ---------*/
+#desktop-sidebar-menu.collapsed {
+  @apply lg:w-12;
+}
+
+#desktop-sidebar-menu .only-collapsed {
+  @apply lg:hidden;
+}
+#desktop-sidebar-menu.collapsed .only-collapsed {
+  display: unset;
+}
+
+#desktop-sidebar-menu .only-expanded {
+  display: unset;
+}
+
+#desktop-sidebar-menu.collapsed .only-expanded {
+  @apply lg:hidden;
+}
+
+#desktop-sidebar-menu nav {
+  @apply mt-6 px-3 text-nowrap;
+}
+
+#desktop-sidebar-menu.collapsed nav {
+  @apply px-0 mt-10;
+}
+
+#desktop-sidebar-menu.collapsed .sidebar-open-close-button {
+  @apply rotate-180;
+}
+
+#desktop-sidebar-menu.collapsed .sidebar-logo-container {
+  @apply px-6 pl-2;
+}
+
+#app-container.app_container_wide {
+  @apply pl-12;
+}
+
+/*--------- Flyout Menu ---------*/
+
+dialog.slide-out {
+  --_duration: 200ms;
+  --_card-inset: 0rem;
+  --ease-in-out-5: cubic-bezier(0.9, 0, 0.1, 1);
+  --ease-in-5: cubic-bezier(1, 0, 1, 1);
+  --ease-2: cubic-bezier(0.25, 0, 0.4, 1);
+  --ease-4: cubic-bezier(0.25, 0, 0.2, 1);
+  transition:
+    display var(--_duration) allow-discrete,
+    overlay var(--_duration) allow-discrete;
+
+  &::backdrop {
+    transition: opacity var(--_duration) var(--ease-4);
+    @apply bg-gray-600/0;
+  }
+  > section {
+    @media (prefers-reduced-motion: reduce) {
+      transition: opacity var(--_duration) var(--ease-2);
+      opacity: 0;
+    }
+
+    @media (prefers-reduced-motion: no-preference) {
+      transition: translate var(--_duration) var(--ease-in-out-5);
+      translate: calc((100% + var(--_card-inset)) * -1) 0;
+    }
+
+    block-size: calc(100% - (var(--_card-inset) * 2));
+    margin-block: var(--_card-inset);
+    margin-inline-start: var(--_card-inset);
+  }
+
+  &:popover-open,
+  &[open] {
+    &,
+    &::backdrop {
+      @apply bg-gray-600/75;
+    }
+    & > section {
+      opacity: 1;
+      translate: 0;
+    }
+  }
+
+  @starting-style {
+    &:popover-open,
+    &:popover-open::backdrop,
+    &[open],
+    &[open]::backdrop {
+      @apply bg-gray-600/0;
+    }
+
+    &:popover-open > section,
+    &[open] > section {
+      opacity: 0;
+      translate: calc((100% + var(--_card-inset)) * -1) 0;
+    }
+  }
+}

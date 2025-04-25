@@ -66,7 +66,7 @@
                       :effect/data (:redirect-to data)}]})
 
 (defn tx-error-command [_cofx {:keys [signals error] :as _data}]
-  (tap> [:login-db-error error])
+  (tap> [:login-db-error error _data])
   {:outcome/effects [(forms/merge-errors signals :login
                                          {:_top "Login failed. Please try again later."})]})
 
@@ -79,9 +79,8 @@
       [:main#morph.main
        [:div {:class "flex min-h-full flex-col justify-center py-12 sm:px-6 lg:px-8"}
         [:div {:class "sm:mx-auto sm:w-full sm:max-w-md"}
-         [:a {:href (url-for :home)}]
-         [icon/Icon {::icon/name :rocket :class "mx-auto h-12 w-auto text-teal-600 fill-teal-900"
-                     :alt        "Your Company"}]
+         [:a {:href (url-for :home)}
+          [icon/Logomark {:class "mx-auto h-12 w-auto text-teal-600 fill-teal-900"}]]
          [:h2 {:class "mt-6 text-center text-2xl/9 font-bold tracking-tight text-gray-900"}
           "Sign in to your account"]]
         [:div {:class "mt-10 sm:mx-auto sm:w-full sm:max-w-[480px]"}
@@ -91,7 +90,6 @@
            [:div.space-y-6
             [form/Input {::form/label  "Email"
                          ::form/form   form
-                         :type         :email
                          :autocomplete "email"
                          :name         :email}]
             [form/Input {::form/label  "Password"

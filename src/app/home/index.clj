@@ -1,6 +1,7 @@
 (ns app.home.index
   (:require
    [app.ui.button :as btn]
+   [app.ui.app-shell :as shell]
    [app.ui.core :as uic]
    [app.ui.icon :as icon]
    [hyperlith.core :as h]))
@@ -31,34 +32,6 @@
                                               (update ts :notifications
                                                       dissoc (-> signals :notification-id)))}}]})
 
-(defn notification [id title text]
-  (h/html
-    [:div {:id id :class "notification-transition pointer-events-auto w-full max-w-sm overflow-hidden rounded-lg bg-white shadow-lg ring-1 ring-black/5"}
-     [:div {:class "p-4"}
-      [:div {:class "flex items-start"}
-       [:div {:class "shrink-0"}
-        [icon/Icon {::icon/name :check-circle :class "size-6 text-green-400"}]]
-       [:div {:class "ml-3 w-0 flex-1 pt-0.5"}
-        [:p {:class "text-sm font-medium text-gray-900"}
-         title]
-        [:p {:class "mt-1 text-sm text-gray-500"}
-         text]]
-       [:div {:class "ml-4 flex shrink-0"}
-        [:button {:type          "button" :class "inline-flex rounded-md bg-white text-gray-400 hover:text-gray-500 focus:ring-2 focus:ring-teal-500 focus:ring-offset-2 focus:outline-hidden"
-                  :data-on-click (format "$notification-id = '%s'; %s" id (uic/dispatch :home/clear-notification))}
-         [:span {:class "sr-only"} "Close"]
-         [icon/Icon {::icon/name :x :class "size-5"}]]]]]]))
-
-(defn notification-region [notifications]
-  (h/html
-    [:div {:aria-live               "assertive"
-           :class                   "pointer-events-none fixed inset-0 flex items-end px-4 py-6 sm:items-start sm:p-6"
-           :data-signals__ifmissing "{'notification-id': null}"}
-     [:div {:id "notification-container" :class "flex w-full flex-col items-center space-y-4 sm:items-end"}
-      (for [notif notifications]
-        (let [{:keys [id title text]} notif]
-          (notification id title text)))]]))
-
 (defn render-home-logged-out [{:keys [url-for] :as req}]
   (let [link-cls "text-sm font-medium text-teal-600 underline"]
     (h/html
@@ -75,33 +48,38 @@
              " or "
              [:a {:href (url-for :register) :class link-cls} "Sign Up"]]]]]]]])))
 
-(defn render-home-logged-in [{:app/keys [current-user tab-state] :as req}]
+#_(defn render-home-logged-in [{:app/keys [current-user tab-state] :as req}]
+    (h/html
+      [:main#morph.main {:data-signals-tab-id__case.kebab (format "'%s'" (:app/tab-id req))}
+       [:div {:class "mx-auto max-w-3xl px-4 py-12 sm:px-6 lg:px-8"}
+        [:div {:class "divide-y divide-gray-200 overflow-hidden rounded-lg bg-white shadow-sm"}
+         [:div {:class "px-4 py-5 sm:px-6"}
+          [:div {:class "sm:flex sm:items-center sm:justify-between"}
+           [:div {:class "sm:flex sm:space-x-5"}
+            [:div {:class "mt-4 text-center sm:mt-0 sm:pt-1 sm:text-left"}
+             [:p {:class "text-sm font-medium text-gray-600"} "Welcome back,"]
+             [:p
+              {:class "text-xl font-bold text-gray-900 sm:text-2xl"}
+              (:user/email current-user)]]]
+           [:div {:class "mt-5 flex justify-center sm:mt-0"}
+            [btn/Button {::btn/intent   :secondary-destructive
+                         :data-on-click (uic/dispatch :logout/submit)}
+             "Logout"]]]]
+         (when current-user)]]
+       (notification-region
+        (vals (:notifications tab-state)))]))
+(defn render-home-logged-in [{:app/keys [tab-state] :as req}]
   (h/html
-    [:main#morph.main {:data-signals-tab-id__case.kebab (format "'%s'" (:app/tab-id req))}
-     [:div {:class "mx-auto max-w-3xl px-4 py-12 sm:px-6 lg:px-8"}
-      [:div {:class "divide-y divide-gray-200 overflow-hidden rounded-lg bg-white shadow-sm"}
-       [:div {:class "px-4 py-5 sm:px-6"}
-        [:div {:class "sm:flex sm:items-center sm:justify-between"}
-         [:div {:class "sm:flex sm:space-x-5"}
-          [:div {:class "mt-4 text-center sm:mt-0 sm:pt-1 sm:text-left"}
-           [:p {:class "text-sm font-medium text-gray-600"} "Welcome back,"]
-           [:p
-            {:class "text-xl font-bold text-gray-900 sm:text-2xl"}
-            (:user/email current-user)]]]
-         [:div {:class "mt-5 flex justify-center sm:mt-0"}
-          [btn/Button {::btn/intent   :secondary-destructive
-                       :data-on-click (uic/dispatch :logout/submit)}
-           "Logout"]]]]
-       (when current-user
-         [:div {:class "px-4 py-5 sm:p-6"}
-          [:p "You are logged in. You can take the following actions:"]
-          [:div {:class "py-5 flex items-center gap-2 justify-end"}
-           [btn/Button {:data-on-click (uic/dispatch :home/admin)}
-            "Admin Action"]
-           [btn/Button {::btn/intent :primary :data-on-click (uic/dispatch :home/hello)}
-            "Hello Action"]]])]]
-     (notification-region
-      (vals (:notifications tab-state)))]))
+    (shell/app-shell req
+                     #_(lay/nav {:current-nav :dashboard})
+                     [:div
+                      [:div {:class "px-4 py-5 sm:p-6"}
+                       [:p "You are logged in. You can take the following actions:"]
+                       [:div {:class "py-5 flex items-center gap-2 justify-end"}
+                        [btn/Button {:data-on-click (uic/dispatch :home/admin)}
+                         "Admin Action"]
+                        [btn/Button {::btn/intent :primary :data-on-click (uic/dispatch :home/hello)}
+                         "Hello Action"]]]])))
 
 (defn render-home [{:app/keys [current-user] :as req}]
   (if (nil? current-user)
