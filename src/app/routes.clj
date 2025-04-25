@@ -1,5 +1,6 @@
 (ns app.routes
   (:require
+   [app.shim :as shim]
    [app.tab-state :as tab-state]
    [app.effects :as effects]
    [app.home :as home]
@@ -70,7 +71,7 @@
    {[:get ((css-thunk) :path)] ((css-thunk) :handler)}))
 
 (def default-shim-handler
-  (h/shim-handler
+  (shim/shim-handler
    {:head
     (h/html
       [:link#css {:rel "stylesheet" :type "text/css" :href (:path (css-thunk))}]
