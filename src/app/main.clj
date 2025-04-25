@@ -63,12 +63,27 @@
   (-> (h/get-app)
       :ctx)
 
+  (do
+    (def app (->  {}
+                  (d/ctx-start  "./db/dev1.sqlite")
+                  (schema/ctx-start)))
+    (def conn (:conn app)))
+  (do
+    (d/ctx-stop app)
+    (def conn nil))
+
   ;; Suck in demo data
   @(d/tx! conn
           (read-string (slurp "extra/data.tx")))
 
+  @(d/tx! conn (take 1000 (read-string (slurp "extra/data.tx"))))
+  @(d/tx! conn [{:session/id (str (random-uuid))}])
+
+  @(d/tx! conn [[:db/retractEntity [:session/id "dh6ezrhvsz5t7vcbmRHUAt9GHM8"]]])
+
   (d/find-all @conn :invoice/id '[* {:invoice/customer [*]}])
 
+  (d/find-all @conn :session/id '[*])
   (d/find-all @conn :user/id '[*])
   ;;
   )
