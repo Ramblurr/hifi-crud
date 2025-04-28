@@ -75,6 +75,7 @@
     (d/ctx-stop app)
     (def conn nil))
 
+  (stop)
   ;; Suck in demo data
   @(d/tx! conn
           (read-string (slurp "extra/data.tx")))
