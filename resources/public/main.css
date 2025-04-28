@@ -81,6 +81,12 @@ body {
   @apply h-full;
 }
 
+a.link {
+  @apply text-primary underline-offset-4 font-semibold hover:underline;
+}
+
+/*--------- Button spinner ---------*/
+
 .btn > .spinner {
   @apply opacity-0 absolute inset-0 m-auto flex items-center justify-center size-5;
 }
@@ -91,6 +97,8 @@ body {
   /* all other children except the .spinner should be hidden */
   @apply opacity-0 pointer-events-none;
 }
+
+/*--------- Notification animations ---------*/
 
 .notification-transition {
   view-transition-name: notification;
