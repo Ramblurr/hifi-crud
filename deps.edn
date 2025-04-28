@@ -1,4 +1,4 @@
-{:paths ["src" "resources"]
+{:paths ["demo/src" "demo/resources"]
  :deps  {;; Hyperlith is for Immediate CRUD (HIFICRUD)
          org.clojure/clojure           {:mvn/version "1.12.0"}
          hyperlith/hyperlith           {:git/url    "https://github.com/ramblurr/hyperlith"
@@ -20,8 +20,7 @@
          com.lambdaworks/scrypt        {:mvn/version "1.4.0"}
          io.github.paintparty/bling    {:mvn/version "0.5.2"}
          ;; Imperative Shell as the Engine of Application State (ISAEOAS)
-         exoscale/interceptor          {:mvn/version "0.1.17"}
-         funcool/promesa               {:mvn/version "11.0.678"}}
+         hifi/engine                   {:local/root "libs/hifi-engine"}}
 
  :aliases {:dev   {:extra-paths ["dev"]
                    :extra-deps  {djblue/portal               {:mvn/version "0.59.0"}
