@@ -1,3 +1,7 @@
+;; Copyright © 2025 Casey Link <casey@outskirtslabs.com>
+;; SPDX-License-Identifier: MIT
+
+
 ;; portal-helpers - a collection of portal render/submit helpers for repl driven development
 ;; Copyright © 2025 Casey Link
 ;; SPDX-License-Identifier: MIT

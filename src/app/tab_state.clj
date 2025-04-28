@@ -1,3 +1,7 @@
+;; Copyright © 2025 Casey Link <casey@outskirtslabs.com>
+;; SPDX-License-Identifier: MIT
+
+
 (ns app.tab-state
   (:import [java.time Instant Duration])
   (:require

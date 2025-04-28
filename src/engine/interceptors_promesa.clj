@@ -1,3 +1,7 @@
+;; Copyright © 2025 Casey Link <casey@outskirtslabs.com>
+;; SPDX-License-Identifier: MIT
+
+
 (ns engine.interceptors-promesa
   "Implement exoscale.interceptor protocols for promesa"
   (:require

@@ -1,3 +1,7 @@
+;; Copyright © 2025 Casey Link <casey@outskirtslabs.com>
+;; SPDX-License-Identifier: MIT
+
+
 (ns app.malli
   (:require
    [app.schema.common :as common]
