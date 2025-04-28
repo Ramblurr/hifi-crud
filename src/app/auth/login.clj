@@ -76,38 +76,38 @@
               :fields         {:email    ""
                                :password ""}}]
     (h/html
-      [:main#morph.main
-       [:div {:class "flex min-h-full flex-col justify-center py-12 sm:px-6 lg:px-8"}
-        [:div {:class "sm:mx-auto sm:w-full sm:max-w-md"}
-         [:a {:href (url-for :home)}
-          [icon/Logomark {:class "mx-auto h-12 w-auto text-teal-600 fill-teal-900"}]]
-         [:h2 {:class "mt-6 text-center text-2xl/9 font-bold tracking-tight text-gray-900"}
-          "Sign in to your account"]]
-        [:div {:class "mt-10 sm:mx-auto sm:w-full sm:max-w-[480px]"}
-         [:div {:class "bg-white px-6 py-12 shadow-sm sm:rounded-lg sm:px-12"}
-          [form/Form {::form/form     form
-                      :data-indicator "inflight"}
-           [:div.space-y-6
-            [form/Input {::form/label  "Email"
-                         ::form/form   form
-                         :autocomplete "email"
-                         :name         :email}]
-            [form/Input {::form/label  "Password"
-                         ::form/form   form
-                         :type         :password
-                         :autocomplete "current-password"
-                         :name         :password}]
+     [:main#morph.main
+      [:div {:class "flex min-h-full flex-col justify-center py-12 sm:px-6 lg:px-8"}
+       [:div {:class "sm:mx-auto sm:w-full sm:max-w-md"}
+        [:a {:href (url-for :home)}
+         [icon/Logomark {:class "mx-auto h-12 w-auto text-accent-foreground fill-accent-foreground"}]]
+        [:h2 {:class "mt-6 text-center text-2xl/9 font-bold tracking-tight"}
+         "Sign in to your account"]]
+       [:div {:class "mt-10 sm:mx-auto sm:w-full sm:max-w-[480px]"}
+        [:div {:class "bg-white px-6 py-12 shadow-sm sm:rounded-lg sm:px-12"}
+         [form/Form {::form/form     form
+                     :data-indicator "inflight"}
+          [:div.space-y-6
+           [form/Input {::form/label  "Email"
+                        ::form/form   form
+                        :autocomplete "email"
+                        :name         :email}]
+           [form/Input {::form/label  "Password"
+                        ::form/form   form
+                        :type         :password
+                        :autocomplete "current-password"
+                        :name         :password}]
 
-            [form/RootErrors {::form/form form}]
-            [:div {:data-signals-spinning "false"}
-             [btn/Button {::btn/intent        :primary
-                          :type               "submit" :class "w-full"
-                          :data-attr-disabled "$inflight"
-                          :data-class         (format "{'spinning': $%s}" "inflight")}
-              "Sign in"]]]]]
-         [:p {:class "mt-10 text-center text-sm/6 text-gray-500"}
-          "Not onboard yet? "
-          [:a {:href (url-for :register) :class "font-semibold text-teal-600 hover:text-teal-500"}
-           "Sign up"]]]]])))
+           [form/RootErrors {::form/form form}]
+           [:div {:data-signals-spinning "false"}
+            [btn/Button {::btn/intent        :primary
+                         :type               "submit" :class "w-full"
+                         :data-attr-disabled "$inflight"
+                         :data-class         (format "{'spinning': $%s}" "inflight")}
+             "Sign in"]]]]]
+        [:p {:class "mt-10 text-center text-sm/6 text-muted-foreground"}
+         "Not onboard yet? "
+         [:a {:href (url-for :register) :class "link"}
+          "Sign up"]]]]])))
 
 (h/refresh-all!)

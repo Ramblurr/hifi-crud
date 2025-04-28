@@ -76,22 +76,22 @@
 (defn user-menu-item
   [idx {:keys [label href attrs]}]
   (h/html
-   [:a (uic/merge-attrs attrs
+    [:a (uic/merge-attrs attrs
                          ;; relative flex cursor-default select-none items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-none transition-colors focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50 [&>svg]:size-4 [&>svg]:shrink-0
-                        :href href :class (uic/cs
+                         :href href :class (uic/cs
                                             ;; "text-gray-700 hover:bg-gray-100 hover:text-gray-900 "
-                                           "transition-colors focus:bg-accent focus:text-accent-foreground "
-                                           "hover:bg-accent hover:text-accent-foreground "
-                                           "block px-4 py-2 text-sm")
-                        :role "menuitem"
-                        :id (str "user-menu-item-" idx))
-    label]))
+                                            "transition-colors focus:bg-accent focus:text-accent-foreground "
+                                            "hover:bg-accent hover:text-accent-foreground "
+                                            "block px-4 py-2 text-sm")
+                         :role "menuitem"
+                         :id (str "user-menu-item-" idx))
+     label]))
 
 (defn user-menu-section
   [section]
   (h/html
-   [:div {:class "py-1" :role "none"}
-    (map-indexed user-menu-item (:items section))]))
+    [:div {:class "py-1" :role "none"}
+     (map-indexed user-menu-item (:items section))]))
 
 (defn user-account-actions
   []

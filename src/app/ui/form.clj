@@ -89,7 +89,7 @@
   (uic/validate-opts! doc-form-actions attrs)
   (cc/compile
    [:div {:class "py-5 flex justify-between items-center"
-          #_     "mt-6 flex items-center justify-end gap-x-6"}
+          #_"mt-6 flex items-center justify-end gap-x-6"}
     [:div {:class "flex items-center space-x-3 space-x-4"}
      left]
     [:div {:class "flex justify-end space-x-4"}
@@ -121,11 +121,11 @@
   (assert form)
   (let [$top-error-signal (str "$" (clojure.core/name (:form/key form)) ".error._top")]
     (cc/compile
-     [:div (uic/merge-attrs attrs :class (uic/cs "hidden mt-1 text-red-700")
+     [:div (uic/merge-attrs attrs :class (uic/cs "hidden mt-1 text-destructive")
                             :data-class-hidden (str "!" $top-error-signal))
       (when title
-        [:h3 {:class "text-sm font-semibold text-red-700"} title])
-      [:p {:class     "mt-1 text-sm/6 text-sm text-red-600"
+        [:h3 {:class "text-sm font-semibold text-destructive"} title])
+      [:p {:class     "mt-1 text-sm/6 text-sm text-destructive"
            :data-text $top-error-signal}]
       [:div {:class (uic/cs "")}
        children]])))
@@ -160,12 +160,12 @@
   (uic/validate-opts! doc-form-section attrs)
   (cc/compile
    [:div (uic/merge-attrs attrs :class (uic/cs
-                                        "border-b border-gray-900/10"
+                                        "border-b border-grid"
                                         (if compact? "pb-6" "pb-12")))
     (when title
-      [:h2 {:class "text-base/7 font-semibold text-gray-900"} title])
+      [:h2 {:class "text-base/7 font-semibold"} title])
     (when subtitle
-      [:p {:class "mt-1 text-sm/6 text-gray-600"} subtitle])
+      [:p {:class "mt-1 text-sm/6 text-base text-muted-foreground"} subtitle])
     [:div {:class (uic/cs "grid grid-cols-1 gap-x-6 gap-y-8 "
                           (if narrow? "sm:grid-cols-3" "sm:grid-cols-6")
                           (if compact? "mt-4" "mt-10"))}
@@ -178,7 +178,7 @@
          {:keys  [id name]
           ::keys [form label  required? description error variant error-icon?]
           :or    {required?   true
-                  error-icon? false}}        attrs
+                  error-icon? false}}         attrs
          id                                   (or id (str "form-control" (:form/key form) name))
          description-id                       (str "_" id "-description")
          required-id                          (str "_" id "-required")
@@ -197,10 +197,9 @@
      [:div {:class (uic/cs class)}
       (when-not hidden?
         [:div  {:class "flex justify-between"}
-         [:label {:for id :class "block text-sm/6 font-medium text-gray-900"} label]
-
+         [:label {:for id :class "block text-sm/6 font-medium"} label]
          (when required?
-           [:span {:class "text-sm/6 text-red-400" :id required-id}
+           [:span {:class "text-sm/6" :id required-id}
             "required"])])
       [:div {:data-class (data-class {$error-signal "grid grid-cols-1"})
              :class      (uic/cs (when-not (= :hidden variant) "mt-2"))}
@@ -218,15 +217,15 @@
                   :error          error})
        (when error-icon?
          [:app.ui/icon {:ico/name    :warning-circle-bold
-                        :class       "pointer-events-none col-start-1 row-start-1 mr-3 size-5 self-center justify-self-end text-red-500 sm:size-4"
+                        :class       "pointer-events-none col-start-1 row-start-1 mr-3 size-5 self-center justify-self-end text-destructive sm:size-4"
                         :aria-hidden "true"
                         :data-show   $error-signal}])]
       (when (and (not error) (not hidden?) description)
-        [:p {:class     "mt-2 text-sm text-gray-500"
+        [:p {:class     "mt-2 text-sm text-muted-foreground"
              :id        description-id
              :data-show (str "!" $error-signal)}
          description])
-      [:p {:class     "mt-2 text-sm text-red-600" :id error-id
+      [:p {:class     "mt-2 text-sm text-destructive" :id error-id
            :data-show $error-signal
            :data-text $error-signal}]])))
 
@@ -297,6 +296,15 @@
                                        :required required?
                                        :class (uic/cs "block w-full rounded-md bg-white py-1.5 text-base outline-1 -outline-offset-1 focus:outline-2 focus:-outline-offset-2 sm:text-sm/6")
                                        :data-class
-                                       (data-class {$error-signal           "col-start-1 row-start-1 pr-10 pl-3 text-red-900 outline-red-300 placeholder:text-red-300 focus:outline-red-600 sm:pr-9"
-                                                    (str "!" $error-signal) "px-3 text-gray-900 outline-gray-300 placeholder:text-gray-400 focus:outline-teal-600"})
+                                       (data-class {$error-signal
+                                                    (uic/cs
+                                                     "col-start-1 row-start-1 pr-10 pl-3  sm:pr-9"
+                                                     "text-destructive outline-destructive focus:outline-destructive")
+
+                                                    (str "!" $error-signal)
+                                                    (uic/cs
+                                                     "px-3"
+                                                     "text-base ring-offset-background"
+                                                     "placeholder:text-muted-foreground"
+                                                     "focus-visible:outline-ring")})
                                        :data-attr-aria-invalid $error-signal)]))))
