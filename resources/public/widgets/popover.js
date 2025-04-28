@@ -44,12 +44,16 @@ export function ActionMenuPopover(container) {
             })
           : null,
       ],
-    }).then(({ x, y }) => {
-      Object.assign(popover.style, {
-        left: `${x}px`,
-        top: `${y}px`,
+    })
+      .then(({ x, y }) => {
+        Object.assign(popover.style, {
+          left: `${x}px`,
+          top: `${y}px`,
+        });
+      })
+      .catch((err) => {
+        console.error("FloatingUI error:", err);
       });
-    });
   };
   popover.addEventListener("toggle", update);
 }

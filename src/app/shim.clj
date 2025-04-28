@@ -13,7 +13,8 @@
   (let [body (-> (h/html
                    [h/doctype-html5
                     [:html  {:lang                   "en"
-                             :data-signals-_darkmode "window.matchMedia(\"(prefers-color-scheme: dark)\").matches"
+                             ;; :data-signals-_darkmode "window.matchMedia(\"(prefers-color-scheme: dark)\").matches"
+                             :data-signals-_darkmode "false"
                              :data-persist           "_darkmode"
                              :data-class-dark        "$_darkmode"}
                      [:head

@@ -45,7 +45,7 @@
 
 (def doc-icon
   {:examples ["[icon/Icon {::icon/name :cloud-thin}]"
-              "[icon/Icon {::icon/name :phosphor/cloud-thin :class \"text-teal-500 size-5\"}]"]
+              "[icon/Icon {::icon/name :phosphor/cloud-thin :class \"text-primary size-5\"}]"]
    :ns       *ns*
    :name     'Icon
    :desc     "Renders an icon from the available icon collections"
