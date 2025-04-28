@@ -11,7 +11,7 @@
    [app.effects :as effects]
    [app.routes :as routes]
    [clojure.pprint :as pprint]
-   [engine.shell :as shell]
+   [hifi.engine.shell :as shell]
    [hyperlith.core :as h]
    [hyperlith.extras.datahike :as d]))
 

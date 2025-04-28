@@ -1,11 +1,9 @@
 ;; Copyright © 2025 Casey Link <casey@outskirtslabs.com>
 ;; SPDX-License-Identifier: EUPL-1.2
 
-
-(ns engine.interceptors-promesa
+(ns hifi.engine.interceptors-promesa
   "Implement exoscale.interceptor protocols for promesa"
   (:require
-   [promesa.exec.csp :as sp]
    [promesa.core :as pr]
    [exoscale.interceptor.protocols :as prot]
    [exoscale.interceptor.impl :as impl]))
