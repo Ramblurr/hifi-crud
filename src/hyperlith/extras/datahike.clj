@@ -1,3 +1,7 @@
+;; Copyright © 2025 Casey Link <casey@outskirtslabs.com>
+;; SPDX-License-Identifier: EUPL-1.2
+
+
 (ns hyperlith.extras.datahike
   "Datahike wrapper for hyperlith. Requires datalevin as a dependency."
   (:require [hyperlith.core :as h]

@@ -1,3 +1,7 @@
+;; Copyright © 2025 Casey Link <casey@outskirtslabs.com>
+;; SPDX-License-Identifier: EUPL-1.2
+
+
 ;; portal-helpers - a collection of portal render/submit helpers for repl driven development
 ;; Copyright © 2025 Casey Link
 ;; SPDX-License-Identifier: EUPL-1.2

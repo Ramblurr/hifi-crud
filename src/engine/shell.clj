@@ -1,3 +1,7 @@
+;; Copyright © 2025 Casey Link <casey@outskirtslabs.com>
+;; SPDX-License-Identifier: EUPL-1.2
+
+
 (ns engine.shell
   "It's not the core, it's the shell"
   (:require

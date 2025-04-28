@@ -116,7 +116,10 @@ The imperative shell is the engine that drives the application forward. It media
 - The effect, coeffect, and command definitions are all data. There are no macros (yet?).
   - as a result defining them is a bit verbose, but I want to massage this technique for awhile before adding registration functions or `defxx` macros.
 
+
+
 [^1]: well, this is isn't Haskell, if you call `(random-uuid)` in your pure function, that's on you. Shame!
 [^2]: ... for me! Please don't take anything personally. If you disagree I would love to hear your thoughts.
 [datahike]: https://github.com/replikativ/datahike
 [src-fx]: ./src/app/effects.clj
+
