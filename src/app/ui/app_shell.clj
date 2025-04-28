@@ -262,13 +262,13 @@
        (let [{:keys [id title text]} notif]
          (notification id title text)))]]))
 
-(defn app-shell [{:keys [tab-state] :as req} body]
+(defn app-shell [{:app/keys [tab-state] :as req} body]
   (h/html
-   [:main#morph.main {:data-signals-tab-id__case.kebab (format "'%s'" (:app/tab-id req))}
-    (mobile-menu req)
-    (desktop-sidebar req)
-    (app-container body)
-    (notification-region
-     (vals (:notifications tab-state)))]))
+    [:main#morph.main {:data-signals-tab-id__case.kebab (format "'%s'" (:app/tab-id req))}
+     (mobile-menu req)
+     (desktop-sidebar req)
+     (app-container body)
+     (notification-region
+      (vals (:notifications tab-state)))]))
 
 (h/refresh-all!)
