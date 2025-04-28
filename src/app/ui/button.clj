@@ -22,27 +22,30 @@
              :icon-size "size-5"}})
 
 (def button-intents
-  {:primary               {:classes       "bg-teal-600 text-white shadow-xs hover:bg-teal-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-600"
-                           :dark          "dark:bg-teal-500 dark:hover:bg-teal-400 dark:focus-visible:outline-teal-500"
-                           :spinner-color "text-white"}
-   :secondary             {:classes       "bg-white text-gray-900 ring-1 ring-gray-300 ring-inset shadow-xs hover:bg-gray-50"
-                           :dark          "dark:bg-white/10 dark:text-white dark:ring-0 dark:hover:bg-white/20"
-                           :spinner-color "text-gray-900"}
-   :secondary-destructive {:classes       "bg-white text-red-600 ring-1 ring-red-300 ring-inset shadow-xs hover:bg-red-50"
-                           :dark          "dark:bg-white/10 dark:text-red-400 dark:ring-0 dark:hover:bg-red-900/20"
+  {:primary {:classes       "bg-primary text-primary-foreground shadow hover:bg-primary/90"
+             :spinner-color "text-primary-foreground"}
+
+   :destructive {:classes "bg-destructive text-destructive-foreground shadow-sm hover:bg-destructive/90"}
+
+   :secondary             {:classes       "bg-secondary text-secondary-foreground shadow-sm hover:bg-secondary/80"
+                           :spinner-color "text-secondary-foreground"}
+   :secondary-destructive {:classes       "bg-secondary text-destructive shadow-sm hover:bg-destructive/20"
                            :spinner-color "text-red-600"}
-   :link                  {:classes       "text-teal-600 hover:text-teal-500 underline-offset-4 hover:underline"
-                           :dark          "dark:text-teal-400 dark:hover:text-teal-300"
-                           :spinner-color "text-teal-600"
-                           :no-border     true}
+
+   :ghost {:classes "hover:bg-accent hover:text-accent-foreground"}
+
+   :outline             {:classes "border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground"}
+   :outline-destructive {:classes "border border-destructive bg-background text-destructive shadow-sm hover:bg-accent hover:text-destructive/80"}
+
+   :link {:classes       "text-primary underline-offset-4 hover:underline"
+          :spinner-color "text-primary"
+          :no-border     true}
 
    :link-success     {:classes       "text-green-600 hover:text-green-500 underline-offset-4 hover:underline"
-                      :dark          "dark:text-green-400 dark:hover:text-green-300"
                       :spinner-color "text-green-600"
                       :no-border     true}
-   :link-destructive {:classes       "text-red-600 hover:text-red-500 underline-offset-4 hover:underline"
-                      :dark          "dark:text-red-400 dark:hover:text-red-300"
-                      :spinner-color "text-red-600"
+   :link-destructive {:classes       "text-destructive underline-offset-4 hover:underline"
+                      :spinner-color "text-destructive"
                       :no-border     true}})
 
 (def doc-button
@@ -62,7 +65,7 @@
     [::intent {:optional true
                :default  :secondary
                :doc      "Button intent"}
-     [:enum :primary :secondary :secondary-destructive :link :link-success :link-destructive]]
+     [:enum :primary :destructive :secondary :secondary-destructive :ghost :outline :outline-destructive :link :link-success :link-destructive]]
     [::disabled? {:optional true
                   :doc      "When true, disables button interaction"}
      :boolean]
@@ -101,7 +104,6 @@
                      "btn font-semibold relative min-w-fit transition-all relative"
                      (:classes size-data)
                      (:classes intent-data)
-                     (:dark intent-data)
                      (when loading? "spinning")
                      (when (or icon icon-trailing loading?) "inline-flex items-center")
                      (when (or icon icon-trailing) (:gap size-data))

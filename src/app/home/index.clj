@@ -33,53 +33,64 @@
                                                       dissoc (-> signals :notification-id)))}}]})
 
 (defn render-home-logged-out [{:keys [url-for] :as req}]
-  (let [link-cls "text-sm font-medium text-teal-600 underline"]
+  (let [link-cls "text-sm font-medium text-primary underline"]
     (h/html
-      [:main#morph.main
-       [:div {:class "mx-auto max-w-3xl px-4 py-12 sm:px-6 lg:px-8"}
-        [:div {:class "divide-y divide-gray-200 overflow-hidden rounded-lg bg-white shadow-sm"}
-         [:div {:class "px-4 py-5 sm:px-6"}
-          [:div {:class "sm:flex sm:items-center sm:justify-between"}
-           [:div {:class "sm:flex sm:space-x-5"}
-            [:div {:class "mt-4 text-center sm:mt-0 sm:pt-1 sm:text-left"}
-             [:p {:class "text-xl font-bold text-gray-900 sm:text-2xl mt-2"}
-              "You are not logged in"]
-             [:a {:href (url-for :login) :class link-cls} "Login"]
-             " or "
-             [:a {:href (url-for :register) :class link-cls} "Sign Up"]]]]]]]])))
+     [:main#morph.main
+      [:div {:class "mx-auto max-w-3xl px-4 py-12 sm:px-6 lg:px-8"}
+       [:div {:class "divide-y divide-gray-200 overflow-hidden rounded-lg bg-white shadow-sm"}
+        [:div {:class "px-4 py-5 sm:px-6"}
+         [:div {:class "sm:flex sm:items-center sm:justify-between"}
+          [:div {:class "sm:flex sm:space-x-5"}
+           [:div {:class "mt-4 text-center sm:mt-0 sm:pt-1 sm:text-left"}
+            [:p {:class "text-xl font-bold text-gray-900 sm:text-2xl mt-2"}
+             "You are not logged in"]
+            [:a {:href (url-for :login) :class link-cls} "Login"]
+            " or "
+            [:a {:href (url-for :register) :class link-cls} "Sign Up"]]]]]]]])))
 
 #_(defn render-home-logged-in [{:app/keys [current-user tab-state] :as req}]
     (h/html
-      [:main#morph.main {:data-signals-tab-id__case.kebab (format "'%s'" (:app/tab-id req))}
-       [:div {:class "mx-auto max-w-3xl px-4 py-12 sm:px-6 lg:px-8"}
-        [:div {:class "divide-y divide-gray-200 overflow-hidden rounded-lg bg-white shadow-sm"}
-         [:div {:class "px-4 py-5 sm:px-6"}
-          [:div {:class "sm:flex sm:items-center sm:justify-between"}
-           [:div {:class "sm:flex sm:space-x-5"}
-            [:div {:class "mt-4 text-center sm:mt-0 sm:pt-1 sm:text-left"}
-             [:p {:class "text-sm font-medium text-gray-600"} "Welcome back,"]
-             [:p
-              {:class "text-xl font-bold text-gray-900 sm:text-2xl"}
-              (:user/email current-user)]]]
-           [:div {:class "mt-5 flex justify-center sm:mt-0"}
-            [btn/Button {::btn/intent   :secondary-destructive
-                         :data-on-click (uic/dispatch :logout/submit)}
-             "Logout"]]]]
-         (when current-user)]]
-       (notification-region
-        (vals (:notifications tab-state)))]))
+     [:main#morph.main {:data-signals-tab-id__case.kebab (format "'%s'" (:app/tab-id req))}
+      [:div {:class "mx-auto max-w-3xl px-4 py-12 sm:px-6 lg:px-8"}
+       [:div {:class "divide-y divide-gray-200 overflow-hidden rounded-lg bg-white shadow-sm"}
+        [:div {:class "px-4 py-5 sm:px-6"}
+         [:div {:class "sm:flex sm:items-center sm:justify-between"}
+          [:div {:class "sm:flex sm:space-x-5"}
+           [:div {:class "mt-4 text-center sm:mt-0 sm:pt-1 sm:text-left"}
+            [:p {:class "text-sm font-medium text-gray-600"} "Welcome back,"]
+            [:p
+             {:class "text-xl font-bold text-gray-900 sm:text-2xl"}
+             (:user/email current-user)]]]
+          [:div {:class "mt-5 flex justify-center sm:mt-0"}
+           [btn/Button {::btn/intent   :secondary-destructive
+                        :data-on-click (uic/dispatch :logout/submit)}
+            "Logout"]]]]
+        (when current-user)]]
+      (notification-region
+       (vals (:notifications tab-state)))]))
 (defn render-home-logged-in [{:app/keys [tab-state] :as req}]
   (h/html
-    (shell/app-shell req
-                     #_(lay/nav {:current-nav :dashboard})
-                     [:div
-                      [:div {:class "px-4 py-5 sm:p-6"}
-                       [:p "You are logged in. You can take the following actions:"]
-                       [:div {:class "py-5 flex items-center gap-2 justify-end"}
-                        [btn/Button {:data-on-click (uic/dispatch :home/admin)}
-                         "Admin Action"]
-                        [btn/Button {::btn/intent :primary :data-on-click (uic/dispatch :home/hello)}
-                         "Hello Action"]]]])))
+   (shell/app-shell req
+                    #_(lay/nav {:current-nav :dashboard})
+                    [:div
+                     [:div {:class "px-4 py-5 sm:p-6"}
+                      [:p "You are logged in. You can take the following actions:"]
+                      [:div {:class "py-5 flex items-center gap-2 justify-end"}
+                       [btn/Button {:data-on-click (uic/dispatch :home/admin)}
+                        "Admin Action"]
+
+                       [btn/Button {::btn/intent :primary :data-on-click (uic/dispatch :home/hello)} "Hello Action"]
+                       [btn/Button {::btn/intent :destructive} "Destructive"]
+                       [btn/Button {::btn/intent :secondary} "Secondary"]
+                       [btn/Button {::btn/intent :secondary-destructive} "Secondary Destructive"]
+                       [btn/Button {::btn/intent :outline} "Outline"]
+                       [btn/Button {::btn/intent :outline-destructive} "Outline Destr"]
+
+                       [btn/Button {::btn/intent :ghost} "Ghost"]
+
+                       [btn/Button {::btn/intent :link} "Link"]
+                       [btn/Button {::btn/intent :link-destructive} "Link Destruct"]
+                       [btn/Button {::btn/intent :link-success} "Link Success"]]]])))
 
 (defn render-home [{:app/keys [current-user] :as req}]
   (if (nil? current-user)

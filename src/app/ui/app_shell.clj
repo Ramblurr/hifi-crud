@@ -1,5 +1,6 @@
 (ns app.ui.app-shell
   (:require
+   [app.ui.button :as btn]
    [app.ui.core :as uic]
    [hyperlith.core :as h]
    [app.ui.icon :as icon]))
@@ -67,14 +68,21 @@
 
 (defn user-menu-sections
   []
-  [{:items [{:label "My Profile" :href "#"}]}
-   {:items [{:label "Logout" :href "/logout"}]}])
+  [{:items [{:label "My Profile" :href "#"}
+            {:label "Logout" :href "/logout"}]}
+   ;; {:items []}
+   ])
 
 (defn user-menu-item
   [idx {:keys [label href attrs]}]
   (h/html
    [:a (uic/merge-attrs attrs
-                        :href href :class "text-gray-700 hover:bg-gray-100 hover:text-gray-900 block px-4 py-2 text-sm"
+                         ;; relative flex cursor-default select-none items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-none transition-colors focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50 [&>svg]:size-4 [&>svg]:shrink-0
+                        :href href :class (uic/cs
+                                            ;; "text-gray-700 hover:bg-gray-100 hover:text-gray-900 "
+                                           "transition-colors focus:bg-accent focus:text-accent-foreground "
+                                           "hover:bg-accent hover:text-accent-foreground "
+                                           "block px-4 py-2 text-sm")
                         :role "menuitem"
                         :id (str "user-menu-item-" idx))
     label]))
@@ -96,17 +104,20 @@
               :id            "desktop-user-menu-button"
               :popovertarget "desktop-user-menu"
               :class         (uic/cs
-                              "group w-full rounded-md bg-gray-100 px-3.5 py-2 text-left text-sm font-medium text-gray-700 hover:bg-gray-200 focus:outline-hidden focus:ring-2 focus:ring-teal-500 focus:ring-offset-2 focus:ring-offset-gray-100")
+                              "group w-full rounded-md px-3.5 py-2 text-left text-sm font-medium focus:outline-hidden focus:ring-2 focus:ring-offset-2"
+                              "active:bg-sidebar-accent active:text-sidebar-accent-foreground "
+                              "hover:bg-sidebar-accent hover:text-sidebar-accent-foreground "
+                              "focus:ring-sidebar-accent-foreground ")
               :aria-expanded "false" :aria-haspopup "true"}
      [:span {:class "flex w-full items-center justify-between"}
       [:span {:class "flex min-w-0 items-center justify-between space-x-3"}
-       (avatar-img nil  "h-10 w-10 shrink-0 rounded-full bg-gray-300")
+       (avatar-img nil "h-10 w-10 shrink-0 rounded-full ")
        [:span {:class "flex min-w-0 flex-1 flex-col"}
-        [:span {:class "truncate text-sm font-medium text-gray-900"}
+        [:span {:class "truncate text-sm font-medium "}
          "Alice Admin"]
-        [:span {:class "truncate text-sm text-gray-500"}
+        [:span {:class "truncate text-sm text-sidebar-foreground/50"}
          "admin"]]]
-      [icon/Icon {::icon/name :caret-down :class "h-5 w-5 shrink-0 text-gray-400 group-hover:text-gray-500"}]]]]
+      [icon/Icon {::icon/name :caret-down :class "h-5 w-5 shrink-0 text-gray-400 group-hover:text-sidebar-accent-foreground"}]]]]
    [:div {:id                         "desktop-user-menu"
           :popover                    true
           :role                       "menu"
@@ -114,7 +125,11 @@
           :aria-orientation           "vertical"
           :aria-labelledby            "desktop-user-menu-button"
           :tabindex                   "-1"
-          :class                      "animate-entry absolute right-0 left-0 z-10 mt-1 origin-top divide-y divide-gray-200 rounded-md bg-white shadow-lg ring-1 ring-black/5 focus:outline-hidden"}
+          :class                      (uic/cs
+                                       ;; z-50 max-h-[var(--radix-dropdown-menu-content-available-height)] overflow-y-auto overflow-x-hidden border bg-popover p-1 text-popover-foreground shadow-md data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 origin-[--radix-dropdown-menu-content-transform-origin] w-[--radix-dropdown-menu-trigger-width] min-w-56 rounded-lg
+                                       "animate-entry absolute right-0 left-0 z-10 mt-1 origin-top divide-y  rounded-md  shadow-lg ring-1  ring-muted focus:outline-hidden"
+                                       ;; "bg-white ring-black/5 divide-gray-200"
+                                       "bg-popover text-popover-foreground divide-muted")}
     (map user-menu-section (user-menu-sections))
     [:div {:class "py-1"} (theme-toggle)]]])
 
@@ -124,17 +139,13 @@
     (h/html
      [:a {:href href
           :class
-          (uic/cs "flex items-center px-2 py-2 text-sm"
-                  #_"-center px-2 py-2 text-sm font-medium rounded-md group cursor-pointer"
+          (uic/cs "flex items-center px-2 py-2 text-sm text-sidebar-foreground"
                   (if active?
-                    "bg-gray-200 text-teal-700 font-semibold"
-                    "text-gray-700 hover:text-gray-900 hover:bg-gray-50"))}
+                    "bg-sidebar-primary text-sidebar-primary-foreground font-semibold hover:bg-sidebar-primary hover:text-sidebar-primary-foreground focus:bg-sidebar-primary focus:text-sidebar-primary-foreground"
+                    "hover:bg-sidebar-accent hover:text-sidebar-accent-foreground focus:bg-sidebar-accent focus:text-sidebar-accent-foreground"))}
 
       (when icon
-        [icon/Icon {::icon/name icon :class (uic/cs "mr-3 shrink-0 h-6 w-6"
-                                                    (if active?
-                                                      "text-teal-700"
-                                                      "text-gray-400 group-hover:text-gray-500"))}])
+        [icon/Icon {::icon/name icon :class (uic/cs "mr-3 shrink-0 h-6 w-6")}])
       [:span {:class "only-expanded"} label]])))
 
 (defn vertical-navigation [{:app/keys [current-route]}]
@@ -144,43 +155,44 @@
   [req]
   [:dialog {:id "mobile-hamburger-menu", :class "slide-out relative lg:hidden" :data-ref "mobile-hamburger-menu" :popover true}
    [:section {:class "fixed inset-0 flex max-w-xs"}
-    [:div {:class "relative flex w-full max-w-xs flex-1 flex-col bg-white pt-5 pb-4"}
+    [:div {:class "relative flex w-full max-w-xs flex-1 flex-col bg-sidebar pt-5 pb-4"}
      [:div {:class "absolute top-0 right-0 -mr-12 pt-2"}
       [:button {:type          "button"
                 :aria-controls "mobile-hamburger-menu"
                 :data-on-click "$mobile-hamburger-menu.hidePopover()"
-                :class         "ml-1 flex h-10 w-10 items-center justify-center rounded-full focus:outline-hidden focus:ring-2 focus:ring-inset focus:ring-white"}
+                :class         "ml-1 flex h-10 w-10 items-center justify-center rounded-full focus:outline-hidden focus:ring-2 focus:ring-inset focus:ring-sidebar-accent-foreground"}
        [:span {:class "sr-only"} "Close sidebar"]
-       [icon/Icon {::icon/name :x :class "h-6 w-6 text-white"}]]]
+       [icon/Icon {::icon/name :x :class "h-6 w-6 text-sidebar-accent-foreground"}]]]
      [:div {:class "flex shrink-0 items-center px-4"}
       [:a {:href "/"}
-       [icon/Logomark {:class "h-8 w-auto text-teal-600 fill-teal-600 logotype-dark"}]]]
+       [icon/Logomark {:class "h-8 w-auto text-sidebar-accent-foreground fill-sidebar-accent-foreground"}]]]
      [:div {:class "mt-5 h-0 flex-1 overflow-y-auto"}
       [:nav {:class "px-2"}
        [:div {:class "space-y-1"}
-        (vertical-navigation req)]]]]
+        (vertical-navigation req)
+        (theme-toggle)]]]]
     ;; Dummy element to force sidebar to shrink to fit close icon
     [:div {:class         "w-14 shrink-0" :aria-hidden "true"
            :data-on-click "$mobile-hamburger-menu.hidePopover()"}]]])
 
-(defn desktop-menu  [req]
+(defn desktop-sidebar  [req]
   (h/html
    [:div {:data-signals-_sidebar.expanded "true"}
     [:div {:id                   "desktop-sidebar-menu"
            :data-class-collapsed "!$_sidebar.expanded"
            :class
            (uic/cs
-            "hidden lg:fixed lg:inset-y-0 lg:flex lg:w-64 lg:flex-col lg:border-r lg:border-gray-200 lg:bg-gray-100 lg:pt-5 lg:pb-4"
-            "lg:translate-x-0"
+            "hidden"
             "no-scrollbar"
-            "shrink-0 border-r border-gray-200 sm:translate-x-0 transition-all duration-200")}
+            "shrink-0 border-r border-sidebar-border sm:translate-x-0 transition-all duration-200"
+            "lg:fixed lg:inset-y-0 lg:flex lg:w-64 lg:flex-col lg:border-r lg:bg-sidebar lg:pt-5 lg:pb-4 lg:translate-x-0")}
 
      [:div {:class "flex shrink-0 items-center px-6 sidebar-logo-container"}
       [:a {:href "/" :class ""}
        [icon/Logomark {:data-class "{'lg:hidden': $_sidebar.expanded, 'lg:cloak': false}"
-                       :class      "h-8 w-auto text-teal-600 logotype-dark lg:cloak"}]
+                       :class      "h-8 w-auto text-sidebar-accent-foreground fill-sidebar-accent-foreground lg:cloak"}]
        [icon/Logotype {:data-class "{'lg:hidden': !$_sidebar.expanded}"
-                       :class      "h-8 w-auto text-teal-600 logotype-dark"}]]]
+                       :class      "h-8 w-auto text-sidebar-accent-foreground fill-sidebar-accent-foreground"}]]]
 
      [:div {:class "mt-5 flex h-0 flex-1 flex-col overflow-y-auto overflow-x-hidden pt-1 sidebar-scroll-container"}
       (user-account-actions)
@@ -188,8 +200,9 @@
        [:div {:class "space-y-1"}
         (vertical-navigation req)]]
       [:div {:class "flex items-end justify-end"}
-       [:button {:class         "px-3 py-2 text-gray-700 hover:text-gray-900 hover:bg-gray-50 rounded-md sidebar-open-close-button rotate-0 "
-                 :data-on-click "$_sidebar.expanded = !$_sidebar.expanded"}
+       [btn/Button {::btn/intent   :ghost
+                    :data-class    "{'rotate-180': !$_sidebar.expanded}"
+                    :data-on-click "$_sidebar.expanded = !$_sidebar.expanded"}
         [icon/Icon {::icon/name :arrow-left :class "w-6 h-6 hidden lg:block"}]]]]]]))
 (defn app-container
   [body]
@@ -197,8 +210,8 @@
    [:div {:id                            "app-container"
           :data-class-app_container_wide "!$_sidebar.expanded"
           :class                         "flex flex-col lg:pl-64 transition-all"}
-    [:div {:class "sticky top-0 z-10 flex h-16 shrink-0 border-b border-gray-200 bg-white lg:hidden"}
-     [:button {:type          "button" :class "border-r border-gray-200 px-4 text-gray-500 focus:outline-hidden focus:ring-2 focus:ring-inset focus:ring-teal-500 lg:hidden"
+    [:div {:class "sticky top-0 z-10 flex h-16 shrink-0 border-b border-sidebar-border bg-sidebar lg:hidden"}
+     [:button {:type          "button" :class "border-r border-accent text-accent-foreground px-4 focus:outline-hidden focus:ring-2 focus:ring-inset focus:ring-accent-foreground lg:hidden"
                :popovertarget "mobile-hamburger-menu"}
       [:span {:class "sr-only"} "Open sidebar"]
       [icon/Icon {::icon/name :hamburger :class "h-6 w-6"}]]
@@ -209,7 +222,7 @@
         [:div
          [:button {:type                     "button"
                    :data-action-menu-trigger "#user-menu"
-                   :class                    "flex max-w-xs items-center rounded-full bg-white text-sm focus:outline-hidden focus:ring-2 focus:ring-teal-500 focus:ring-offset-2" :id "user-menu-button" :aria-expanded "false" :aria-haspopup "true"}
+                   :class                    "flex max-w-xs items-center rounded-full bg-white text-sm focus:outline-hidden focus:ring-2 focus:ring-accent-foreground focus:ring-offset-2" :id "user-menu-button" :aria-expanded "false" :aria-haspopup "true"}
           [:span {:class "sr-only"} "Open user menu"]
 
           (avatar-img nil "h-8 w-8 rounded-full")]]
@@ -253,7 +266,7 @@
   (h/html
    [:main#morph.main {:data-signals-tab-id__case.kebab (format "'%s'" (:app/tab-id req))}
     (mobile-menu req)
-    (desktop-menu req)
+    (desktop-sidebar req)
     (app-container body)
     (notification-region
      (vals (:notifications tab-state)))]))
