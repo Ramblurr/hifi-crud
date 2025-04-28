@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="164.2438mm"
+   height="33.654999mm"
+   viewBox="0 0 164.2438 33.654998"
+   version="1.1"
+   id="svg1"
+   sodipodi:docname="wordmark.svg"
+   inkscape:version="1.4 (e7c3feb100, 2024-10-09)"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview1"
+     pagecolor="#ffffff"
+     bordercolor="#000000"
+     borderopacity="0.25"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     inkscape:document-units="mm"
+     inkscape:zoom="0.56693536"
+     inkscape:cx="276.92751"
+     inkscape:cy="-77.610259"
+     inkscape:window-width="1676"
+     inkscape:window-height="1398"
+     inkscape:window-x="0"
+     inkscape:window-y="0"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="layer1" />
+  <defs
+     id="defs1" />
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1"
+     transform="translate(-7.8524641,-66.73832)">
+    <text
+       xml:space="preserve"
+       style="font-size:35.2777px;font-family:'Acier BAT';-inkscape-font-specification:'Acier BAT, Normal';text-align:start;writing-mode:lr-tb;direction:ltr;text-anchor:start;fill:#1a1a1a;stroke:none;stroke-width:0.291;stroke-dasharray:none"
+       x="37.547085"
+       y="93.72583"
+       id="text1-3"><tspan
+         sodipodi:role="line"
+         id="tspan1-0"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:35.2777px;font-family:'Zona Pro';-inkscape-font-specification:'Zona Pro, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;fill:#1a1a1a;stroke:none;stroke-width:0.291;stroke-dasharray:none"
+         x="37.547085"
+         y="93.72583">hificrud</tspan></text>
+    <path
+       fill="none"
+       d="M 6.2649631,66.738324 H 39.919967 V 100.39332 H 6.2649631 Z"
+       id="path1"
+       style="stroke-width:3;stroke-dasharray:none" />
+    <path
+       fill="none"
+       stroke="currentColor"
+       stroke-linecap="round"
+       stroke-linejoin="round"
+       stroke-width="4.23333"
+       d="M 25.195901,98.303115 H 20.989026"
+       id="path2"
+       style="stroke-width:4;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none" />
+    <path
+       fill="none"
+       stroke="currentColor"
+       stroke-linecap="round"
+       stroke-linejoin="round"
+       stroke-width="4.23333"
+       d="M 18.729146,91.979575 C 11.197524,79.269552 19.920217,71.014873 22.446971,69.062621 a 1.0517188,1.0517188 0 0 1 1.290985,0 c 2.526754,1.952252 11.249447,10.206931 3.717826,22.916954 z"
+       id="path3"
+       style="stroke-width:3;stroke-dasharray:none" />
+    <path
+       fill="none"
+       stroke="currentColor"
+       stroke-linecap="round"
+       stroke-linejoin="round"
+       stroke-width="4.23333"
+       d="m 30.433461,81.315146 3.9847,4.780062 a 1.0517188,1.0517188 0 0 1 0.218231,0.901848 l -1.624905,7.313389 a 1.0517188,1.0517188 0 0 1 -1.684065,0.592907 l -3.87164,-2.923777 M 15.751466,81.315146 11.766767,86.095208 a 1.0517188,1.0517188 0 0 0 -0.218232,0.901848 l 1.624906,7.313389 a 1.0517188,1.0517188 0 0 0 1.684065,0.592907 l 3.87164,-2.923777"
+       id="path4"
+       style="stroke-width:3;stroke-dasharray:none" />
+    <path
+       style="font-size:35.2777px;font-family:'Zona Pro';-inkscape-font-specification:'Zona Pro, Normal';fill:#1a1a1a;stroke-width:0.291"
+       d="m 23.210513,83.969 c 1.552223,0 2.786943,-1.270003 2.786943,-2.857493 0,-1.5875 -1.23472,-2.89277 -2.786943,-2.89277 -1.552218,0 -2.822216,1.30527 -2.822216,2.89277 0,1.58749 1.269998,2.857493 2.822216,2.857493 z"
+       id="path14" />
+  </g>
+</svg>
