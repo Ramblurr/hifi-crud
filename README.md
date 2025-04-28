@@ -1,3 +1,7 @@
+<div align="center">
+  <img width="400" src="docs/logo.svg" alt="hificrud">
+</div>
+
 # HIFI CRUD
 
 > **H**yperlith **I**s **F**or **I**mmediate **CRUD** - An exploration of FC/IS and server driven web applications in Clojure
