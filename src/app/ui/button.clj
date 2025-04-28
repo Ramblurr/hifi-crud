@@ -1,5 +1,6 @@
 (ns app.ui.button
   (:require
+   [app.ui.icon :as icon]
    [app.ui.core :as uic]
    [dev.onionpancakes.chassis.compiler :as cc]
    [dev.onionpancakes.chassis.core :as c]))
@@ -97,8 +98,7 @@
        intent   :secondary
        loading? false} :as attrs} children]
   (uic/validate-opts! doc-button attrs)
-  (let [anchor?     (some? href)
-        size-data   (get button-sizes size)
+  (let [size-data   (get button-sizes size)
         intent-data (get button-intents intent)
         classes     (uic/cs
                      "btn font-semibold relative min-w-fit transition-all relative"
@@ -119,7 +119,7 @@
                             (:spinner-color intent-data))}
        [:use {:href "#svg-sprite-spinner"}]]
       (when (and icon (not loading?))
-        [:app.ui/icon  {:ico/name icon :class (uic/cs "button-icon" (:icon-size size-data) "-ml-0.5") :aria-hidden true}])
+        [icon/Icon  {::icon/name icon :class (uic/cs "button-icon" (:icon-size size-data) "-ml-0.5") :aria-hidden true}])
       (uic/wrap-text-node :span children)
       (when icon-trailing
         (icon-trailing {:class (uic/cs "button-icon" (:icon-size size-data) "-mr-0.5") :aria-hidden true}))])))
