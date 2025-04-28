@@ -5,15 +5,6 @@
    [hyperlith.core :as h]
    [app.ui.icon :as icon]))
 
-(def $nav-item-current  "inline-flex items-center border-b-2 border-teal-500 px-1 pt-1 text-sm font-medium text-gray-900")
-(def $nav-item-inactive  "inline-flex items-center border-b-2 border-transparent px-1 pt-1 text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700")
-
-#_(defn nav-item [{:keys [href label current?]}]
-    (comment
-      "Current: \"border-teal-500 text-gray-900\", Default: \"border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700\"")
-    [:a {:href href :class (if current? $nav-item-current $nav-item-inactive)}
-     label])
-
 (def nav-data
   [{:href       "#"
     :label      "Dashboard"
@@ -46,19 +37,17 @@
   []
   (let [$icon-cls "h-6 w-6 fill-accent stroke-accent transition group-hover:fill-accent/90 group-hover:stroke-accent/90"]
     (h/html
-     [:button {:type          "button"
-               :class         (uic/cs
-                               "block text-sm flex gap-2 w-full cursor-pointer group px-3 py-2 backdrop-blur-sm"
-                               "transition shadow-lg shadow-primary/5 ring-primary/5 text-accent-foreground hover:bg-accent hover:text-accent-foreground")
-                ;; :data-attr-aria-pressed "!!$_darkmode"
-                ;; :data-on-click "$_darkmode = !$_darkmode;"
-               :data-ref      "_darktoggle"
-               :data-on-click "$_darkmode = !$_darkmode; $_darktoggle.setAttribute('ariapressed', !!$_darkmode)"}
-      [icon/Icon {::icon/name :sun-bold
-                  :class      (uic/cs "block dark:hidden" $icon-cls)}]
-      [icon/Icon {::icon/name :moon-stars-bold
-                  :class      (uic/cs "hidden dark:block" $icon-cls)}]
-      "Toggle Dark Mode"])))
+      [:button {:type                   "button"
+                :class                  (uic/cs
+                                         "block text-sm flex gap-2 w-full cursor-pointer group px-3 py-2 backdrop-blur-sm"
+                                         "transition shadow-lg shadow-primary/5 ring-primary/5 text-accent-foreground hover:bg-accent hover:text-accent-foreground")
+                :data-attr-aria-pressed "$_darkmode ? 'true' : 'false'"
+                :data-on-click          "$_darkmode = !$_darkmode;"}
+       [icon/Icon {::icon/name :sun-bold
+                   :class      (uic/cs "block dark:hidden" $icon-cls)}]
+       [icon/Icon {::icon/name :moon-stars-bold
+                   :class      (uic/cs "hidden dark:block" $icon-cls)}]
+       "Toggle Dark Mode"])))
 
 (defn avatar-img [avatar class]
   [:img {:class class

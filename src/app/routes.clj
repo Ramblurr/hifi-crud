@@ -130,6 +130,7 @@
 
 (def router
   (h/router
-   (merge {[:post "/cmd"] (h/action-handler #'action-dispatch-command)}
+   (merge {[:post "/cmd"]               (h/action-handler #'action-dispatch-command)
+           [:get (shim/datastar :path)] (shim/datastar :handler)}
           (asset-routes)
           (pages->routes pages))))

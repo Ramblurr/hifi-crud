@@ -1,5 +1,8 @@
 (ns app.shim
   (:require
+   [clojure.string :as str]
+   [hyperlith.impl.assets :refer [static-asset]]
+   [hyperlith.impl.util :as util]
    [hyperlith.impl.brotli :as br]
    [hyperlith.impl.crypto :as crypto]
    [hyperlith.impl.datastar :as d*]
@@ -8,6 +11,15 @@
    [hyperlith.impl.session :refer [csrf-cookie-js]]))
 
 ;; HACK(hyperlith): I wish hyperlith let us do this without importing impl nses
+(def datastar
+  (static-asset
+   {:body
+    (-> (util/load-resource "public/datastarRC6.js")
+        slurp
+        ;; Make sure we point to the right source map
+        (str/replace "datastar.js.map" (:path d*/datastar-source-map)))
+    :content-type "text/javascript"
+    :compress?    true}))
 
 (defn build-shim-page-resp [head-hiccup body-pre body-post]
   (let [body (-> (h/html
@@ -22,7 +34,7 @@
                       (when head-hiccup head-hiccup)
                       ;; Scripts
                       [:script#js {:defer true :type "module"
-                                   :src   (d*/datastar :path)}]
+                                   :src   (datastar :path)}]
                       ;; Enables responsiveness on mobile devices
                       [:meta {:name    "viewport"
                               :content "width=device-width, initial-scale=1.0"}]]
