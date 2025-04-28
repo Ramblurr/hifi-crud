@@ -167,33 +167,33 @@
 
 (defn desktop-sidebar  [req]
   (h/html
-   [:div {:data-signals-_sidebar.expanded "true"}
-    [:div {:id                   "desktop-sidebar-menu"
-           :data-class-collapsed "!$_sidebar.expanded"
-           :class
-           (uic/cs
-            "hidden"
-            "no-scrollbar"
-            "shrink-0 border-r border-sidebar-border sm:translate-x-0 transition-all duration-200"
-            "lg:fixed lg:inset-y-0 lg:flex lg:w-64 lg:flex-col lg:border-r lg:bg-sidebar lg:pt-5 lg:pb-4 lg:translate-x-0")}
+    [:div {:data-signals-_sidebar.expanded "true"}
+     [:div {:id                   "desktop-sidebar-menu"
+            :data-class-collapsed "!$_sidebar.expanded"
+            :class
+            (uic/cs
+             "hidden"
+             "no-scrollbar"
+             "shrink-0 border-r border-sidebar-border sm:translate-x-0 transition-all duration-200"
+             "lg:fixed lg:inset-y-0 lg:flex lg:w-64 lg:flex-col lg:border-r lg:bg-sidebar lg:pt-5 lg:pb-4 lg:translate-x-0")}
 
-     [:div {:class "flex shrink-0 items-center px-6 sidebar-logo-container"}
-      [:a {:href "/" :class ""}
-       [icon/Logomark {:data-class "{'lg:hidden': $_sidebar.expanded, 'lg:cloak': false}"
-                       :class      "h-8 w-auto text-sidebar-accent-foreground fill-sidebar-accent-foreground lg:cloak"}]
-       [icon/Logotype {:data-class "{'lg:hidden': !$_sidebar.expanded}"
-                       :class      "h-8 w-auto text-sidebar-accent-foreground fill-sidebar-accent-foreground"}]]]
+      [:div {:class "flex shrink-0 items-center px-6 sidebar-logo-container"}
+       [:a {:href "/" :class ""}
+        [icon/Logomark {:data-class "{'lg:hidden': $_sidebar.expanded, 'lg:cloak': false}"
+                        :class      "h-8 w-auto text-sidebar-accent-foreground fill-sidebar-accent-foreground lg:cloak"}]
+        [icon/Logotype {:data-class "{'lg:hidden': !$_sidebar.expanded}"
+                        :class      "h-8 w-auto text-sidebar-accent-foreground fill-sidebar-accent-foreground"}]]]
 
-     [:div {:class "mt-5 flex h-0 flex-1 flex-col overflow-y-auto overflow-x-hidden pt-1 sidebar-scroll-container"}
-      (user-account-actions)
-      [:nav
-       [:div {:class "space-y-1"}
-        (vertical-navigation req)]]
-      [:div {:class "flex items-end justify-end"}
-       [btn/Button {::btn/intent   :ghost
-                    :data-class    "{'rotate-180': !$_sidebar.expanded}"
-                    :data-on-click "$_sidebar.expanded = !$_sidebar.expanded"}
-        [icon/Icon {::icon/name :arrow-left :class "w-6 h-6 hidden lg:block"}]]]]]]))
+      [:div {:class "mt-5 flex h-0 flex-1 flex-col overflow-y-auto overflow-x-hidden pt-1 sidebar-scroll-container"}
+       (user-account-actions)
+       [:nav
+        [:div {:class "space-y-1"}
+         (vertical-navigation req)]]
+       [:div {:class "flex items-end justify-end"}
+        [btn/Button {::btn/intent   :ghost
+                     :data-class    "{'rotate-180': !$_sidebar.expanded}"
+                     :data-on-click "$_sidebar.expanded = !$_sidebar.expanded"}
+         [icon/Icon {::icon/name :arrow-left :class "w-6 h-6 hidden lg:block"}]]]]]]))
 (defn app-container
   [body]
   (h/html

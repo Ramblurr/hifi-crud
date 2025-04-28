@@ -80,7 +80,7 @@
       [:div {:class "flex min-h-full flex-col justify-center py-12 sm:px-6 lg:px-8"}
        [:div {:class "sm:mx-auto sm:w-full sm:max-w-md"}
         [:a {:href (url-for :home)}
-         [icon/Logomark {:class "mx-auto h-12 w-auto text-accent-foreground fill-accent-foreground"}]]
+         [icon/Logotype {:class "mx-auto h-12 w-auto text-accent-foreground fill-accent-foreground"}]]
         [:h2 {:class "mt-6 text-center text-2xl/9 font-bold tracking-tight"}
          "Sign in to your account"]]
        [:div {:class "mt-10 sm:mx-auto sm:w-full sm:max-w-[480px]"}
