@@ -14,7 +14,9 @@
 (def datastar
   (static-asset
    {:body
-    (-> (util/load-resource "public/datastarRC6.js")
+    (-> (util/load-resource
+         ;; "public/datastar@1.0.0-beta.11.js"
+         "public/datastarRC6.js")
         slurp
         ;; Make sure we point to the right source map
         (str/replace "datastar.js.map" (:path d*/datastar-source-map)))
@@ -23,28 +25,28 @@
 
 (defn build-shim-page-resp [head-hiccup body-pre body-post]
   (let [body (-> (h/html
-                   [h/doctype-html5
-                    [:html  {:lang                   "en"
+                  [h/doctype-html5
+                   [:html  {:lang                   "en"
                              ;; :data-signals-_darkmode "window.matchMedia(\"(prefers-color-scheme: dark)\").matches"
-                             :data-signals-_darkmode "false"
-                             :data-persist           "_darkmode"
-                             :data-class-dark        "$_darkmode"}
-                     [:head
-                      [:meta {:charset "UTF-8"}]
-                      (when head-hiccup head-hiccup)
+                            :data-signals-_darkmode "false"
+                            :data-persist           "_darkmode"
+                            :data-class-dark        "$_darkmode"}
+                    [:head
+                     [:meta {:charset "UTF-8"}]
+                     (when head-hiccup head-hiccup)
                       ;; Scripts
-                      [:script#js {:defer true :type "module"
-                                   :src   (datastar :path)}]
+                     [:script#js {:defer true :type "module"
+                                  :src   (datastar :path)}]
                       ;; Enables responsiveness on mobile devices
-                      [:meta {:name    "viewport"
-                              :content "width=device-width, initial-scale=1.0"}]]
-                     [:body
-                      [:div {:data-signals-csrf csrf-cookie-js}]
-                      [:div {:data-on-load d*/on-load-js}]
-                      [:noscript "Your browser does not support JavaScript!"]
-                      body-pre
-                      [:main {:id "morph"}]
-                      body-post]]])
+                     [:meta {:name    "viewport"
+                             :content "width=device-width, initial-scale=1.0"}]]
+                    [:body
+                     [:div {:data-signals-csrf csrf-cookie-js}]
+                     [:div {:data-on-load d*/on-load-js}]
+                     [:noscript "Your browser does not support JavaScript!"]
+                     body-pre
+                     [:main {:id "morph"}]
+                     body-post]]])
                  h/html->str)]
     (-> {:status  200
          :headers (assoc default-headers "Content-Encoding" "br")
