@@ -1,6 +1,7 @@
 @import "tailwindcss" source(none);
 @source "./main.css";
 @source "../../src/app";
+@import "./tw-animate.css";
 
 /* this makes dark only active when html has .dark class */
 /* we need to fully support dark mode everywhere before removing this */
@@ -98,7 +99,7 @@ a.link {
   @apply opacity-0 pointer-events-none;
 }
 
-/*--------- Notification animations ---------*/
+/*--------- Toast/Notification animations ---------*/
 
 .notification-transition {
   view-transition-name: notification;

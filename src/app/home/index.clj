@@ -3,11 +3,10 @@
    [app.ui.button :as btn]
    [app.ui.app-shell :as shell]
    [app.ui.core :as uic]
-   [app.ui.icon :as icon]
    [hyperlith.core :as h]))
 
 (defn hello-command [{:app/keys [current-user tab-state] :as _cofx} {:keys [signals]}]
-  (let [notif-id (h/new-uid)
+  (let [notif-id (str "toast" (h/new-uid))
         counter  (inc (:counter tab-state 0))
         notif    {:id    notif-id
                   :title "Hello"
@@ -23,7 +22,7 @@
                         :effect/data {:command {:command/kind :home/clear-notification
                                                 :signals      {:tab-id          (:tab-id signals)
                                                                :notification-id notif-id}}
-                                      :seconds 5}}]}))
+                                      :seconds 10}}]}))
 
 (defn clear-notification-command [_cofx {:keys [signals]}]
   {:outcome/effects [{:effect/kind :app/tab-transact
@@ -32,7 +31,7 @@
                                               (update ts :notifications
                                                       dissoc (-> signals :notification-id)))}}]})
 
-(defn render-home-logged-out [{:keys [url-for] :as req}]
+(defn render-home-logged-out [{:keys [url-for] :as _req}]
   (let [link-cls "text-sm font-medium text-primary underline"]
     (h/html
      [:main#morph.main
@@ -47,27 +46,6 @@
             [:a {:href (url-for :login) :class link-cls} "Login"]
             " or "
             [:a {:href (url-for :register) :class link-cls} "Sign Up"]]]]]]]])))
-
-#_(defn render-home-logged-in [{:app/keys [current-user tab-state] :as req}]
-    (h/html
-      [:main#morph.main {:data-signals-tab-id__case.kebab (format "'%s'" (:app/tab-id req))}
-       [:div {:class "mx-auto max-w-3xl px-4 py-12 sm:px-6 lg:px-8"}
-        [:div {:class "divide-y divide-gray-200 overflow-hidden rounded-lg bg-white shadow-sm"}
-         [:div {:class "px-4 py-5 sm:px-6"}
-          [:div {:class "sm:flex sm:items-center sm:justify-between"}
-           [:div {:class "sm:flex sm:space-x-5"}
-            [:div {:class "mt-4 text-center sm:mt-0 sm:pt-1 sm:text-left"}
-             [:p {:class "text-sm font-medium text-gray-600"} "Welcome back,"]
-             [:p
-              {:class "text-xl font-bold text-gray-900 sm:text-2xl"}
-              (:user/email current-user)]]]
-           [:div {:class "mt-5 flex justify-center sm:mt-0"}
-            [btn/Button {::btn/intent   :secondary-destructive
-                         :data-on-click (uic/dispatch :logout/submit)}
-             "Logout"]]]]
-         (when current-user)]]
-       (notification-region
-        (vals (:notifications tab-state)))]))
 
 (defn button-gallery []
   [:div {:class "py-5 flex flex-col sm:flex-row sm:items-center gap-2 justify-end"}
@@ -93,6 +71,7 @@
                      [:div
                       [:div {:class "px-4 py-5 sm:p-6"}
                        [:p "You are logged in. You can take the following actions:"]
+                       ;; [:pre {:data-json-signals true}]
                        [:div {:class "py-5 flex flex-col sm:flex-row sm:items-center gap-2 justify-end"}
                         [btn/Button {:data-on-click (uic/dispatch :home/admin)}
                          "Admin Action"]

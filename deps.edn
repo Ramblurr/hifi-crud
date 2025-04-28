@@ -5,6 +5,8 @@
                                         :git/sha    "676c2b57cc8b9114859646ea09cb2578f902b2ec"
                                         ;; :local/root "../hyperlith"
                                         :exclusions [http-kit/http-kit]}
+         datastar/expressions          {:git/url "https://github.com/ramblurr/datastar-expressions/"
+                                        :git/sha "8db9d4bf5a178912ca173f67671fd9dba6b14f90"}
          http-kit/http-kit             {:mvn/version "2.9.0-beta1"}
          org.xerial/sqlite-jdbc        {:mvn/version "3.49.1.0"}
          io.replikativ/datahike        {:mvn/version "0.6.1596"}
