@@ -2,13 +2,13 @@
 ;; SPDX-License-Identifier: MIT
 
 
-(ns engine.fx
+(ns hifi.engine.fx
   "Built in effects"
   (:require
    [promesa.exec.csp :as sp]))
 
 (defn dispatch-command [ctx command]
-  (sp/put! (:engine.impl/chan ctx) command)
+  (sp/put! (:hifi.engine.impl/chan ctx) command)
   :dispatched)
 
 (def dispatch-fx

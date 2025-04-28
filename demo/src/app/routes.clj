@@ -9,7 +9,7 @@
    [app.effects :as effects]
    [app.home :as home]
    [app.auth :as auth]
-   [engine.shell :as shell]
+   [hifi.engine.shell :as shell]
    [hyperlith.core :as h]))
 
 (defn make-url-for [pages]

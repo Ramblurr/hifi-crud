@@ -1,10 +1,9 @@
 ;; Copyright © 2025 Casey Link <casey@outskirtslabs.com>
 ;; SPDX-License-Identifier: MIT
 
-
-(ns engine.interceptors
+(ns hifi.engine.interceptors
   (:require
-   [engine.context :as context]
+   [hifi.engine.context :as context]
    [promesa.core :as pr]))
 
 (defn do-effect
@@ -62,7 +61,7 @@
 (def report-unhandled-error-interceptor
   {:interceptor/name :report-unhandled-error-interceptor
    :doc              "Reports unhandled errors to the logger"
-   :error            (fn report-unhandled-error [ctx error]
+   :error            (fn report-unhandled-error [_ctx error]
                        (tap> [:unhandled-error error])
                        (throw error))})
 

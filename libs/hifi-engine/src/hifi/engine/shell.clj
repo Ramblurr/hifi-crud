@@ -1,14 +1,13 @@
 ;; Copyright © 2025 Casey Link <casey@outskirtslabs.com>
 ;; SPDX-License-Identifier: MIT
 
-
-(ns engine.shell
+(ns hifi.engine.shell
   "It's not the core, it's the shell"
   (:require
-   [engine.context :as context]
-   [engine.fx :as fx]
-   [engine.interceptors :as int]
-   [engine.impl :as impl]))
+   [hifi.engine.context :as context]
+   [hifi.engine.fx :as fx]
+   [hifi.engine.interceptors :as int]
+   [hifi.engine.impl :as impl]))
 
 (def default-global-interceptors
   "The default set of interceptors that executes effects"

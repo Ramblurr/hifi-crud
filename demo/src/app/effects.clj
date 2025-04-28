@@ -4,12 +4,12 @@
 
 (ns app.effects
   (:require
-   [engine.shell :as shell]
+   [hifi.engine.shell :as shell]
    [app.tab-state :as tab-state]
    [medley.core :as medley]
    [exoscale.cloak :as cloak]
-   [engine.fx :as fx]
-   [engine.context :as context]
+   [hifi.engine.fx :as fx]
+   [hifi.engine.context :as context]
    [hyperlith.core :as h]
    [hyperlith.extras.datahike :as d]))
 

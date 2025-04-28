@@ -2,7 +2,7 @@
 ;; SPDX-License-Identifier: MIT
 
 
-(ns engine.context)
+(ns hifi.engine.context)
 
 (defn get-effectuator [ctx fx-id]
   (get-in ctx [:engine/registry :effects fx-id :effect/handler]))

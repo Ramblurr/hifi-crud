@@ -1,11 +1,10 @@
 ;; Copyright © 2025 Casey Link <casey@outskirtslabs.com>
 ;; SPDX-License-Identifier: MIT
 
-
-(ns engine.impl
+(ns hifi.engine.impl
   (:require
-   [engine.context :as context]
-   [engine.interceptors-promesa :as ip]
+   [hifi.engine.context :as context]
+   [hifi.engine.interceptors-promesa :as ip]
    [promesa.exec.csp :as sp]
    [promesa.core :as pr]
    [exoscale.interceptor :as i]))
@@ -118,7 +117,8 @@
                   :exoscale.interceptor/stack
                   :engine/registry))))))
 
-(defn handle-sync [{::keys [chan] :as env} opts]
+(defn handle-sync
+  [{::keys [chan] :as env} opts]
   (let [!rv (atom nil)]
     #_{:clj-kondo/ignore [:loop-without-recur]}
     (pr/loop []
