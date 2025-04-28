@@ -72,6 +72,13 @@
                     (swap! !page-state clean-stale-page-state)
                     (clean-stale-watches!))))
 
+(defn ctx-start [ctx]
+  (assoc ctx :clean-tab-state-chime (start-clean-page-state-job)))
+
+(defn ctx-stop [ctx]
+  (when-let [chime (:clean-tab-state-chime ctx)]
+    (.close chime)))
+
 (defn generate-tab-id []
   (h/new-uid))
 

@@ -1,6 +1,7 @@
 (ns app.main
   (:gen-class)
   (:require
+   [app.tab-state :as tab-state]
    [app.schema :as schema]
    [app.commands :as commands]
    [app.effects :as effects]
@@ -26,9 +27,11 @@
   (-> {}
       (d/ctx-start "./db/dev1.sqlite")
       (schema/ctx-start)
+      (tab-state/ctx-start)
       (prepare-engine)))
 
 (defn ctx-stop [ctx]
+  (tab-state/ctx-stop ctx)
   (d/ctx-stop ctx))
 
 (defn -main [& _]
