@@ -7,8 +7,8 @@
 @custom-variant dark (&:where(.dark, .dark *));
 /*@custom-variant dark (&:is(.dark *));*/
 
-/* @import "./theme-graphite.css"; */
-@import "./theme-shad.css";
+@import "./theme-graphite.css";
+/* @import "./theme-shad.css"; */
 
 @theme inline {
   --color-background: var(--background);
