@@ -84,4 +84,4 @@
                            16384))
   ([^OutputStream os opts]
    (BrotliOutputStream/new os (encoder-params opts)
-                           (:buffer-size opts))))
+                           (:buffer-size opts 16384))))
