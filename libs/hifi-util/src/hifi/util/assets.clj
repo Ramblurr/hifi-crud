@@ -6,7 +6,6 @@
 (ns hifi.util.assets
   (:import [java.io InputStream])
   (:require
-   [hifi.util.codec :as codec]
    [clojure.java.io :as io]
    [hifi.util.crypto :as crypto]))
 

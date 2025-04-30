@@ -8,4 +8,5 @@
          com.aayushatharva.brotli4j/native-linux-x86_64 {:mvn/version "1.18.0"}
          io.netty/netty-buffer                          {:mvn/version "4.1.119.Final"}
          com.cnuernber/charred                          {:mvn/version "1.037"}
+         jarohen/chime                                  {:mvn/version "0.3.3"}
          hifi/util                                      {:local/root "../hifi-util"}}}

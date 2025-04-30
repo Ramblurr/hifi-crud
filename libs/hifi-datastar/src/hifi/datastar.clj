@@ -95,7 +95,7 @@
                   (recur new-view-hash))))))
 
 (defn long-lived-render-on-close [{::keys [<cancel]}]
-  (sp/put! <cancel :cancel))
+  (sp/put <cancel :cancel))
 
 (comment
   ;; sample usage

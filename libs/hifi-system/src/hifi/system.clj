@@ -1,5 +1,6 @@
 (ns hifi.system
   (:require [clojure.string :as str]
+            [hifi.datastar.tab-state :as tab-state]
             [hifi.datastar :as datastar]
             [hifi.env :as env]
             [hifi.system.middleware.exception :as middleware.exception]
@@ -216,6 +217,7 @@
                         :ring-handler                RingHandlerComponent
                         :router-options              RouterOptionsComponent
                         :datastar-render-multiplexer datastar/DatastarRenderMultiplexerComponent
+                        :tab-state                   tab-state/TabStateComponent
                         :options                     options
                         :middleware                  (MiddlewareRegistryComponent nil)}}
      ::ds/plugins [pop/options-plugin]}))
