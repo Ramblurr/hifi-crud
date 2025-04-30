@@ -1,0 +1,10 @@
+{:paths ["src"]
+ :deps  {datastar/sdk                                   {:git/url   "https://github.com/starfederation/datastar/"
+                                                         :git/sha   "4a9b1e4f15a82fcb366297c9c7da25f62ee980c7"
+                                                         :deps/root "sdk/clojure/sdk"}
+         funcool/promesa                                {:mvn/version "11.0.678"}
+         ;; Compression - Assumes you deploy uberjar on linux x86_64
+         com.aayushatharva.brotli4j/brotli4j            {:mvn/version "1.18.0"}
+         com.aayushatharva.brotli4j/native-linux-x86_64 {:mvn/version "1.18.0"}
+         com.cnuernber/charred                          {:mvn/version "1.037"}
+         hifi/util                                      {:local/root "../hifi-util"}}}

@@ -1,0 +1,3 @@
+{:paths ["src"]
+ :deps  {dev.weavejester/medley          {:mvn/version "1.8.1"}
+         crypto-equality/crypto-equality {:mvn/version "1.0.1"}}}

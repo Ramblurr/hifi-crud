@@ -116,6 +116,9 @@ The imperative shell is the engine that drives the application forward. It media
 - The effect, coeffect, and command definitions are all data. There are no macros (yet?).
   - as a result defining them is a bit verbose, but I want to massage this technique for awhile before adding registration functions or `defxx` macros.
 
+## License: European Union Public License 1.2
+
+Copyright © 2025 Casey Link. Distributed under the [EUPL-1.2](https://spdx.org/licenses/EUPL-1.2.html).
 
 
 [^1]: well, this is isn't Haskell, if you call `(random-uuid)` in your pure function, that's on you. Shame!
