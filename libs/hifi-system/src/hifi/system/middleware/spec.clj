@@ -113,3 +113,57 @@
     [:cookie-name {:default "sid" :doc "Name of the cookie holding the session key."} NonBlankString]
     [:cookie-attrs {:default {:same-site :lax :http-only true :secure true :path "/" :host-prefix true}
                     :doc     "Map of attributes for the session cookie."} CookieAttrsOption]]))
+
+(def csp-keys [:base-uri
+               :default-src
+               :script-src
+               :object-src
+               :style-src
+               :img-src
+               :media-src
+               :frame-src
+               :child-src
+               :frame-ancestors
+               :font-src
+               :connect-src
+               :manifest-src
+               :form-action
+               :sandbox
+               :script-nonce
+               :plugin-types
+               :reflected-xss
+               :block-all-mixed-content
+               :upgrade-insecure-requests
+               :referrer
+               :report-uri
+               :report-to])
+
+(def ContentSecurityPolicyData
+  (m/schema
+   (into [:map]
+         (mapv (fn [k]
+                 [k {:optional true} [:vector :string]])
+               csp-keys))))
+
+(def SecHeadersMiddlewareOptions
+  (m/schema
+   [:map
+    [:hsts? {:default true :doc "The HTTP Strict-Transport-Security (HSTS) response header makes sure the browser automatically upgrades to HTTPS for current and future connections."} :boolean]
+    [:content-security-policy {:default {:font-src        ["'self'"]
+                                         :script-src      ["'self'" "'unsafe-eval'"]
+                                         :style-src-elem  ["'self'" "'unsafe-inline'"]
+                                         :form-action     ["'self'"]
+                                         :style-src       ["'self'" "'unsafe-inline'"]
+                                         :connect-src     ["'self'"]
+                                         :img-src         ["'self'" "https: data:"]
+                                         :frame-ancestors ["'none'"]
+                                         :base-uri        ["'self'"]
+                                         :default-src     ["'none'"]
+                                         :media-src       ["'self'" "https: data:"]}}
+     ContentSecurityPolicyData]
+    [:content-security-policy-raw {:optional true
+                                   :doc      "Raw CSP header value. This will override the content-security-policy key if both are present."} :string]
+    [:x-permitted-cross-domain-policies {:default "none"} :string]
+    [:referrer-policy {:default "no-referrer"} :string]
+    [:x-content-type-options {:default "nosniff"} :string]
+    [:x-frame-options {:optional true :default "deny"} :string]]))

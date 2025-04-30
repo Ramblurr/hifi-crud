@@ -3,6 +3,7 @@
    [hifi.datastar.middleware :as d*mw]
    [hifi.system.middleware.csrf :as csrf]
    [hifi.system.middleware.session :as session]
+   [hifi.system.middleware.secheaders :as secheaders]
    [hifi.system.middleware.exception :as exception]
    [reitit.ring.middleware.parameters :as reitit.params]
    [reitit.ring.middleware.multipart :as reitit.multipart]))
@@ -18,7 +19,8 @@
    :exception-backstop (exception/exception-backstop-middleware (:exception-backstop opts))
    :datastar-signals   (d*mw/datastar-signals-middleware (:datastar-signals opts))
    :session-cookie     (session/session-middleware (:session-cookie opts))
-   :csrf-protection    (csrf/csrf-middleware (:csrf-protection opts))})
+   :csrf-protection    (csrf/csrf-middleware (:csrf-protection opts))
+   :security-headers   (secheaders/security-headers-middleware (:security-headers opts))})
 
 (def hypermedia-chain
   [:parse-raw-params
@@ -26,4 +28,5 @@
    :parse-multipart
    :datastar-signals
    :session-cookie
-   :csrf-protection])
+   :csrf-protection
+   :security-headers])
