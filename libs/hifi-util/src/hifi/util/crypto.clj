@@ -4,12 +4,14 @@
   "Utilities related to security"
   (:refer-clojure :exclude [bytes])
   (:require
+
+   [clojure.java.io :as io]
    [crypto.equality :as equality]
    [hifi.util.codec :as codec])
   (:import
    [javax.crypto Mac]
    [javax.crypto.spec SecretKeySpec]
-   [java.security SecureRandom]))
+   [java.security SecureRandom MessageDigest]))
 
 (def ^SecureRandom secure-random
   (SecureRandom/new))
@@ -53,3 +55,35 @@
         (.init key-spec))
       (.doFinal (String/.getBytes data))
       codec/->base64))
+
+(defn hash-stream-data ^MessageDigest
+  [^String algo ^java.io.InputStream in]
+  (when in
+    (let [d      (MessageDigest/getInstance algo)
+          buffer (byte-array 5120)]
+      (loop []
+        (let [read-size (.read in buffer 0 5120)]
+          (when-not (= read-size -1)
+            (.update d ^bytes buffer 0 read-size)
+            (recur))))
+      d)))
+
+(defn sha384
+  ^bytes [^bytes input-bytes]
+  (-> (doto (MessageDigest/getInstance "SHA-384")
+        (.update input-bytes))
+      (.digest)))
+
+(defn sha384-stream
+  ^bytes [^bytes ^java.io.InputStream in]
+  (.digest (hash-stream-data "SHA-384" in)))
+
+(defn sha384-resource [path]
+  (if-let [resource (io/resource path)]
+    (str "sha384-"
+         (-> resource
+             io/input-stream
+             sha384-stream
+             codec/->base64))
+    (throw (ex-info "Cannot load resource %s from classpath" {:path path}))))
+

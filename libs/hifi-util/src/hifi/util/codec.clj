@@ -12,6 +12,10 @@
   ^String [^byte/1 b]
   (.encodeToString base64-encoder b))
 
+(defn ->base64
+  ^String [^byte/1 b]
+  (.encodeToString base64-encoder b))
+
 (defn digest
   "Digest function based on Clojure's hash."
   ^String [data]

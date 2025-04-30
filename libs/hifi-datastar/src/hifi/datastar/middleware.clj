@@ -26,6 +26,14 @@
                  (let [signals-edn (read-json signals)]
                    (handler (assoc req
                                    :datastar-signals signals-edn
-                                   :submitted-csrf-token (:csrf-token signals-edn))))
+                                   :submitted-csrf-token (:csrf signals-edn))))
                  (handler req))
                (handler req))))})
+
+(defn datastar-render-multiplexer-middleware
+  [mult]
+  (assert mult)
+  {:name ::datastar-render-multiplexer
+   :wrap (fn wrap-datastar-render-multiplexer [handler]
+           (fn [req]
+             (handler (assoc req :hifi.datastar/multiplexer (force mult)))))})

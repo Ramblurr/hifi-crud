@@ -77,8 +77,9 @@
                                      response       (handler (assoc request :csrf-token new-csrf-token))]
                                  (update-csrf-cookie response new-csrf-token options))
 
-                               :else {:status 403
-                                      :body   "Invalid csrf"})))))})))
+                               :else {:status  403
+                                      :headers {"Content-Type" "text/plain"}
+                                      :body    "Invalid csrf"})))))})))
 
 (comment
 

@@ -137,9 +137,9 @@
 
 (def MiddlewareOptions
   [:map
-   [:default-middleware-registry-fn {:doc     "A function that accepts middleware-opts and returns the default middleware registry. "
+   [:default-middleware-registry-fn {:doc     "An arity/2 function that accepts system config and middleware-opts and returns the default middleware registry. "
                                      :default default.middleware/default-middleware-registry} fn?]
-   [:registry-fn {:doc      "A function that accepts middleware-opts and returns a middleware registry to be merged with the default middleware registry"
+   [:registry-fn {:doc      "An arity/2 function that accepts system config middleware-opts and returns a middleware registry to be merged with the default middleware registry"
                   :optional true}
     fn?
     ;; MiddlewareRegistryOptions

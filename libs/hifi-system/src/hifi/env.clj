@@ -7,10 +7,31 @@
    [aero.core :as aero]
    [clojure.java.io :as io]))
 
-(defn get-env-profile
-  "Returns the value of HIFI_PROFILE or nil if it does not exist"
+(def ^:dynamic *env*
+  nil)
+
+(defn set-env!
+  "Sets the current profile for the REPL. This is useful for development
+  when you want to change the profile without restarting the REPL."
+  [profile]
+  (alter-var-root #'*env* (constantly profile)))
+
+(defn current-profile
+  "Returns the current profile value or nil if it does not exist
+
+  The profile can be set via (in priority order):
+  - `HIFI_PROFILE` environment variablex
+  - `hifi.profile` JVM property
+  - [[*env*]] - a dynamic var for use during REPL driven development, so you don't have to restart your REPL to change your profile
+
+  Possible options are:
+    - `nil` or `:prod` for production
+    - `:dev` for development"
   []
-  (System/getenv "HIFI_PROFILE"))
+  (or
+   *env*
+   (keyword (System/getenv "HIFI_PROFILE"))
+   (keyword (System/getProperty "hifi.profile"))))
 
 (defn mask
   "Mask a value behind the `Secret` type, hiding its real value when printing"
@@ -49,24 +70,47 @@
 
    Accepts key-value pairs, all are optional.
    - `:env-filename`, a string containing a filename, the env EDN file to load
-   - `:profile`, a keyword, can be passed to load a specific profile (e.g., `:dev`, `:test`, etc), by default this is nil, which is probably the production profile
    - `:opts`, a map, are  extra Aero options
 
    This is a more opinionated version of `hifi.env/read-config` with a naming convention.
+
+   The active profile is controlled by the HIFI_PROFILE environment variable.
 
    Example:
 
    ```clojure
    (hifi.env/read-env)                 ;; reads env.edn with the default profile
-   (hifi.env/read-env :profile :dev)   ;; reads env.edn with the :dev profile
    ```
 
    Options are passed to the underlying Aero reader."
-  [& {:keys [profile env-filename opts]
+  [& {:keys [env-filename opts]
       :or   {env-filename "env.edn"
-             profile      (get-env-profile)
              opts         {}}}]
 
-  (let [aero-opts (merge (when profile {:profile profile}) opts)]
+  (let [profile   (current-profile)
+        aero-opts (merge (when profile {:profile profile}) opts)]
     (-> (read-config env-filename aero-opts)
         (assoc :profile profile))))
+
+(comment
+  (def env-data
+    (dissoc (read-env) :hifi/components))
+
+  (defmacro env
+    "Read env from .env.edn. If env is missing fails at compile time."
+    [k]
+    (if (k env-data)
+      ;; We could just inline the value, but that makes it trickier
+      ;; to patch env values on a running server from the REPL.
+      `(env-data ~k)
+      (throw (ex-info (str "Missing env in .env.edn: " k)
+                      {:hifi/error :hifi.env/missing-env
+                       :env-key    k})))))
+
+(defn prod? []
+  (let [p (current-profile)]
+    (or (nil? p)
+        (= :prod p))))
+
+(defn dev? []
+  (= :dev (current-profile)))

@@ -1,5 +1,6 @@
 (ns hifi.system
   (:require [clojure.string :as str]
+            [hifi.datastar :as datastar]
             [hifi.env :as env]
             [hifi.system.middleware.exception :as middleware.exception]
             [org.httpkit.server :as hk-server]
@@ -176,22 +177,20 @@
                     :reitit.middleware/transform (if print-context-diffs?
                                                    (conj middleware-transformers reitit.ring.middleware.dev/print-request-diffs)
                                                    middleware-transformers)
-                    #_#_:exception               pretty/exception
-                    ;; :validate                        reitit.spec/validate
                     :data                        route-data}))
 
         :hifi/options-schema spec/RouterOptionsOptions
         :hifi/options-ref    [:hifi/components :options :router-options]
         :config              {:middleware [::ds/local-ref [:middleware]]}})
 
-(def MiddlewareRegistryComponent
-  #::ds{:start (fn middleware-registry-component-start [{::ds/keys [config]}]
+(defn MiddlewareRegistryComponent  [component-config]
+  {::ds/start  (fn middleware-registry-component-start [{::ds/keys [config]}]
                  (let [{:keys [default-middleware-registry-fn registry-fn opts]} (-> config :hifi/options)]
-                   (merge (default-middleware-registry-fn opts) (when registry-fn (registry-fn opts)))))
+                   (merge (default-middleware-registry-fn config opts) (when registry-fn (registry-fn config opts)))))
+   ::ds/config {:datastar-render-multiplexer [::ds/local-ref [:datastar-render-multiplexer]]}
 
-        :hifi/options-schema spec/MiddlewareRegistryOptions
-        :hifi/options-ref    [:hifi/components :options :middleware]
-        :config              {}})
+   :hifi/options-schema spec/MiddlewareRegistryOptions
+   :hifi/options-ref    [:hifi/components :options :middleware]})
 
 (defn coerce-opts [opts env]
   ;; There are 3 sources of options (in order of priority from highest to least)
@@ -208,16 +207,17 @@
 
 (defn hifi-system
   "Returns a complete donut.system map intialized with the hifi system opts"
-  [{:keys [profile] :or {profile :dev} :as opts}]
-  (let [env     (env/read-env :profile profile)
+  [opts]
+  (let [env     (env/read-env)
         options (coerce-opts opts env)]
     {::ds/defs
      {:env             (dissoc env :hifi/components)
-      :hifi/components {:http-server    HTTPServerComponent
-                        :ring-handler   RingHandlerComponent
-                        :router-options RouterOptionsComponent
-                        :options        options
-                        :middleware     MiddlewareRegistryComponent}}
+      :hifi/components {:http-server                 HTTPServerComponent
+                        :ring-handler                RingHandlerComponent
+                        :router-options              RouterOptionsComponent
+                        :datastar-render-multiplexer datastar/DatastarRenderMultiplexerComponent
+                        :options                     options
+                        :middleware                  (MiddlewareRegistryComponent nil)}}
      ::ds/plugins [pop/options-plugin]}))
 
 (defn hifi-plugin

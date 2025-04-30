@@ -2,6 +2,7 @@
   {:clj-kondo/ignore [:clojure-lsp/unused-public-var]}
   (:require
    [promesa.exec.csp :as sp]
+   [hifi.util.assets :as assets]
    [hifi.util.codec :as codec]
    [hifi.datastar.brotli :as br]
    [hifi.datastar.util :as util]
@@ -75,13 +76,16 @@
   #_{:clj-kondo/ignore [:unused-binding]}
   [{:as opts ::keys [req <render <cancel render-fn view-hash-fn
                      report-fn merge-fragment-opts]} sse-gen]
+  (assert <render)
+  (assert <cancel)
   (sp/go-loop [last-view-hash (get-in req [:headers "last-event-id"])]
     (let [[event ch] (sp/alts! [<cancel <render]
                                :priority true ;; we want work cancelling to have higher priority
                                )]
       (condp = ch
-        <cancel (do (sp/close! <render)
-                    (sp/close! <cancel))
+        <cancel (do
+                  (sp/close! <render)
+                  (sp/close! <cancel))
         <render (let [req           (assoc req ::first-render? (= (first event) :first-render))
                       new-view      ^String (try-log report-fn req (render-fn req))
                       new-view-hash ^String (view-hash-fn new-view)]
@@ -90,7 +94,7 @@
                     (d*/merge-fragment! sse-gen new-view (assoc merge-fragment-opts d*/id new-view-hash)))
                   (recur new-view-hash))))))
 
-(defn long-lived-render-on-close [{:keys [<cancel]}]
+(defn long-lived-render-on-close [{::keys [<cancel]}]
   (sp/put! <cancel :cancel))
 
 (comment
@@ -117,15 +121,15 @@
    (rerender-all! nil))
   ([event]
    (when-let [<refresh-ch @!refresh-ch]
-     (sp/put! <refresh-ch (or event [])))))
+     (sp/put <refresh-ch (or event [])))))
 
 (defn throttle [<in-ch msec]
   (let [;; No buffer on the out-ch as the in-ch should be buffered
         <out-ch (sp/chan)]
     (sp/go
       (util/while-some [event (sp/take! <in-ch)]
-                       (sp/put! <out-ch event)
-                       (Thread/sleep ^long msec)))
+        (sp/put! <out-ch event)
+        (Thread/sleep ^long msec)))
     <out-ch))
 
 (defn start-render-multiplexer [{:keys [max-refresh-ms on-refresh]
@@ -134,16 +138,22 @@
         _            (reset! !refresh-ch <refresh-ch)
         refresh-mult (-> (throttle <refresh-ch max-refresh-ms)
                          (sp/pipe
-                          (sp/chan :buf 1
+                          (sp/chan :buf (sp/dropping-buffer 1)
                                    :xf
                                    (map (fn [event]
                                           (when (and on-refresh (seq event))
-                                            (apply on-refresh event))
+                                            (on-refresh event))
                                           event))))
-                         sp/mult)]
-
+                         sp/mult*)]
     {::<refresh-ch  <refresh-ch
      ::refresh-mult refresh-mult}))
+
+(comment
+  (def _s (start-render-multiplexer {:max-refresh-ms 100}))
+  (stop-render-multiplexer _s)
+  ;; rcf
+  ;;
+  )
 
 (defn stop-render-multiplexer [{::keys [<refresh-ch refresh-mult]}]
   (when <refresh-ch
@@ -151,3 +161,32 @@
     (reset! !refresh-ch nil))
   (when refresh-mult
     (sp/close! refresh-mult)))
+
+(def !datastar-asset (assets/static-asset false
+                                          {:resource-path "hifi-datastar/datastar@rc6.js"
+                                           :content-type  "text/javascript"
+                                           :compress-fn   (fn [body]
+                                                            (br/compress body :quality 11))
+                                           :encoding      "br"
+                                           :route-path    "datastar.js"}))
+
+(def DatastarRenderMultiplexerOptions
+  [:map {:name ::render-multiplexer}
+   [:max-refresh-ms {:default 100
+                     :doc     "Don't re-render clients more often than this many milliseconds"} :int]
+   [:on-refresh {:optional true
+                 :doc      "An arity/1 function called with the refresh event"} fn?]])
+
+(def DatastarRenderMultiplexerComponent
+  "A donut.system component for the datastar render multiplexer
+  Config:
+    - :hifi/options - See DatastarRenderMultiplexerOptions"
+  {:donut.system/start  (fn  [{{:keys [:hifi/options]} :donut.system/config}]
+                          ;; workaround https://github.com/donut-party/system/issues/43
+                          (let [multiplexer (start-render-multiplexer options)]
+                            (delay multiplexer)))
+   :donut.system/stop   (fn [{instance :donut.system/instance}]
+                          (stop-render-multiplexer @instance))
+   :donut.system/config {}
+   :hifi/options-schema DatastarRenderMultiplexerOptions
+   :hifi/options-ref    [:hifi/components :options :datastar-render-multiplexer]})

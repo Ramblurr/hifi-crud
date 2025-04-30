@@ -43,7 +43,7 @@
   All other options are passed directly to malli.
   "
   [schema {:keys [error-msg more-ex-data transformer] :or {transformer default-transformer} :as opts}]
-  (m/coercer schema transformer identity
+  (m/coercer (m/schema schema) transformer identity
              (partial throw-explanation error-msg more-ex-data)
              (dissoc opts :error-msg :more-ex-data :transformer)))
 

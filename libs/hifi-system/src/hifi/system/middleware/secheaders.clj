@@ -51,7 +51,6 @@
      :wrap           (fn wrap-security-headers [handler]
                        (fn [request]
                          (let [response (handler request)]
-                           (tap> [:GOT sec-headers (update response :headers #(merge sec-headers %))])
                            (update response :headers #(merge sec-headers %)))))}))
 
 (comment

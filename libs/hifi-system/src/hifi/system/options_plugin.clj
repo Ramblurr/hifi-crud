@@ -13,7 +13,7 @@
   (get-in system (into [::ds/defs] ks)))
 
 (defn- coerce-config! [comp-id options-schema supplied-options]
-  (de/coerce! options-schema supplied-options
+  (de/coerce! options-schema (or supplied-options {})
               {:error-msg    (str "Component '" comp-id "' has invalid options")
                :more-ex-data {::de/id         ::invalid-component-options
                               ::de/url        (de/url ::invalid-component-options)
