@@ -163,7 +163,7 @@
     (sp/close! refresh-mult)))
 
 (def !datastar-asset (assets/static-asset false
-                                          {:resource-path "hifi-datastar/datastar@rc6.js"
+                                          {:resource-path "hifi-datastar/datastar@rc7.js"
                                            :content-type  "text/javascript"
                                            :compress-fn   (fn [body]
                                                             (br/compress body :quality 11))
