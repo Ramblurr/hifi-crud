@@ -11,8 +11,6 @@
   (in-ns 'dev)
   :loaded)
 
-(dev)
-
 (comment
   (require
    '[datahike-sqlite.core]

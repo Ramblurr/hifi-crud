@@ -1,10 +1,7 @@
 ;; Copyright © 2025 Casey Link <casey@outskirtslabs.com>
 ;; SPDX-License-Identifier: EUPL-1.2
-
-
 (ns dev
   (:require
-
    [hyperlith.core :as h]
    [hyperlith.extras.datahike :as d]
    [app.schema :as schema]
