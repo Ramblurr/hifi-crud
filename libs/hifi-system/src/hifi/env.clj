@@ -3,6 +3,7 @@
 (ns hifi.env
   (:refer-clojure :exclude [mask])
   (:require
+   [hifi.anomalies.iface :as anom]
    [exoscale.cloak :as cloak]
    [aero.core :as aero]
    [clojure.java.io :as io]))
@@ -43,6 +44,15 @@
   unmasked, works on any walkable type"
   [x]
   (cloak/unmask x))
+
+(defn unmask!
+  "Like [[unmask]] but throws if the unmasked value is nil"
+  [x]
+  (let [v (cloak/unmask x)]
+    (if (nil? v)
+      (throw (ex-info "Unmasked secret is nil" {:hifi/error     :hifi.env/unmask-nil
+                                                ::anom/category ::anom/incorrect}))
+      v)))
 
 (defn secret?
   "Returns true if x is a value wrapped by the Secret type, false otherwise"

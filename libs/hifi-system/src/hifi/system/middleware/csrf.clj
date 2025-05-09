@@ -56,7 +56,7 @@
 (defn csrf-middleware
   ([options]
    (let [options      (->csrf-middleware-opts options)
-         csrf-keyspec (crypto/secret-key->hmac-sha256-keyspec (-> options :csrf-secret env/unmask))
+         csrf-keyspec (crypto/secret-key->hmac-sha256-keyspec (-> options :csrf-secret env/unmask!))
          validate     (partial valid-csrf-token? csrf-keyspec)
          generate     (partial generate-csrf-token csrf-keyspec)]
      {:name           ::csrf
