@@ -128,8 +128,8 @@
         <out-ch (sp/chan)]
     (sp/go
       (util/while-some [event (sp/take! <in-ch)]
-        (sp/put! <out-ch event)
-        (Thread/sleep ^long msec)))
+                       (sp/put! <out-ch event)
+                       (Thread/sleep ^long msec)))
     <out-ch))
 
 (defn start-render-multiplexer [{:keys [max-refresh-ms on-refresh]
@@ -168,7 +168,7 @@
                                            :compress-fn   (fn [body]
                                                             (br/compress body :quality 11))
                                            :encoding      "br"
-                                           :route-path    "datastar.js"}))
+                                           :route-path    "/datastar.js"}))
 
 (def DatastarRenderMultiplexerOptions
   [:map {:name ::render-multiplexer}

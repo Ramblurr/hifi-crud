@@ -37,8 +37,8 @@
                         cache-buster (subs sri-hash (- 71 8))]
                     {:handler   (fn [_] resp)
                      :integrity (if (some? integrity) integrity sri-hash)
-                     :href      (str "/" route-path "?v=" cache-buster)
-                     :path      (str "/" route-path)}))]
+                     :href      (str route-path "?v=" cache-buster)
+                     :path      route-path}))]
 
     (if reload?
       ;; In dev mode, re-evaluate on every deref
