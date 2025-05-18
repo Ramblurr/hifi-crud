@@ -1,0 +1,26 @@
+{:id :test-schema-project
+ :tx-data [{:db/ident :project/id
+            :db/valueType :db.type/uuid
+            :db/cardinality :db.cardinality/one
+            :db/unique :db.unique/identity
+            :db/doc "Project's unique identifier"}
+           
+           {:db/ident :project/name
+            :db/valueType :db.type/string
+            :db/cardinality :db.cardinality/one
+            :db/doc "Project name"}
+           
+           {:db/ident :project/description
+            :db/valueType :db.type/string
+            :db/cardinality :db.cardinality/one
+            :db/doc "Project description"}
+           
+           {:db/ident :project/owner
+            :db/valueType :db.type/ref
+            :db/cardinality :db.cardinality/one
+            :db/doc "Project owner (reference to a person)"}
+           
+           {:db/ident :project/members
+            :db/valueType :db.type/ref
+            :db/cardinality :db.cardinality/many
+            :db/doc "Project members (references to people)"}]}
