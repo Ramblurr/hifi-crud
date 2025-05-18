@@ -1,11 +1,8 @@
 ;; Copyright © 2025 Casey Link <casey@outskirtslabs.com>
 ;; SPDX-License-Identifier: EUPL-1.2
-
-
 (ns app.forms
   (:require
    [app.malli :as s]
-   [hyperlith.extras.datahike :as d]
    [medley.core :as medley]))
 
 (defn untouched-fields
@@ -41,9 +38,6 @@
   "Returns an effect to clear the form errors by merging the appropriate signals as nil"
   [signals form-key]
   (merge-errors signals form-key nil))
-
-(defn unique-attr-available? [attr db value]
-  (nil? (d/find-by db attr value [attr])))
 
 (defn remove-untouched-errors
   "Remove errors from the validation result for fields that haven't been touched by the user yet"

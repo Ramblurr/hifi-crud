@@ -1,17 +1,15 @@
 ;; Copyright © 2025 Casey Link <casey@outskirtslabs.com>
 ;; SPDX-License-Identifier: EUPL-1.2
-
-
 (ns app.effects
   (:require
+   [promesa.exec.csp :as sp]
    [hifi.engine.shell :as shell]
-   [app.tab-state :as tab-state]
+   [hifi.datastar.tab-state :as tab-state]
    [medley.core :as medley]
    [exoscale.cloak :as cloak]
+   [app.db :as d]
    [hifi.engine.fx :as fx]
-   [hifi.engine.context :as context]
-   [hyperlith.core :as h]
-   [hyperlith.extras.datahike :as d]))
+   [hifi.engine.context :as context]))
 
 (def print-fx
   {:effect/kind    :print
@@ -28,7 +26,7 @@
   {:effect/kind    :d*/merge-signals
    :effect/handler (fn d*-merge-signals
                      [{:keys [!http-return] :as _ctx} data]
-                     (swap! !http-return merge (h/signals data)))})
+                     (swap! !http-return merge {:hyperlith.core/signals data}))})
 
 (def d*-redirect-fx
   {:effect/kind    :d*/redirect
@@ -36,12 +34,12 @@
                      [{:keys [!http-return] :as _ctx} data]
                      (swap! !http-return  (fn [ret]
                                             (-> ret
-                                                (merge (h/script (format "window.location = '%s'" data)))))))})
+                                                (merge {:hyperlith.core/script (format "window.location = '%s'" data)})))))})
 
 (def schedule-fx
   {:effect/kind    :app/schedule
    :effect/handler (fn schedule [ctx {:keys [command seconds]}]
-                     (h/thread
+                     (sp/go
                        (Thread/sleep (* 1000 seconds))
                        (try
                          (shell/dispatch-sync ctx command)
@@ -50,7 +48,7 @@
 
 (def db-transact-fx
   {:effect/kind    :db/transact
-   :effect/handler (fn db-transact [{:keys [conn] :as ctx} {:keys [tx-data on-success on-error] :as data}]
+   :effect/handler (fn db-transact [{:keys [conn] :as ctx} {:keys [tx-data on-success on-error] :as _data}]
                      (assert (some? conn) "No connection to Datahike")
                      (assert (vector? tx-data) "Datahike transaction data must be a vector")
                      (try
@@ -85,7 +83,7 @@
   ([{:keys [sid conn]}]
    (current-user sid conn))
   ([sid conn]
-   (some-> (d/find-by @conn :session/id sid '[:session/id {:session/user [:user/id :user/email]}])
+   (some-> (d/find-by (d/db conn) :session/id sid '[:session/id {:session/user [:user/id :user/email]}])
            :session/user
            (assoc :user/role :app.role/user))))
 
@@ -148,8 +146,3 @@
                   root-public-keychain-input
                   db-input
                   tab-state-input])
-
-(defn enrich-render [req]
-  (-> req
-      (assoc :db (d/db (:conn req)))
-      (assoc :app/current-user (current-user req))))

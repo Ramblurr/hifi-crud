@@ -1,7 +1,5 @@
 ;; Copyright © 2025 Casey Link <casey@outskirtslabs.com>
 ;; SPDX-License-Identifier: EUPL-1.2
-
-
 (ns app.auth
   (:require
    [app.auth.login :as login]
@@ -11,16 +9,16 @@
    [app.auth.register :as register]))
 
 (def pages
-  {:login           {:path    "/login"
-                     :handler #'login/render-login}
-   :logout          {:path    "/logout"
-                     :handler #'logout/render-logout}
-   :register        {:path    "/register"
-                     :handler #'register/render-register}
-   :forgot-password {:path    "/forgot-password"
-                     :handler #'forgot-password/render-forgot-password}
-   :reset-password  {:path    "/reset-password"
-                     :handler #'reset-password/render-reset-password}})
+  {::login           {:path   "/login"
+                      :render #'login/render-login}
+   ::logout          {:path   "/logout"
+                      :render #'logout/render-logout}
+   ::register        {:path   "/register"
+                      :render #'register/render-register}
+   ::forgot-password {:path   "/forgot-password"
+                      :render #'forgot-password/render-forgot-password}
+   ::reset-password  {:path   "/reset-password"
+                      :render #'reset-password/render-reset-password}})
 
 (def register-validate-command
   {:command/kind      :register/validate

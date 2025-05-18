@@ -1,16 +1,15 @@
 ;; Copyright © 2025 Casey Link <casey@outskirtslabs.com>
 ;; SPDX-License-Identifier: EUPL-1.2
-
-
 (ns app.auth.login
   (:require
+   [hifi.datastar :as datastar]
+   [hifi.html :as html]
    [app.forms :as forms]
    [app.ui.button :as btn]
    [app.ui.form :as form]
    [app.ui.icon :as icon]
+   [app.db :as d]
    [exoscale.cloak :as cloak]
-   [hyperlith.core :as h]
-   [hyperlith.extras.datahike :as d]
    [taoensso.tempel :as tempel]))
 
 (defonce password-rate-limiter
@@ -31,6 +30,7 @@
 
   Returns user's unencrypted secret `KeyChain` on success, or throws."
   [db user-email user-password]
+  (tap> [:user-login-attemp user-email (cloak/unmask user-password)])
 
   ;; Ensure a minimum runtime to help protect against timing attacks,
   ;; Ref. <https://en.wikipedia.org/wiki/Timing_attack>.
@@ -61,7 +61,7 @@
                             :effect/data {:tx-data    [{:session/id   sid
                                                         :session/user [:user/id user-id]}]
                                           :on-success {:command/kind :login/tx-success
-                                                       :redirect-to  (url-for :home)}
+                                                       :redirect-to  (url-for :app.home/home)}
                                           :on-error   {:command/kind :login/tx-error
                                                        :signals      signals}}}]}))))
 
@@ -79,11 +79,33 @@
               :submit-command :login/submit
               :fields         {:email    ""
                                :password ""}}]
-    (h/html
+    (html/->str
      [:main#morph.main
+      #_[:style
+         (html/raw "
+button:disabled  {
+  opacity: 0.5;
+}
+
+button > span {
+  display: none;
+}
+
+button.spinning > span {
+  display: inline;
+}
+")]
+      #_[:form
+         {:data-indicator "inflight2", :data-on-submit "@post('/wutf')"}
+         [:button
+          {:type               "submit",
+           :data-attr-disabled "$inflight2",
+           :data-class         "{spinning: $inflight2}"}
+          [:span "Spinner"]
+          "Click Me"]]
       [:div {:class "flex min-h-full flex-col justify-center py-12 sm:px-6 lg:px-8"}
        [:div {:class "sm:mx-auto sm:w-full sm:max-w-md"}
-        [:a {:href (url-for :home)}
+        [:a {:href (url-for :app.home/home)}
          [icon/Logotype {:class "mx-auto h-12 w-auto text-accent-foreground fill-accent-foreground"}]]
         [:h2 {:class "mt-6 text-center text-2xl/9 font-bold tracking-tight"}
          "Sign in to your account"]]
@@ -103,15 +125,16 @@
                         :name         :password}]
 
            [form/RootErrors {::form/form form}]
-           [:div {:data-signals-spinning "false"}
+           [:div
             [btn/Button {::btn/intent        :primary
                          :type               "submit" :class "w-full"
                          :data-attr-disabled "$inflight"
-                         :data-class         (format "{'spinning': $%s}" "inflight")}
+                         :data-class         (format "{'spinning': %s}" "$inflight")}
              "Sign in"]]]]]
+
         [:p {:class "mt-10 text-center text-sm/6 text-muted-foreground"}
          "Not onboard yet? "
-         [:a {:href (url-for :register) :class "link"}
+         [:a {:href (url-for :app.auth/register) :class "link"}
           "Sign up"]]]]])))
 
-(h/refresh-all!)
+(datastar/rerender-all!)

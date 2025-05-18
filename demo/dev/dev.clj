@@ -2,12 +2,9 @@
 ;; SPDX-License-Identifier: EUPL-1.2
 (ns dev
   (:require
-   [hyperlith.core :as h]
-   [hyperlith.extras.datahike :as d]
-   [app.schema :as schema]
    [portal-helpers :as portal-repl]
-   [app.main :as app]
-   [app.ui.core :as uic]
+   [app.main2 :as app]
+   ;; [app.ui.core :as uic]
    [portal.colors]
    [portal.api :as p]))
 
@@ -30,11 +27,11 @@
 ;; (p/open {:theme :portal.colors/gruvbox})
 ;; (add-tap portal.api/submit)
 ;; (remove-tap portal.api/submit)
-(uic/enable-opts-validation!)
+;; (uic/enable-opts-validation!)
 
-(defn reset []
-  (app/stop)
-  (app/start))
+#_(defn reset []
+    (app/stop)
+    (app/start))
 
 (comment
 
@@ -68,12 +65,11 @@
     (defn tx-n [app n]
       (let [d (take n (read-string (slurp "extra/data.tx")))]
         @(d/tx! (:conn app)
-                {:tx-data d})
+                d)
         (tap> [:txed n])))
 
     (defn poke-tx [app]
-      @(d/tx! (:conn app) {:tx-data
-                           [{:session/id (str (random-uuid))}]}))
+      @(d/tx! (:conn app) [{:session/id (str (random-uuid))}]))
 
     (defn test [n]
       (reset nil)

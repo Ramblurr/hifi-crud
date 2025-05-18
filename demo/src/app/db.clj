@@ -1,54 +1,9 @@
 ;; Copyright © 2025 Casey Link <casey@outskirtslabs.com>
 ;; SPDX-License-Identifier: EUPL-1.2
-
-
-(ns hyperlith.extras.datahike
-  "Datahike wrapper for hyperlith. Requires datalevin as a dependency."
-  (:require [hyperlith.core :as h]
-            [datahike-sqlite.core]
-            [datahike.core :as dc]
-            [datahike.api :as d]))
-
-(def default-schema
-  (merge
-   #:session
-    {:id   {:db/unique      :db.unique/identity
-            :db/valueType   :db.type/string
-            :db/index       true
-            :db/cardinality :db.cardinality/one}
-     :user {:db/valueType   :db.type/ref
-            :db/index       true
-            :db/cardinality :db.cardinality/one}}
-
-   #:user
-    {:id {:db/unique      :db.unique/identity
-          :db/valueType   :db.type/uuid
-          :db/index       true
-          :db/cardinality :db.cardinality/one}}
-
-   #:error
-    {:id    {:db/unique      :db.unique/identity
-             :db/valueType   :db.type/uuid
-             :db/index       true
-             :db/cardinality :db.cardinality/one}
-     :cause {:db/valueType   :db.type/string
-             :db/cardinality :db.cardinality/one}
-     :trace {:db/valueType   :db.type/bytes
-             :db/cardinality :db.cardinality/one}
-     :type  {:db/valueType   :db.type/string
-             :db/index       true
-             :db/cardinality :db.cardinality/one}
-     :data  {:db/valueType   :db.type/bytes
-             :db/cardinality :db.cardinality/one}}
-
-   #:error-event
-    {;; Reified join so we get the date of when it happened
-     :session {:db/valueType   :db.type/ref
-               :db/index       true
-               :db/cardinality :db.cardinality/one}
-     :error   {:db/valueType   :db.type/ref
-               :db/index       true
-               :db/cardinality :db.cardinality/one}}))
+(ns app.db
+  (:require
+   [hifi.datastar :as datastar]
+   [datomic.api :as d]))
 
 (defn schema->tx-data
   [schema]
@@ -57,38 +12,37 @@
 
 (def q d/q)
 (def db d/db)
-(def tx! d/transact!)
-(def squuid dc/squuid)
+(def tx! d/transact-async)
+(def squuid d/squuid)
 
-(defn create-and-connect [db-path]
-  (let [cfg {:store              {:backend      :sqlite
-                                  :journal_mode "WAL"
-                                  :synchronous  "NORMAL"
-                                  :dbname       db-path}
-             :schema-flexibility :write
-             :heep-history?      true
-             :initial-tx         {:tx-data (schema->tx-data default-schema)}}]
-    (when-not (d/database-exists? cfg)
-      (d/create-database cfg :initial-tx {:tx-data (schema->tx-data default-schema)}))
-    (d/connect cfg)))
+(defn create-and-connect [db-uri]
+  (d/create-database db-uri)
+  (d/connect db-uri))
 
-(defn ctx-start [ctx db-path]
-  (let [conn (create-and-connect db-path)]
+(defn start [{:keys [db-uri]}]
+  (assert db-uri)
+  (let [conn (create-and-connect db-uri)]
     (assert (some? conn))
-    (d/listen conn :refresh-on-change
-              (fn [_] (h/refresh-all!)))
-    (assoc ctx :conn conn)))
+    #_(d/listen conn :refresh-on-change
+                (fn [_] (datastar/rerender-all!)))
+    conn))
 
-(defn ctx-stop [{:keys [conn] :as _ctx}]
+(defn stop [conn]
   (try
-    (d/unlisten conn :refresh-on-change)
+    #_(d/unlisten conn :refresh-on-change)
     (d/release conn)
     (catch Exception e
       (tap> e))))
 
+(defn datomic-middleware [conn]
+  {:name ::datomic-middleware
+   :wrap (fn [handler]
+           (fn [req]
+             (handler (assoc req :conn conn))))})
+
 (comment
 
-  (defn log-on-error [{:keys [db] :as _ctx} {:keys [req error]}]
+  (defn log-on-error [{:app/keys [db] :as _ctx} {:keys [req error]}]
     (let [sid (or (:sid req) "no-sid")
           txs [{:session/id sid} ;; users might not have a session in the db
                (h/qualify-keys
@@ -117,7 +71,7 @@
     "Returns the set of tuples that represent a nested map/vector. Lets you
   use datalog query engines to query json/edn data."
     ([root] {:pre [(or (map? root) (vector? root))]}
-            (tuples [] root))
+     (tuples [] root))
     ([parent x]
      (cond (map? x)
            (mapcat (fn [[k v]] (tuples (conj parent k) v)) x)
@@ -169,3 +123,6 @@
   "Returns the unique entity identified by attr and val."
   [db attr attr-val pattern]
   (ffirst (find-all-by db attr attr-val pattern)))
+
+(defn unique-attr-available? [attr db value]
+  (nil? (find-by db attr value [attr])))

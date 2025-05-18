@@ -13,7 +13,7 @@
   (clean nil)
   (b/copy-dir {:src-dirs ["src" "resources"] :target-dir class-dir})
   (b/compile-clj {:basis      @basis
-                  :ns-compile '[app.main]
+                  :ns-compile '[app.main2]
                   :src-dirs   ["src"]
                   :class-dir  class-dir
                   :java-opts ;; needed for datalevin
@@ -22,4 +22,4 @@
   (b/uber {:class-dir class-dir
            :uber-file uber-file
            :basis     @basis
-           :main      'app.main}))
+           :main      'app.main2}))

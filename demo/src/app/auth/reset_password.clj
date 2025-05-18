@@ -1,10 +1,10 @@
 ;; Copyright © 2025 Casey Link <casey@outskirtslabs.com>
 ;; SPDX-License-Identifier: EUPL-1.2
-
-
 (ns app.auth.reset-password
-  (:require [hyperlith.core :as h]))
+  (:require
+   [hifi.datastar :as datastar]
+   [hifi.html :as html]))
 
 (defn render-reset-password [req])
 
-(h/refresh-all!)
+(datastar/rerender-all!)

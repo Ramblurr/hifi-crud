@@ -1,9 +1,9 @@
 ;; Copyright © 2025 Casey Link <casey@outskirtslabs.com>
 ;; SPDX-License-Identifier: EUPL-1.2
-
-
 (ns app.auth.register
   (:require
+   [hifi.datastar :as datastar]
+   [hifi.html :as html]
    [app.ui.button :as btn]
    [app.ui.form :as form]
    [app.ui.icon :as icon]
@@ -11,9 +11,9 @@
    [app.crypto :as crypto]
    [app.malli :as s]
    [app.forms :as forms]
-   [hyperlith.core :as h]))
+   [app.db :as d]))
 
-(def email-available? (partial forms/unique-attr-available? :user/email))
+(def email-available? (partial d/unique-attr-available? :user/email))
 
 (defn EmailAvailable [db]
   [:fn {:error/message "that email is already registered"} #(email-available? db %)])
@@ -83,46 +83,46 @@
               :fields           {:email     ""
                                  :password  ""
                                  :password2 ""}}]
-    (h/html
-      [:main#morph.main
-       [:div {:class "flex min-h-full flex-col justify-center py-12 sm:px-6 lg:px-8"}
-        [:div {:class "sm:mx-auto sm:w-full sm:max-w-md"}
-         [:a {:href (url-for :home)}
-          [icon/Logotype {:class "mx-auto h-12 w-auto text-accent-foreground fill-accent-foreground"}]]
-         [:h2 {:class "mt-6 text-center text-2xl/9 font-bold tracking-tight"}
-          "Create an account"]]
-        [:div {:class "mt-10 sm:mx-auto sm:w-full sm:max-w-[480px]"}
-         [:div {:class "bg-white px-6 py-12 shadow-sm sm:rounded-lg sm:px-12"}
-          [form/Form {::form/form form :data-indicator "inflight"}
-           [:div.space-y-6
-            [form/Input {::form/label       "Email"
-                         ::form/form        form
-                         ::form/description "Demo note: Use any email, no email confirmations are sent."
-                         :type              :email
-                         :autocomplete      "email"
-                         :placeholder       "name@company.com"
-                         :name              :email}]
-            [form/Input {::form/label  "Password"
-                         ::form/form   form
-                         :type         :password
-                         :autocomplete "new-password"
-                         :name         :password}]
-            [form/Input {::form/label  "Confirm Password"
-                         ::form/form   form
-                         :type         :password
-                         :autocomplete "new-password"
-                         :name         :password2}]
-            [form/RootErrors {::form/form form}]
-            [:div {:data-signals-spinning "false"}
-             [btn/Button {::btn/intent        :primary
-                          :type               "submit" :class "w-full"
-                          :data-attr-disabled "$inflight"
-                          :data-class         (format "{'spinning': $%s}" "inflight")}
-              "Sign up"]]]]]
+    (html/->str
+     [:main#morph.main
+      [:div {:class "flex min-h-full flex-col justify-center py-12 sm:px-6 lg:px-8"}
+       [:div {:class "sm:mx-auto sm:w-full sm:max-w-md"}
+        [:a {:href (url-for :app.home/home)}
+         [icon/Logotype {:class "mx-auto h-12 w-auto text-accent-foreground fill-accent-foreground"}]]
+        [:h2 {:class "mt-6 text-center text-2xl/9 font-bold tracking-tight"}
+         "Create an account"]]
+       [:div {:class "mt-10 sm:mx-auto sm:w-full sm:max-w-[480px]"}
+        [:div {:class "bg-white px-6 py-12 shadow-sm sm:rounded-lg sm:px-12"}
+         [form/Form {::form/form form :data-indicator "inflight"}
+          [:div.space-y-6
+           [form/Input {::form/label       "Email"
+                        ::form/form        form
+                        ::form/description "Demo note: Use any email, no email confirmations are sent."
+                        :type              :email
+                        :autocomplete      "email"
+                        :placeholder       "name@company.com"
+                        :name              :email}]
+           [form/Input {::form/label  "Password"
+                        ::form/form   form
+                        :type         :password
+                        :autocomplete "new-password"
+                        :name         :password}]
+           [form/Input {::form/label  "Confirm Password"
+                        ::form/form   form
+                        :type         :password
+                        :autocomplete "new-password"
+                        :name         :password2}]
+           [form/RootErrors {::form/form form}]
+           [:div {:data-signals-spinning "false"}
+            [btn/Button {::btn/intent        :primary
+                         :type               "submit" :class "w-full"
+                         :data-attr-disabled "$inflight"
+                         :data-class         (format "{'spinning': $%s}" "inflight")}
+             "Sign up"]]]]]
 
-         [:p {:class "mt-10 text-center text-sm/6 text-muted-foreground"}
-          "Already have an account? "
-          [:a {:href (url-for :login) :class "link"}
-           "Sign in"]]]]])))
+        [:p {:class "mt-10 text-center text-sm/6 text-muted-foreground"}
+         "Already have an account? "
+         [:a {:href (url-for :app.auth/login) :class "link"}
+          "Sign in"]]]]])))
 
-(h/refresh-all!)
+(datastar/rerender-all!)

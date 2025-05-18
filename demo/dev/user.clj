@@ -1,7 +1,5 @@
 ;; Copyright © 2025 Casey Link <casey@outskirtslabs.com>
 ;; SPDX-License-Identifier: EUPL-1.2
-
-
 (ns user)
 
 (defn dev
@@ -13,8 +11,7 @@
 
 (comment
   (require
-   '[datahike-sqlite.core]
-   '[datahike.api :as d])
+   '[datomic.api :as d])
 
   (def cfg {:store {:backend      :sqlite
                     :journal_mode "WAL"
@@ -46,5 +43,5 @@
   (d/q '[:find (pull ?e [*])
          :in $ ?name
          :where [?e :name ?name]]
-       @conn "React")
+       (d/db conn) "React")
   (d/release conn))

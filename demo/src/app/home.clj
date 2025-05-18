@@ -1,14 +1,12 @@
 ;; Copyright © 2025 Casey Link <casey@outskirtslabs.com>
 ;; SPDX-License-Identifier: EUPL-1.2
-
-
 (ns app.home
   (:require
    [app.home.index :as index]))
 
 (def pages
-  {:home {:path    "/"
-          :handler #'index/render-home}})
+  {:app.home/home {:path   "/"
+                   :render #'index/render-home}})
 
 (def hello-command
   {:command/kind    :home/hello

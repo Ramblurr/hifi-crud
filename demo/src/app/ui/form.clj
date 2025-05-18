@@ -1,12 +1,10 @@
 ;; Copyright © 2025 Casey Link <casey@outskirtslabs.com>
 ;; SPDX-License-Identifier: EUPL-1.2
-
-
 (ns app.ui.form
   (:require
+   [hifi.datastar :as datastar]
    [dev.onionpancakes.chassis.compiler :as cc]
    [dev.onionpancakes.chassis.core :as c]
-   [hyperlith.impl.json :as j]
    [app.ui.core :as uic]
    [clojure.string :as str]
    [malli.experimental.lite :as l]))
@@ -59,7 +57,7 @@
   (assert form)
   (cc/compile
    [:form (uic/merge-attrs attrs
-                           :data-signals__ifmissing (j/edn->json
+                           :data-signals__ifmissing (datastar/edn->json
                                                      {(:form/key form)
                                                       (merge (-> form :fields)
                                                              {:touched (zipmap (-> form :fields keys) (repeat 0))
