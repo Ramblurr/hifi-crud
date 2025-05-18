@@ -1,6 +1,8 @@
 (ns hifi.datastar
   {:clj-kondo/ignore [:clojure-lsp/unused-public-var]}
+  (:import [java.io StringWriter])
   (:require
+   [charred.api :as charred]
    [promesa.exec.csp :as sp]
    [hifi.util.assets :as assets]
    [hifi.util.codec :as codec]
@@ -8,6 +10,18 @@
    [hifi.datastar.util :as util]
    [starfederation.datastar.clojure.adapter.common :as d*com]
    [starfederation.datastar.clojure.api :as d*]))
+
+(def default-read-json (charred/parse-json-fn {:async? false :bufsize 1024 :key-fn keyword}))
+(def default-write-json (charred/write-json-fn {}))
+
+(defn write-json-str
+  "Write json to a string.  See options for [[write-json]]."
+  [data & {:as args}]
+  (let [w (StringWriter.)]
+    (default-write-json w data)
+    (.toString w)))
+
+(def edn->json write-json-str)
 
 (defn brotli-write-profile
   "Constructs a write-profile for compressing D* SSE respsonses with brotli.
@@ -75,7 +89,7 @@
   The render function will be called with the original request map with ::first-render? set to true on the first render."
   #_{:clj-kondo/ignore [:unused-binding]}
   [{:as opts ::keys [req <render <cancel render-fn view-hash-fn
-                     report-fn merge-fragment-opts]} sse-gen]
+                     error-report-fn merge-fragment-opts]} sse-gen]
   (assert <render)
   (assert <cancel)
   (sp/go-loop [last-view-hash (get-in req [:headers "last-event-id"])]
@@ -87,7 +101,7 @@
                   (sp/close! <render)
                   (sp/close! <cancel))
         <render (let [req           (assoc req ::first-render? (= (first event) :first-render))
-                      new-view      ^String (try-log report-fn req (render-fn req))
+                      new-view      ^String (try-log error-report-fn req (render-fn req))
                       new-view-hash ^String (view-hash-fn new-view)]
                   ;; only send an event if the view has changed
                   (when (and new-view (not= last-view-hash new-view-hash))
