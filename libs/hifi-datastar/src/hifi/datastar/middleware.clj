@@ -15,7 +15,7 @@
     :datastar-signals - a map of datastar signals
 
   The middleware options are:
-    - read-json - an arity/1 function accepting the raw signal data and returning the parsed json as edn. defaults to a charred parese fn"
+    - read-json - an arity/1 function accepting the raw signal data and returning the parsed json as edn. defaults to a charred parse fn"
   [{:keys [read-json] :or {read-json default-read-json}}]
   {:name ::datastar-signals
    :wrap (fn wrap-datastar-sigals
@@ -30,10 +30,27 @@
                  (handler req))
                (handler req))))})
 
+(def DatastarSignalsMiddlewareComponentData
+  {:name           ::datastar-signals
+   :options-schema [:map
+                    [:read-json
+                     {:doc "An arity/1 function accepting the raw signal data and returning the parsed json as edn. defaults to a charred parese fn"}
+                     (fn? default-read-json)]]
+   :factory        #(datastar-signals-middleware %)})
+
 (defn datastar-render-multiplexer-middleware
-  [mult]
-  (assert mult)
+  "Creates a middleware that adds the multiplexer to the request map.
+
+  Adds the key :hifi.datastar/multiplexer to the request map with the value of the multiplexer"
+  [{:keys [datastar-render-multiplexer_] :as config}]
+  (assert datastar-render-multiplexer_)
   {:name ::datastar-render-multiplexer
    :wrap (fn wrap-datastar-render-multiplexer [handler]
            (fn [req]
-             (handler (assoc req :hifi.datastar/multiplexer (force mult)))))})
+             (handler (assoc req :hifi.datastar/multiplexer (force datastar-render-multiplexer_)))))})
+
+(def DatastarRenderMultiplexerMiddlewareComponentData
+  {:name                ::datastar-render-multiplexer
+   :options-schema      nil
+   :donut.system/config {:datastar-render-multiplexer_ [:donut.system/ref [:hifi/components :datastar-render-multiplexer]]}
+   :factory             #(datastar-render-multiplexer-middleware %)})

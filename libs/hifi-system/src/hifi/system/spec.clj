@@ -127,26 +127,6 @@
                        [:fn ZeroArityFn]
                        [:var [:fn {:error/message "should be a var of a function returning or vector of reitit routes"} (fn [v] (fn? (var-get v)))]]])
 
-(def MiddlewareRegistryOptionsOptions
-  [:map-of {:error/message "should be a map of middleware name keywords to options map for them"}
-   :keyword :any])
-
-(def MiddlewareRegistryOptions
-  [:map-of {:error/message "should be a map of middleware name keywords to IntoMiddleware"}
-   :keyword IntoMiddleware])
-
-(def MiddlewareOptions
-  [:map
-   [:default-middleware-registry-fn {:doc     "An arity/2 function that accepts system config and middleware-opts and returns the default middleware registry. "
-                                     :default default.middleware/default-middleware-registry} fn?]
-   [:registry-fn {:doc      "An arity/2 function that accepts system config middleware-opts and returns a middleware registry to be merged with the default middleware registry"
-                  :optional true}
-    fn?
-    ;; MiddlewareRegistryOptions
-    ]
-   [:opts {:doc     "A map of middleware name keywords to maps of options for the respective middleware"
-           :default {}} MiddlewareRegistryOptionsOptions]])
-
 (def RoutesKey [:routes {:doc           "Route definitions using reitit syntax. Can be the routes themselves or a fn/0 that returns them."
                          :error/message "should be a vector of reitit routes or zero-arity function that returns the routes"}
                 ReititRoutesLike])
@@ -156,7 +136,7 @@
    RoutesKey
    [:profile {:default :dev} ProfileEnum]
    [:http-server HTTPServerOptions]
-   [:middleware {:default {}} MiddlewareOptions]
+   #_[:middleware {:default {}} MiddlewareOptions]
    [:ring-handler {:default {}} RingHandlerOptions]
    [:router-options {:default {}} RouterOptionsOptions]])
 
@@ -170,13 +150,16 @@
    :routes               [:routes]})
 
 (def HifiSystemOptionsSchema
+  "These are the options passed to hifi.system/start.
+
+  They are shortcuts for common options that get merged into the component configs."
   [:map {:name ::hifi-system-options}
    RoutesKey
    [:profile {:optional true} ProfileEnum]
    [:debug-errors? {:optional true} :boolean]
    [:print-context-diffs? {:optional true} :boolean]
    [:reload-per-request? {:optional true} :boolean]
-   [:middleware {:optional true} MiddlewareOptions]
+   #_[:middleware {:optional true :default {}} MiddlewareOptions]
    [:port {:optional true} :int]
    [:host {:default "127.0.0.1"} :string]
    [:component-opts {:optional true} HifiComponentOptionsSchema]])
@@ -185,4 +168,5 @@
   (let [opts (pe/coerce! HifiSystemOptionsSchema (dissoc raw-opts :component-opts))]
     (->> system-opts->component-opts-path
          (map (fn [[k path]]
+                #_(tap> [:k k :path path :v (get opts k)])
                 (assoc-in {} path (get opts k)))))))

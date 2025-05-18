@@ -81,6 +81,11 @@
                                       :headers {"Content-Type" "text/plain"}
                                       :body    "Invalid csrf"})))))})))
 
+(def CSRFProtectionMiddlewareComponentData
+  {:name           :csrf-protection
+   :factory        #(csrf-middleware %)
+   :options-schema options/CSRFProtectionMiddlewareOptions})
+
 (comment
 
   (require '[reitit.middleware :as middleware])

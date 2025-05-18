@@ -144,6 +144,11 @@
       :options-schema options/ExceptionMiddlewareOptions
       :wrap           (wrap debug-errors? prepared-handlers)})))
 
+(def ExceptionMiddlewareComponentData
+  {:name           ::exception
+   :options-schema options/ExceptionMiddlewareOptions
+   :factory        #(exception-middleware %)})
+
 (defn- report-backstop-and-return [report request e]
   (when report
     (try
@@ -186,6 +191,11 @@
    {:name           ::exception-backstop-middleware
     :options-schema options/ExceptionBackstopMiddlewareOptions
     :wrap           (wrap-backstop report)}))
+
+(def ExceptionBackstopMiddlewareComponentData
+  {:name           ::exception-backstop
+   :options-schema options/ExceptionBackstopMiddlewareOptions
+   :factory        #(exception-backstop-middleware %)})
 
 (comment
   ;; Thought: Pedestal's core.match macro based exception handling is nice and expressive,

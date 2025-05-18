@@ -72,17 +72,17 @@ This plugin is responsible for merging user-supplied options and
 default options into the system. It does this by looking at each
 component in the system defs and checking if it has a
 `:hifi/options-schema` and  a `:hifi/options-ref`. If it does,
-it will merge the user-options and default options into the system.
+it will merge the user-options at options-ref into the config for the component under the :hifi/options key.
 
 In your donut.system component definitions you can specify the following extra keys:
 
   - `:hifi/options-schema` is a malli schema that describes the shape of the options
-     the component expects to receive. This schemas should be open, malli's default,
+     the component expects to receive. This schema should be open, malli's default,
      to allow for the unexpected. When distributing components in the hifi ecosystem,
      the component author should supply a well-formed options schema, complete with
      documentation.
 
-  - `:hifi/options-ref` is a reference, like `:donut.system/ref` to another path
+  - `:hifi/options-ref` is a system reference, like `:donut.system/ref` to another path
      in the system map where the user-supplied options can be found. 99.9% of the time
      this should be a path under `:env`, where hifi places the contents of `env.edn`.
 

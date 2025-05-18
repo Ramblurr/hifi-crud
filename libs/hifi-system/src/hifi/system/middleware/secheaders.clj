@@ -53,6 +53,11 @@
                          (let [response (handler request)]
                            (update response :headers #(merge sec-headers %)))))}))
 
+(def SecurityHeadersMiddlewareComponentData
+  {:name           ::security-headers
+   :options-schema options/SecHeadersMiddlewareOptions
+   :factory        #(security-headers-middleware %)})
+
 (comment
   (build-headers (->secheaders-middleware-opts nil))
 

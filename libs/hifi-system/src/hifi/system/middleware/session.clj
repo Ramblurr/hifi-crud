@@ -86,6 +86,11 @@
                                  (update-session-cookie response new-sid options))
                                :else {:status 403})))))})))
 
+(def SessionMiddlewareComponentData
+  {:name           :session-cookie
+   :factory        #(session-middleware %)
+   :options-schema options/SessionMiddlewareOptions})
+
 (comment
 
   (require '[reitit.middleware :as middleware])

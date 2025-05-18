@@ -1,19 +1,24 @@
 (ns hifi.system
   (:require [clojure.string :as str]
+            [hifi.logging :as logging]
             [hifi.datastar.tab-state :as tab-state]
             [hifi.datastar :as datastar]
             [hifi.env :as env]
+            [hifi.system.middleware :as middleware]
             [hifi.system.middleware.exception :as middleware.exception]
             [org.httpkit.server :as hk-server]
             [com.fulcrologic.guardrails.malli.core :refer [=> >defn-]]
             [donut.system :as ds]
             [donut.system.plugin :as dsp]
+            [donut.system.validation :as dsv]
             [medley.core :as medley]
             [hifi.error.iface :as pe]
             [hifi.system.options-plugin :as pop]
             [hifi.system.spec :as spec]
             [reitit.ring.middleware.dev :as reitit.ring.middleware.dev]
-            [reitit.ring :as reitit.ring]))
+            [reitit.ring :as reitit.ring])
+  (:import
+   [clojure.lang ExceptionInfo]))
 
 (defn start-hk [handler {:keys [port host] :as opts}]
   (let [hk-opts (:http-kit opts)]
@@ -104,7 +109,9 @@
                                               :handler-opts          (-> config :hifi/options :handler-opts)
                                               :resource-handler-opts (-> config :hifi/options :resource-handler-opts)
                                               :default-handler-opts  (-> config :hifi/options :default-handler-opts)
-                                              :middleware-top-level  [(middleware.exception/exception-backstop-middleware (-> config :middleware :opts :exception-backstop))]})))
+                                              :middleware-top-level  (if-let [exception-backstop (-> config :middleware-registry :exception-backstop)]
+                                                                       [exception-backstop]
+                                                                       [])})))
 
 (defn reloading-ring-handler
   "Returns a ring-handler that recreates the actual ring-handler for each request.
@@ -163,14 +170,14 @@
         :hifi/options-schema spec/RingHandlerOptions
         :hifi/options-ref    [:hifi/components :options :ring-handler]
 
-        :config {:routes         [::ds/local-ref [:options :routes]]
-                 :middleware     [::ds/local-ref [:middleware]]
-                 :router-options [::ds/local-ref [:router-options]]}})
+        :config {:routes              [::ds/local-ref [:options :routes]]
+                 :middleware-registry [::ds/ref [:hifi/middleware]]
+                 :router-options      [::ds/local-ref [:router-options]]}})
 
 (def RouterOptionsComponent
   "Constructs a router options map (to be passed as 2nd arg to the reitit router function)"
   #::ds{:start (fn router-options-component-start [{::ds/keys [config]}]
-                 (let [middleware-registry            (:middleware config)
+                 (let [middleware-registry            (:middleware-registry config)
                        {:keys [middleware-transformers
                                route-data
                                print-context-diffs?]} (:hifi/options config)]
@@ -182,16 +189,14 @@
 
         :hifi/options-schema spec/RouterOptionsOptions
         :hifi/options-ref    [:hifi/components :options :router-options]
-        :config              {:middleware [::ds/local-ref [:middleware]]}})
+        :config              {:middleware-registry [::ds/ref [:hifi/middleware]]}})
 
-(defn MiddlewareRegistryComponent  [component-config]
-  {::ds/start  (fn middleware-registry-component-start [{::ds/keys [config]}]
-                 (let [{:keys [default-middleware-registry-fn registry-fn opts]} (-> config :hifi/options)]
-                   (merge (default-middleware-registry-fn config opts) (when registry-fn (registry-fn config opts)))))
-   ::ds/config {:datastar-render-multiplexer [::ds/local-ref [:datastar-render-multiplexer]]}
-
-   :hifi/options-schema spec/MiddlewareRegistryOptions
-   :hifi/options-ref    [:hifi/components :options :middleware]})
+(defn xxx ([v]
+           (tap> v)
+           v)
+  ([tag v]
+   (tap> [tag v])
+   v))
 
 (defn coerce-opts [opts env]
   ;; There are 3 sources of options (in order of priority from highest to least)
@@ -206,6 +211,13 @@
                      (:component-opts opts)
                      (spec/system-opts->component-opts opts))))
 
+(defn merge-middleware-env [middleware-registry-component-group middleware-env]
+  (reduce (fn [comp-group mw-key]
+            (update-in comp-group [mw-key :donut.system/config]
+                       merge
+                       (get middleware-env mw-key)))
+          middleware-registry-component-group (keys middleware-env)))
+
 (defn hifi-system
   "Returns a complete donut.system map intialized with the hifi system opts"
   [opts]
@@ -213,13 +225,15 @@
         options (coerce-opts opts env)]
     {::ds/defs
      {:env             (dissoc env :hifi/components)
+      :hifi/middleware (merge-middleware-env  middleware/MiddlewareRegistryComponentGroup (:hifi/middleware env))
       :hifi/components {:http-server                 HTTPServerComponent
                         :ring-handler                RingHandlerComponent
                         :router-options              RouterOptionsComponent
                         :datastar-render-multiplexer datastar/DatastarRenderMultiplexerComponent
                         :tab-state                   tab-state/TabStateComponent
                         :options                     options
-                        :middleware                  (MiddlewareRegistryComponent nil)}}
+                        :logging-console             logging/ConsoleLoggingComponent
+                        :logging-tap                 logging/TelemereTapHandlerComponent}}
      ::ds/plugins [pop/options-plugin]}))
 
 (defn hifi-plugin
@@ -238,11 +252,21 @@
    ::dsp/system-defaults (hifi-system opts)})
 
 (defn start
-  "A convenience function to start a bare-bones hifi system."
-  [opts]
-  (ds/start
-   {::ds/defs    {}
-    ::ds/plugins [(hifi-plugin opts)]}))
+  "A convenience function to start a hifi system.
+
+  Takes a map of hifi options, and optionally a map of additional donut.system component definitions.
+
+  Returns a donut system map."
+  ([opts]
+   (start opts {}))
+  ([opts defs]
+   (try
+     (ds/start
+      {::ds/defs    (or defs {})
+       ::ds/plugins [(hifi-plugin opts) dsv/validation-plugin]})
+     (catch ExceptionInfo e
+       (ds/stop-failed-system e)
+       (throw e)))))
 
 (defn stop
   "Stop Hifi. Accepts the system map returned by start"
