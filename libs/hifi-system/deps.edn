@@ -24,4 +24,5 @@
          hifi/error                 {:local/root "../hifi-error"}
          hifi/engine                {:local/root "../hifi-engine"}
          hifi/util                  {:local/root "../hifi-util"}
+         hifi/logging               {:local/root "../hifi-logging"}
          hifi/datastar              {:local/root "../hifi-datastar"}}}
