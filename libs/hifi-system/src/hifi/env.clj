@@ -4,9 +4,12 @@
   (:refer-clojure :exclude [mask])
   (:require
    [hifi.anomalies.iface :as anom]
+   [time-literals.read-write]
    [exoscale.cloak :as cloak]
    [aero.core :as aero]
    [clojure.java.io :as io]))
+
+(time-literals.read-write/print-time-literals-clj!)
 
 (def ^:dynamic *env*
   nil)
