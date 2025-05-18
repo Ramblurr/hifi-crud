@@ -1,4 +1,5 @@
 {:paths ["scripts"]
+ :deps  {io.github.paintparty/bling {:mvn/version "0.4.2"}}
  :tasks {:requires      ([clojure.string :as str]
                          [babashka.tasks :refer [shell]])
          repl           {:override-builtin true
@@ -23,4 +24,5 @@
                          :task             (shell "clojure -T:build uber")}
          css            (shell "tailwindcss -i resources/public/main.css -o resources/public/compiled.css")
          watch-css      (shell "tailwindcss --watch --input resources/public/main.css --output resources/public/compiled.css")
-         prod-css       (shell "tailwindcss --minify --input resources/public/main.css --output resources/public/compiled.css")}}
+         prod-css       (shell "tailwindcss --minify --input resources/public/main.css --output resources/public/compiled.css")
+         datomic        {:task (exec 'datomic/-main)}}}
