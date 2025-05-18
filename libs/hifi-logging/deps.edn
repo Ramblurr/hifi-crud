@@ -1,0 +1,11 @@
+{:paths   ["src"]
+ :deps    {com.cnuernber/charred       {:mvn/version "1.037"}
+           com.taoensso/telemere       {:mvn/version "1.0.0"}
+           com.taoensso/telemere-slf4j {:mvn/version "1.0.0"}}
+ :aliases {:test {:extra-paths ["test"]
+                  :extra-deps  {}}
+
+           :build {:extra-deps  {io.github.clojure/tools.build {:git/tag "v0.10.9" :git/sha "e405aac"}
+                                 com.xadecimal/expose-api      {:mvn/version "0.3.0"}}
+                   :extra-paths ["." "src"]
+                   :ns-default  build}}}
