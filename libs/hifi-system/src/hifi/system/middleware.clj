@@ -31,7 +31,8 @@
    :exception                   (middleware-component exception/ExceptionMiddlewareComponentData)
    :exception-backstop          (middleware-component exception/ExceptionBackstopMiddlewareComponentData)
    :datastar-signals            (middleware-component d*mw/DatastarSignalsMiddlewareComponentData)
-   :datastar-render-multiplexer (middleware-component d*mw/DatastarRenderMultiplexerMiddlewareComponentData)
+   :datastar-render-multicaster (middleware-component d*mw/DatastarRenderMulticasterMiddlewareComponentData)
+   :datastar-tab-state          (middleware-component d*mw/DatastarTabStateMiddlewareComponentData)
    :session-cookie              (middleware-component session/SessionMiddlewareComponentData)
    :csrf-protection             (middleware-component csrf/CSRFProtectionMiddlewareComponentData)
    :security-headers            (middleware-component secheaders/SecurityHeadersMiddlewareComponentData)})
@@ -42,7 +43,8 @@
    :exception
    :parse-multipart
    :datastar-signals
-   :datastar-render-multiplexer
+   :datastar-render-multicaster
+   :datastar-tab-state
    :session-cookie
    :csrf-protection
    :security-headers])

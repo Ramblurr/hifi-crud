@@ -2,10 +2,9 @@
   (:require [clojure.string :as str]
             [hifi.logging :as logging]
             [hifi.datastar.tab-state :as tab-state]
-            [hifi.datastar :as datastar]
+            [hifi.datastar.system :as datastar]
             [hifi.env :as env]
             [hifi.system.middleware :as middleware]
-            [hifi.system.middleware.exception :as middleware.exception]
             [org.httpkit.server :as hk-server]
             [com.fulcrologic.guardrails.malli.core :refer [=> >defn-]]
             [donut.system :as ds]
@@ -229,7 +228,7 @@
       :hifi/components {:http-server                 HTTPServerComponent
                         :ring-handler                RingHandlerComponent
                         :router-options              RouterOptionsComponent
-                        :datastar-render-multiplexer datastar/DatastarRenderMultiplexerComponent
+                        :datastar-render-multicaster datastar/DatastarRenderMulticasterComponent
                         :tab-state                   tab-state/TabStateComponent
                         :options                     options
                         :logging-console             logging/ConsoleLoggingComponent

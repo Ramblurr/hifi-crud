@@ -4,11 +4,12 @@
   (:require
    [hifi.html :as html]
    [hifi.util.crypto :as crypto]
+   [hifi.datastar :as datastar]
    [app.ui.button :as btn]
    [app.ui.app-shell :as shell]
    [app.ui.core :as uic]))
 
-(defn hello-command [{:app/keys [current-user tab-state] :as _cofx} {:keys [signals]}]
+(defn hello-command [{:app/keys [current-user tab-state] :as _cofx} {::datastar/keys [signals tab-id]}]
   (let [notif-id (str "toast" (crypto/new-uid))
         counter  (inc (:counter tab-state 0))
         notif    {:id    notif-id
@@ -17,19 +18,19 @@
     {:outcome/effects [{:effect/kind :print
                         :effect/data (str "Hello there " (:user/email current-user) "!")}
                        {:effect/kind :app/tab-transact
-                        :effect/data {:tab-id (:tab-id signals)
+                        :effect/data {:tab-id tab-id
                                       :tx-fn  #(-> %
                                                    (assoc :counter counter)
                                                    (update :notifications assoc notif-id notif))}}
                        {:effect/kind :app/schedule
                         :effect/data {:command {:command/kind :home/clear-notification
-                                                :signals      {:tab-id          (:tab-id signals)
+                                                :signals      {:tab-id          tab-id
                                                                :notification-id notif-id}}
                                       :seconds 10}}]}))
 
-(defn clear-notification-command [_cofx {:keys [signals]}]
+(defn clear-notification-command [_cofx {::datastar/keys [signals tab-id]}]
   {:outcome/effects [{:effect/kind :app/tab-transact
-                      :effect/data {:tab-id (-> signals :tab-id)
+                      :effect/data {:tab-id tab-id
                                     :tx-fn  (fn [ts]
                                               (update ts :notifications
                                                       dissoc (-> signals :notification-id)))}}]})

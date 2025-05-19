@@ -1,11 +1,10 @@
 {:paths ["src" "resources"  "dev"]
  :deps  {;; Hyperlith is for Immediate CRUD (HIFICRUD)
-         org.clojure/clojure  {:mvn/version "1.12.0"}
-         datastar/expressions {:git/url "https://github.com/ramblurr/datastar-expressions/"
-                               :git/sha "8db9d4bf5a178912ca173f67671fd9dba6b14f90"}
-         com.datomic/peer     {:mvn/version "1.0.7364"
-                               :exclusions  [org.slf4j/slf4j-api]}
-
+         org.clojure/clojure         {:mvn/version "1.12.0"}
+         datastar/expressions        {:git/url "https://github.com/ramblurr/datastar-expressions/"
+                                      :git/sha "8db9d4bf5a178912ca173f67671fd9dba6b14f90"}
+         com.datomic/peer            {:mvn/version "1.0.7364"
+                                      :exclusions  [org.slf4j/slf4j-api]}
          org.slf4j/slf4j-api         {:mvn/version "2.0.17"}
          org.xerial/sqlite-jdbc      {:mvn/version "3.49.1.0"}
          org.flatland/ordered        {:mvn/version "1.15.12"}
@@ -14,9 +13,9 @@
          com.taoensso/telemere-slf4j {:mvn/version "1.0.0"}
          com.lambdaworks/scrypt      {:mvn/version "1.4.0"}
          io.github.paintparty/bling  {:mvn/version "0.5.2"}
-         hifi/system                 {:local/root "../libs/hifi-system"}
-         hifi/datomic                {:local/root "../libs/hifi-datomic"}
-         hifi/html                   {:local/root "../libs/hifi-html"}}
+         hifi/system                 {:local/root "../../libs/hifi-system"}
+         hifi/datomic                {:local/root "../../libs/hifi-datomic"}
+         hifi/html                   {:local/root "../../libs/hifi-html"}}
 
  :aliases {:dev   {:extra-paths ["dev"]
                    :extra-deps  {djblue/portal               {:mvn/version "0.59.0"}

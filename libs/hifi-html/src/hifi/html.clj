@@ -153,15 +153,20 @@
   ;; is added to the url.
   "@post(window.location.pathname + (window.location.search + '&u=').replace(/^&/,'?'))")
 
+(def default-tab-id-js "self.crypto.randomUUID()")
+
 (defn shim-document [{:keys [body-pre body-post
                              csrf-cookie-js
+                             tab-id-js
                              on-load-js]
                       :or   {on-load-js     default-on-load-js
+                             tab-id-js      default-tab-id-js
                              csrf-cookie-js csrf-cookie-js-prod}
                       :as   opts}]
   (html-document opts
                  (list
-                  [:div {:data-signals-csrf csrf-cookie-js}]
+                  [:div {:data-signals-csrf               csrf-cookie-js
+                         :data-signals-tab-id__case.kebab tab-id-js}]
                   [:div {:data-on-load on-load-js}]
                   [:noscript "Your browser does not support JavaScript!"]
                   body-pre

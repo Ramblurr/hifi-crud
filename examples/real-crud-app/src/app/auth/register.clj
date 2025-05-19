@@ -55,13 +55,13 @@
 
 (defn validate-command
   "Handle registration form interactive validation"
-  [cofx {:keys [signals]}]
+  [cofx {:keys [::datastar/signals]}]
   {:outcome/effects
    [(forms/validate-form (RegisterForm cofx) signals)]})
 
 (defn submit-command
   "Handle registration form submission"
-  [cofx {:keys [signals]}]
+  [cofx {:keys [::datastar/signals]}]
   (let [errors (forms/validate-form (RegisterForm cofx) signals :clear? false)]
     (if false
       {:outcome/effects [errors]}
@@ -71,7 +71,7 @@
                                         :on-error {:command/kind :register/tx-error
                                                    :signals      signals}}}]})))
 
-(defn tx-error-command [_cofx {:keys [signals error] :as _data}]
+(defn tx-error-command [_cofx {:keys [::datastar/signals error] :as _data}]
   {:outcome/effects [(forms/merge-errors signals :register
                                          (tx-error->errors error)
                                          {:only :touched})]})

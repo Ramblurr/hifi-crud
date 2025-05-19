@@ -47,8 +47,11 @@
              :keychain decrypted-keychain})
           {:error :bad-login})))))
 
-(defn submit-login-command [{:keys [db] :as _cofx} {:keys [sid signals url-for]}]
+(defn submit-login-command [{:keys [db] :as _cofx} {:keys [sid ::datastar/signals url-for]}]
+  (assert db)
   (let [{:keys [email password]} (forms/values-from-signals [:email :password] :login signals)
+        _                        (assert email)
+        _                        (assert password)
         {:keys [error]}          (user-log-in db email password)]
     (if error
       {:outcome/effects [(forms/merge-errors signals :login
@@ -69,7 +72,7 @@
   {:outcome/effects [{:effect/kind :d*/redirect
                       :effect/data (:redirect-to data)}]})
 
-(defn tx-error-command [_cofx {:keys [signals error] :as _data}]
+(defn tx-error-command [_cofx {:keys [::datastar/signals error] :as _data}]
   (tap> [:login-db-error error _data])
   {:outcome/effects [(forms/merge-errors signals :login
                                          {:_top "Login failed. Please try again later."})]})

@@ -1,30 +1,26 @@
 (ns app.main2
   (:require
+   [app.auth :as auth]
+   [app.home :as home]
    [app.system :as system]
-   [app.db :as d]
-   [app.effects :as effects]
-   [app.commands :as commands]
-   [starfederation.datastar.clojure.api :as d*]
-   [starfederation.datastar.clojure.adapter.common :as d*com]
-   [starfederation.datastar.clojure.adapter.http-kit :as hk-gen]
-   [hifi.datastar.tab-state :as tab-state]
+   [hifi.datastar :as datastar]
+   [hifi.datastar.brotli :as br]
+   [hifi.datastar.http-kit :as d*http-kit]
+   [hifi.engine.shell :as shell]
    [hifi.env :as env]
    [hifi.html :as html]
-   [hifi.datastar.brotli :as br]
-   [hifi.datastar :as datastar]
-   [hifi.util.assets :as assets]
-   [hifi.system.middleware :as hifi.mw]
    [hifi.system :as hifi]
-   [hifi.engine.shell :as shell]
-   [taoensso.telemere :as t]
-   [app.home :as home]
-   [app.auth :as auth]))
+   [hifi.system.middleware :as hifi.mw]
+   [hifi.util.assets :as assets]
+   [taoensso.telemere :as t]))
 
 (def pages
   (merge home/pages
          auth/pages))
 
-(defn action-dispatch-command [{:app/keys [engine] :keys [sid datastar-signals url-for query-params] :as req}]
+(def forward-to-cmd-keys [:sid ::datastar/tab-state ::datastar/signals ::datastar/tab-id :url-for])
+
+(defn action-dispatch-command [{:app/keys [engine] :keys [sid ::datastar/tab-state-store ::datastar/tab-state ::datastar/signals ::datastar/tab-id url-for query-params] :as req}]
   (assert sid)
   (assert engine)
   (let [command-name (keyword (query-params "cmd"))
@@ -34,10 +30,9 @@
       (try
         ;; (tap> [:command command-name sid])
         (shell/dispatch-sync (assoc engine :!http-return !http-return)
-                             {:command/kind command-name
-                              :sid          sid
-                              :url-for      url-for
-                              :signals      datastar-signals}
+                             (merge
+                              (select-keys req forward-to-cmd-keys)
+                              {:command/kind command-name})
                              {:interceptors (conj shell/default-global-interceptors :app/cloak-signals)})
         (when-let [http-return @!http-return]
           ;; (tap> [:command-signals-result http-return])
@@ -76,41 +71,12 @@
 
 (def shim-handler (html/shim-handler shim-response))
 
-(defn render-handler [render-fn]
-  (assert render-fn "No render-fn provided")
-  (fn [req]
-    (let [tab-id (tab-state/new-tab-id)
-          req    (assoc req :tab-id tab-id)
-          ctx    (datastar/long-lived-render-setup req render-fn {:error-report-fn #(tap> [:render-error %1 %2])})]
-      (hk-gen/->sse-response req
-                             {:headers            {}
-                              hk-gen/on-open      (fn [sse-gen]
-                                                    (tab-state/init-tab-state! (::datastar/<render ctx) tab-id)
-                                                    (datastar/long-lived-render-on-open ctx sse-gen))
-                              hk-gen/on-close     (fn [_ _]
-                                                    (datastar/long-lived-render-on-close ctx)
-                                                    (tab-state/remove-tab-state! tab-id))
-                              d*com/write-profile (datastar/brotli-write-profile)}))))
-
-(defn action-handler [handler]
-  (fn [req]
-    (let [{:hyperlith.core/keys [signals script]} (handler req)]
-      (if (or signals script)
-        (hk-gen/->sse-response req {:headers            {"Cache-Control" "no-store"}
-                                    hk-gen/on-open      (fn [sse-gen]
-                                                          (d*/merge-signals! sse-gen (datastar/edn->json signals))
-                                                          (d*/close-sse! sse-gen))
-                                    hk-gen/on-close     (fn [_ _])
-                                    d*com/write-profile (datastar/brotli-write-profile)})
-        {:status  204
-         :headers {"Cache-Control" "no-store"}}))))
-
 (defn pages->routes [pages]
   (->> pages
        (mapv (fn [[page-route-name {:keys [path render]}]]
                [path {:name page-route-name
                       :get  shim-handler
-                      :post (render-handler render)}]))
+                      :post (d*http-kit/render-handler render)}]))
 
        (into [""])))
 
@@ -118,7 +84,7 @@
   [""  {:middleware (conj hifi.mw/hypermedia-chain
                           :app)}
    (pages->routes pages)
-   ["/cmd" {:post {:handler (action-handler #'action-dispatch-command)}}]
+   ["/cmd" {:post {:handler (d*http-kit/action-handler #'action-dispatch-command)}}]
    (assets/asset->route !css)
    (assets/asset->route !datastar)
    (assets/asset->route !floating-ui-core)

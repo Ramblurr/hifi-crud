@@ -2,19 +2,21 @@
 ;; SPDX-License-Identifier: EUPL-1.2
 (ns app.effects
   (:require
-   [promesa.exec.csp :as sp]
-   [hifi.engine.shell :as shell]
-   [hifi.datastar.tab-state :as tab-state]
-   [medley.core :as medley]
-   [exoscale.cloak :as cloak]
    [app.db :as d]
+   [exoscale.cloak :as cloak]
+   [hifi.datastar :as datastar]
+   [hifi.datastar.spec :as datastar.spec]
+   [hifi.datastar.tab-state :as tab-state]
+   [hifi.engine.context :as context]
    [hifi.engine.fx :as fx]
-   [hifi.engine.context :as context]))
+   [hifi.engine.shell :as shell]
+   [medley.core :as medley]
+   [promesa.exec.csp :as sp]
+   [taoensso.telemere :as t]))
 
 (def print-fx
   {:effect/kind    :print
    :effect/handler (fn print-effect [_ctx data]
-                     (tap> [:print-effect data])
                      (println data))})
 
 (def sleep-fx
@@ -26,15 +28,16 @@
   {:effect/kind    :d*/merge-signals
    :effect/handler (fn d*-merge-signals
                      [{:keys [!http-return] :as _ctx} data]
-                     (swap! !http-return merge {:hyperlith.core/signals data}))})
+                     (swap! !http-return merge {datastar.spec/signals data}))})
 
 (def d*-redirect-fx
   {:effect/kind    :d*/redirect
    :effect/handler (fn d*-redirect
                      [{:keys [!http-return] :as _ctx} data]
-                     (swap! !http-return  (fn [ret]
-                                            (-> ret
-                                                (merge {:hyperlith.core/script (format "window.location = '%s'" data)})))))})
+                     (throw (ex-info "d* redirect effect not yet implemented." {}))
+                     #_(swap! !http-return  (fn [ret]
+                                              (-> ret
+                                                  (merge {:hyperlith.core/script (format "window.location = '%s'" data)})))))})
 
 (def schedule-fx
   {:effect/kind    :app/schedule
@@ -44,7 +47,7 @@
                        (try
                          (shell/dispatch-sync ctx command)
                          (catch Exception e
-                           (tap> [:schedule-error e])))))})
+                           (t/error! ::schedule-fx-error e)))))})
 
 (def db-transact-fx
   {:effect/kind    :db/transact
@@ -62,10 +65,10 @@
 
 (def tab-transact-fx
   {:effect/kind    :app/tab-transact
-   :effect/handler (fn tab-transact [_ctx {:keys [tab-id tx-fn] :as data}]
+   :effect/handler (fn tab-transact [_ctx {:keys [::datastar/tab-state-store ::datastar/tab-id tx-fn] :as data}]
                      (assert (some? tab-id) "No tab id provided")
                      (assert (fn? tx-fn) "Transaction function must be a function")
-                     (tab-state/transact! tab-id tx-fn))})
+                     (tab-state/transact! tab-state-store tab-id tx-fn))})
 
 (def db-input
   {:input/kind    :app/db
@@ -114,8 +117,7 @@
   {:input/kind    :app/tab-state
    :input/handler (fn squuid-input [ctx inputs _]
                     (assoc inputs :app/tab-state
-                           (tab-state/tab-state!
-                            (get-in ctx [:command :command/data :signals :tab-id]))))})
+                           (get-in ctx [:command :command/data ::datastar/tab-state])))})
 
 (def cloak-signals-interceptor
   {:interceptor/name :app/cloak-signals
@@ -125,7 +127,7 @@
                              signal-name-paths (:app/cloak-signals command-def)]
                          (if signal-name-paths
                            (reduce (fn [ctx signal-path]
-                                     (let [path (into [] (concat [:command :command/data :signals] signal-path))]
+                                     (let [path (into [] (concat [:command :command/data ::datastar/signals] signal-path))]
                                        (medley/update-existing-in ctx path cloak/mask)))
                                    ctx
                                    signal-name-paths)
