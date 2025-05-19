@@ -12,6 +12,7 @@
    [hifi.system :as hifi]
    [hifi.system.middleware :as hifi.mw]
    [hifi.util.assets :as assets]
+   [starfederation.datastar.clojure.api :as d*]
    [taoensso.telemere :as t]))
 
 (def pages
@@ -20,27 +21,25 @@
 
 (def forward-to-cmd-keys [:sid ::datastar/tab-state ::datastar/signals ::datastar/tab-id :url-for])
 
-(defn action-dispatch-command [{:app/keys [engine] :keys [sid ::datastar/tab-state-store ::datastar/tab-state ::datastar/signals ::datastar/tab-id url-for query-params] :as req}]
+(defn action-dispatch-command [{:app/keys [engine] :keys [sid query-params] :as req}
+                               sse-gen]
   (assert sid)
   (assert engine)
-  (let [command-name (keyword (query-params "cmd"))
-        ;; HACK(hyperlith) this is a workaround for the fact that hyperlith doesn't let us return signals async
-        !http-return (atom nil)]
+  (let [command-name (keyword (query-params "cmd"))]
     (if (shell/command engine command-name)
       (try
-        ;; (tap> [:command command-name sid])
-        (shell/dispatch-sync (assoc engine :!http-return !http-return)
+        ;; (tap> [:command command-name sid]
+        (shell/dispatch-sync (assoc engine ::datastar/sse-gen sse-gen :nonce (:nonce req)  :url-for (:url-for req))
                              (merge
                               (select-keys req forward-to-cmd-keys)
                               {:command/kind command-name})
                              {:interceptors (conj shell/default-global-interceptors :app/cloak-signals)})
-        (when-let [http-return @!http-return]
-          ;; (tap> [:command-signals-result http-return])
-          http-return)
         (catch Throwable t
           (tap> [:command-error t])
           (println t)
-          nil))
+          nil)
+        (finally
+          (d*/close-sse! sse-gen)))
       (throw (ex-info "Command not found" {:command command-name})))))
 
 (def static-asset (partial assets/static-asset (env/dev?)))
@@ -84,7 +83,7 @@
   [""  {:middleware (conj hifi.mw/hypermedia-chain
                           :app)}
    (pages->routes pages)
-   ["/cmd" {:post {:handler (d*http-kit/action-handler #'action-dispatch-command)}}]
+   ["/cmd" {:post {:handler (d*http-kit/action-handler-async #'action-dispatch-command)}}]
    (assets/asset->route !css)
    (assets/asset->route !datastar)
    (assets/asset->route !floating-ui-core)

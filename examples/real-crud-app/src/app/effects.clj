@@ -5,13 +5,13 @@
    [app.db :as d]
    [exoscale.cloak :as cloak]
    [hifi.datastar :as datastar]
-   [hifi.datastar.spec :as datastar.spec]
    [hifi.datastar.tab-state :as tab-state]
    [hifi.engine.context :as context]
    [hifi.engine.fx :as fx]
    [hifi.engine.shell :as shell]
    [medley.core :as medley]
    [promesa.exec.csp :as sp]
+   [starfederation.datastar.clojure.api :as d*]
    [taoensso.telemere :as t]))
 
 (def print-fx
@@ -27,17 +27,17 @@
 (def d*-merge-signals-fx
   {:effect/kind    :d*/merge-signals
    :effect/handler (fn d*-merge-signals
-                     [{:keys [!http-return] :as _ctx} data]
-                     (swap! !http-return merge {datastar.spec/signals data}))})
+                     [{:keys [::datastar/sse-gen] :as _ctx} data]
+                     (d*/merge-signals! sse-gen (datastar/edn->json data)))})
 
 (def d*-redirect-fx
   {:effect/kind    :d*/redirect
    :effect/handler (fn d*-redirect
-                     [{:keys [!http-return] :as _ctx} data]
-                     (throw (ex-info "d* redirect effect not yet implemented." {}))
-                     #_(swap! !http-return  (fn [ret]
-                                              (-> ret
-                                                  (merge {:hyperlith.core/script (format "window.location = '%s'" data)})))))})
+                     [{:keys [::datastar/sse-gen url-for] :as _ctx} {:keys [redirect-to]}]
+                     (assert (keyword? redirect-to) "redirect-to must be a keyword")
+                     (let [uri (url-for redirect-to)]
+                       (when uri
+                         (d*/merge-fragment! sse-gen (str "<div id=\"hifi-on-load\" data-on-load=\"window.location = '" (url-for redirect-to) "'\">")))))})
 
 (def schedule-fx
   {:effect/kind    :app/schedule

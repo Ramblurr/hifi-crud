@@ -167,7 +167,7 @@
                  (list
                   [:div {:data-signals-csrf               csrf-cookie-js
                          :data-signals-tab-id__case.kebab tab-id-js}]
-                  [:div {:data-on-load on-load-js}]
+                  [:div {:id "hifi-on-load" :data-on-load on-load-js}]
                   [:noscript "Your browser does not support JavaScript!"]
                   body-pre
                   [:main#morph]

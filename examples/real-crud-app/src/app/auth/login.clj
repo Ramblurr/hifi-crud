@@ -2,14 +2,14 @@
 ;; SPDX-License-Identifier: EUPL-1.2
 (ns app.auth.login
   (:require
-   [hifi.datastar :as datastar]
-   [hifi.html :as html]
+   [app.db :as d]
    [app.forms :as forms]
    [app.ui.button :as btn]
    [app.ui.form :as form]
    [app.ui.icon :as icon]
-   [app.db :as d]
    [exoscale.cloak :as cloak]
+   [hifi.datastar :as datastar]
+   [hifi.html :as html]
    [taoensso.tempel :as tempel]))
 
 (defonce password-rate-limiter
@@ -62,16 +62,16 @@
                             :effect/data {:tx-data    [{:session/id   sid
                                                         :session/user [:user/id user-id]}]
                                           :on-success {:command/kind :login/tx-success
-                                                       :redirect-to  (url-for :app.home/home)}
+                                                       :redirect-to  :app.home/home}
                                           :on-error   {:command/kind :login/tx-error
                                                        :signals      signals}}}]}))))
 
 (defn tx-success-command [_cofx data]
   {:outcome/effects [{:effect/kind :d*/redirect
-                      :effect/data (:redirect-to data)}]})
+                      :effect/data (select-keys data [:redirect-to])}]})
 
 (defn tx-error-command [_cofx {:keys [::datastar/signals error] :as _data}]
-  (tap> [:login-db-error error _data])
+  ;; (tap> [:login-db-error error _data])
   {:outcome/effects [(forms/merge-errors signals :login
                                          {:_top "Login failed. Please try again later."})]})
 

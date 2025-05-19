@@ -1,11 +1,11 @@
 (ns hifi.datastar
   {:clj-kondo/ignore [:clojure-lsp/unused-public-var]}
   (:require
-   [hifi.datastar.spec :as spec]
    [charred.api :as charred]
    [clojure.tools.logging :as log]
    [hifi.datastar.brotli :as br]
    [hifi.datastar.multicast :as mult]
+   [hifi.datastar.spec :as spec]
    [hifi.util.assets :as assets]
    [hifi.util.codec :as codec]
    [promesa.exec.csp :as sp]

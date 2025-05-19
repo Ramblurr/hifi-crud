@@ -4,9 +4,9 @@
   (:require
    [hifi.datastar :as datastar]
    [hifi.datastar.tab-state :as tab-state]
-   [starfederation.datastar.clojure.api :as d*]
    [starfederation.datastar.clojure.adapter.common :as d*com]
-   [starfederation.datastar.clojure.adapter.http-kit :as hk-gen]))
+   [starfederation.datastar.clojure.adapter.http-kit :as hk-gen]
+   [starfederation.datastar.clojure.api :as d*]))
 
 (defn render-handler
   "A default http-kit ring handler for rendering views over a long-lived SSE connection with datastar.
@@ -41,15 +41,12 @@
                                  d*com/write-profile (datastar/brotli-write-profile)}))))))
 
 (defn action-handler
-  "A default http-kit ring handler for executing commands.
-
-  Commands (the C in CQRS) are HTTP requests that perform side effects and optionally send a datstar merge-signals event to the client.
-  "
+  "A default http-kit ring handler for executing commands, side effects which might return signals to be merged."
   [handler]
   (fn [req]
     (let [{:hifi.datastar/keys [signals]} (handler req)]
       (if signals
-        (hk-gen/->sse-response req {:headers            {"Cache-Control" "no-store"}
+        (hk-gen/->sse-response req {:headers            (merge (:security-headers req) {"Cache-Control" "no-store"})
                                     hk-gen/on-open      (fn [sse-gen]
                                                           (d*/merge-signals! sse-gen (datastar/edn->json signals))
                                                           (d*/close-sse! sse-gen))
@@ -57,3 +54,16 @@
                                     d*com/write-profile (datastar/brotli-write-profile)})
         {:status  204
          :headers {"Cache-Control" "no-store"}}))))
+
+(defn action-handler-async
+  [handler]
+  (fn [req]
+    (hk-gen/->sse-response req {:headers       (merge (:security-headers req) {"Cache-Control" "no-store"})
+                                hk-gen/on-open (fn [sse-gen]
+                                                 (try
+                                                   (handler req sse-gen)
+                                                   (catch Throwable t
+                                                     (d*/close-sse! sse-gen))))
+
+                                hk-gen/on-close     (fn [_ _])
+                                d*com/write-profile (datastar/brotli-write-profile)})))
