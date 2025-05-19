@@ -22,23 +22,25 @@
 (defn static-asset
   [reload? {:keys [resource-path route-path content-type compress-fn encoding integrity]}]
   (let [route-path (or route-path
-
                        (when resource-path
-                         (.getName (io/as-file (io/resource resource-path)))))
-        _       (assert route-path)
-        compute (fn []
-                  (let [resp         (cond-> {:status  200
-                                              :headers {"Cache-Control" "max-age=31536000, immutable"
-                                                        "Content-Type"  content-type}
-                                              :body (resource->bytes (io/resource resource-path))}
-                                       compress-fn (update :body compress-fn)
-                                       compress-fn (assoc-in [:headers "Content-Encoding"] encoding))
-                        sri-hash     (crypto/sha384-resource resource-path)
-                        cache-buster (subs sri-hash (- 71 8))]
-                    {:handler   (fn [_] resp)
-                     :integrity (if (some? integrity) integrity sri-hash)
-                     :href      (str route-path "?v=" cache-buster)
-                     :path      route-path}))]
+                         (str "/"
+                              (.getName (io/as-file (io/resource resource-path))))))
+        _          (assert route-path)
+        compute    (fn []
+                     (let [resp         (cond-> {:status  200
+                                                 :headers {"Cache-Control" "max-age=31536000, immutable"
+                                                           "Content-Type"  content-type}
+                                                 :body (resource->bytes (io/resource resource-path))}
+                                          compress-fn (update :body compress-fn)
+                                          compress-fn (assoc-in [:headers "Content-Encoding"] encoding))
+                           sri-hash     (crypto/sha384-resource resource-path)
+                           cache-buster (subs sri-hash (- 71 8))]
+                       {:handler   (fn [_]
+                                     (tap> [resource-path :resp resp])
+                                     resp)
+                        :integrity (if (some? integrity) integrity sri-hash)
+                        :href      (str route-path "?v=" cache-buster)
+                        :path      route-path}))]
 
     (if reload?
       ;; In dev mode, re-evaluate on every deref
