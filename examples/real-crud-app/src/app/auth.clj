@@ -22,48 +22,48 @@
 
 (def register-validate-command
   {:command/kind      :register/validate
-   :command/inputs    [:app/db]
+   :command/coeffects [:app/db]
    :command/handler   #'register/validate-command
    :app/cloak-signals #{[:register :password]
                         [:register :password2]}})
 
 (def register-submit-command
   {:command/kind      :register/submit
-   :command/inputs    [:app/db [:db/squuid :new-user-id] :app/root-public-keychain]
+   :command/coeffects [:app/db [:db/squuid :new-user-id] :app/root-public-keychain]
    :command/handler   #'register/submit-command
    :app/cloak-signals #{[:register :password]
                         [:register :password2]}})
 
 (def register-tx-error-command
-  {:command/kind    :register/tx-error
-   :command/inputs  [:app/db]
-   :command/handler #'register/tx-error-command})
+  {:command/kind      :register/tx-error
+   :command/coeffects [:app/db]
+   :command/handler   #'register/tx-error-command})
 
 (def login-submit-command
   {:command/kind      :login/submit
-   :command/inputs    [:app/db]
+   :command/coeffects [:app/db]
    :command/handler   #'login/submit-login-command
    :app/cloak-signals #{[:login :password]}})
 
 (def login-tx-success-command
-  {:command/kind    :login/tx-success
-   :command/inputs  []
-   :command/handler #'login/tx-success-command})
+  {:command/kind      :login/tx-success
+   :command/coeffects []
+   :command/handler   #'login/tx-success-command})
 
 (def login-tx-error-command
-  {:command/kind    :login/tx-error
-   :command/inputs  []
-   :command/handler #'login/tx-error-command})
+  {:command/kind      :login/tx-error
+   :command/coeffects []
+   :command/handler   #'login/tx-error-command})
 
 (def logout-submit-command
-  {:command/kind    :logout/submit
-   :command/inputs  [:app/current-user]
-   :command/handler #'logout/submit-logout-command})
+  {:command/kind      :logout/submit
+   :command/coeffects [:app/current-user]
+   :command/handler   #'logout/submit-logout-command})
 
 (def logout-tx-success-command
-  {:command/kind    :logout/tx-success
-   :command/inputs  []
-   :command/handler #'logout/tx-success-command})
+  {:command/kind      :logout/tx-success
+   :command/coeffects []
+   :command/handler   #'logout/tx-success-command})
 
 (defn commands []
   [register-validate-command

@@ -22,7 +22,7 @@
 (def default-registry
   {:engine/registry {:commands     {}
                      :effects      {::fx/dispatch fx/dispatch-fx}
-                     :inputs       {}
+                     :coeffects       {}
                      :interceptors {:unhandled-error-interceptor int/unhandled-error-interceptor
                                     :do-fx-interceptor           int/do-fx-interceptor}}})
 
@@ -32,10 +32,10 @@
   (context/get-command env cmd-name))
 
 (defn register
-  "Register a command, effect or input definition, returns a dispatch environment.
+  "Register a command, effect or coeffect definition, returns a dispatch environment.
 
   command: adds a single command to the registry
-  input: adds a single input to the registry
+  coeffect: adds a single coeffect to the registry
   effect: adds a single effect to the registry
   interceptor: adds a single interceptor to the registry
 

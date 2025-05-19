@@ -20,30 +20,30 @@
 
 (def cmd-handler-interceptor
   {:interceptor/name :cmd-handler-interceptor
-   :doc              "Applies the command handler to the inputs and puts the outcome in the context"
+   :doc              "Calls the command handler with the coeffects and command data, then puts the outcome in the context"
    :enter            (fn cmd-handler-enter [ctx]
                        (let [command (:command ctx)
-                             inputs  (:inputs ctx)
+                             coeffects  (:coeffects ctx)
                              data    (:command/data command)
                              handler (context/get-command-handler ctx (:command/kind command))]
-                         #_(tap> [:command-running command :inputs inputs :ctx ctx])
+                         #_(tap> [:command-running command :coeffects coeffects :ctx ctx])
                          (if (some? handler)
                            (assoc ctx :outcome
-                                  (-> (handler inputs data)
+                                  (-> (handler coeffects data)
                                       (assert-handler-return command)
                                       (assoc :outcome/command-id (:command/id command))))
                            (throw (context/ex ::no-cmd-handler {:command command
                                                                 :ctx     ctx})))))})
 
-(defn input-interceptors [env command]
-  (for [[input-kind data] (context/get-command-inputs env (:command/kind command))]
+(defn coeffect-interceptors-for [env command]
+  (for [[coeffect-kind data] (context/get-command-coeffects env (:command/kind command))]
 
-    (if-let [handler (context/get-input-handler env input-kind)]
-      {:interceptor/name input-kind
+    (if-let [handler (context/get-coeffect-handler env coeffect-kind)]
+      {:interceptor/name coeffect-kind
        :enter            (fn [ctx]
-                           (update ctx :inputs (partial handler ctx) data))}
-      (throw (context/ex ::no-input {:command    command
-                                     :input-kind input-kind})))))
+                           (update ctx :coeffects (partial handler ctx) data))}
+      (throw (context/ex ::no-coeffect {:command       command
+                                        :coeffect-kind coeffect-kind})))))
 
 (defn resolve-interceptor [env int-name]
   (if-let [int (context/get-interceptor env int-name)]
@@ -60,7 +60,7 @@
 
 (defn with-interceptors [env command opts]
   (let [head   (:interceptors opts)
-        middle (input-interceptors env command)
+        middle (coeffect-interceptors-for env command)
         tail   [cmd-handler-interceptor]]
     (i/enqueue env
                (resolve-interceptors env (concat head middle tail)))))
@@ -77,25 +77,25 @@
 (defn merge-registries [r1 r2]
   (-> r1
       (update :commands merge (:commands r2))
-      (update :inputs merge (:inputs r2))
+      (update :coeffects merge (:coeffects r2))
       (update :interceptors merge (:interceptors r2))
       (update :effects merge (:effects r2))))
 
 (def kinds {:command/kind     :commands
             :effect/kind      :effects
-            :input/kind       :inputs
+            :coeffect/kind    :coeffects
             :interceptor/name :interceptors})
 
 (def kind-keys (into #{} (keys kinds)))
 
 (defn compile-item [kind x]
   (case kind
-    :command/kind     (update x :command/inputs #(map (fn [input]
-                                                        (if (keyword? input)
-                                                          [input nil]
-                                                          input)) %))
+    :command/kind     (update x :command/coeffects #(map (fn [coeffect]
+                                                           (if (keyword? coeffect)
+                                                             [coeffect nil]
+                                                             coeffect)) %))
     :effect/kind      x
-    :input/kind       x
+    :coeffect/kind    x
     :interceptor/name x))
 
 (defn register-kind [env kind cmd-or-fx]

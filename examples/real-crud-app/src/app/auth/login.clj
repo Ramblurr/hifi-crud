@@ -30,8 +30,6 @@
 
   Returns user's unencrypted secret `KeyChain` on success, or throws."
   [db user-email user-password]
-  (tap> [:user-login-attemp user-email (cloak/unmask user-password)])
-
   ;; Ensure a minimum runtime to help protect against timing attacks,
   ;; Ref. <https://en.wikipedia.org/wiki/Timing_attack>.
   (tempel/with-min-runtime 2000

@@ -10,11 +10,11 @@
 (defn get-effects [ctx]
   (get-in ctx [:outcome :outcome/effects]))
 
-(defn get-input-handler [ctx input-kind]
-  (get-in ctx [:engine/registry :inputs input-kind :input/handler]))
+(defn get-coeffect-handler [ctx coeffect-kind]
+  (get-in ctx [:engine/registry :coeffects coeffect-kind :coeffect/handler]))
 
-(defn get-command-inputs [ctx cmd-kind]
-  (get-in ctx [:engine/registry :commands cmd-kind :command/inputs]))
+(defn get-command-coeffects [ctx cmd-kind]
+  (get-in ctx [:engine/registry :commands cmd-kind :command/coeffects]))
 
 (defn get-command [ctx cmd-kind]
   (get-in ctx [:engine/registry :commands cmd-kind]))

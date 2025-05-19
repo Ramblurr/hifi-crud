@@ -70,17 +70,17 @@
                      (assert (fn? tx-fn) "Transaction function must be a function")
                      (tab-state/transact! tab-state-store tab-id tx-fn))})
 
-(def db-input
-  {:input/kind    :app/db
-   :input/handler (fn db-input [{:keys [conn] :as _ctx} inputs _]
-                    (assert (some? conn) "No connection to Datahike")
-                    (assoc inputs :db (d/db conn)))})
+(def db-coeffect
+  {:coeffect/kind    :app/db
+   :coeffect/handler (fn db-coeffect [{:keys [conn] :as _ctx} coeffects _]
+                       (assert (some? conn) "No connection to Datahike")
+                       (assoc coeffects :db (d/db conn)))})
 
-(def root-public-keychain-input
-  {:input/kind    :app/root-public-keychain
-   :input/handler (fn root-public-keychain [ctx inputs _]
-                    (assoc inputs :app/root-public-keychain
-                           (:app/root-public-keychain ctx)))})
+(def root-public-keychain-coeffect
+  {:coeffect/kind    :app/root-public-keychain
+   :coeffect/handler (fn root-public-keychain [ctx coeffects _]
+                       (assoc coeffects :app/root-public-keychain
+                              (:app/root-public-keychain ctx)))})
 
 (defn current-user
   ([{:keys [sid conn]}]
@@ -90,34 +90,34 @@
            :session/user
            (assoc :user/role :app.role/user))))
 
-(def current-user-input
-  {:input/kind    :app/current-user
-   :input/handler (fn current-user-input [{:keys [conn] :as ctx} inputs _]
-                    (if-let [user (current-user (get-in ctx [:command :command/data :sid]) conn)]
-                      (assoc inputs :app/current-user user)
-                      inputs))})
+(def current-user-coeffect
+  {:coeffect/kind    :app/current-user
+   :coeffect/handler (fn current-user-coeffect [{:keys [conn] :as ctx} coeffects _]
+                       (if-let [user (current-user (get-in ctx [:command :command/data :sid]) conn)]
+                         (assoc coeffects :app/current-user user)
+                         coeffects))})
 
-(def restrict-roles-input
-  {:input/kind    :app/restrict-roles
-   :input/handler (fn restrict-roles-input [_ctx inputs required-roles]
-                    (if-let [user (:app/current-user inputs)]
-                      (if (required-roles (:user/role user))
-                        inputs
-                        (throw (ex-info "User not authorized" {:required-roles required-roles
-                                                               :user           user})))
+(def restrict-roles-coeffect
+  {:coeffect/kind    :app/restrict-roles
+   :coeffect/handler (fn restrict-roles-coeffect [_ctx coeffects required-roles]
+                       (if-let [user (:app/current-user coeffects)]
+                         (if (required-roles (:user/role user))
+                           coeffects
+                           (throw (ex-info "User not authorized" {:required-roles required-roles
+                                                                  :user           user})))
 
-                      (throw (ex-info "User not found" {}))))})
+                         (throw (ex-info "User not found" {}))))})
 
-(def squuid-input
-  {:input/kind    :db/squuid
-   :input/handler (fn squuid-input [_ctx inputs key]
-                    (assoc inputs key (d/squuid)))})
+(def squuid-coeffect
+  {:coeffect/kind    :db/squuid
+   :coeffect/handler (fn squuid-coeffect [_ctx coeffects key]
+                       (assoc coeffects key (d/squuid)))})
 
-(def tab-state-input
-  {:input/kind    :app/tab-state
-   :input/handler (fn squuid-input [ctx inputs _]
-                    (assoc inputs :app/tab-state
-                           (get-in ctx [:command :command/data ::datastar/tab-state])))})
+(def tab-state-coeffect
+  {:coeffect/kind    :app/tab-state
+   :coeffect/handler (fn squuid-coeffect [ctx coeffects _]
+                       (assoc coeffects :app/tab-state
+                              (get-in ctx [:command :command/data ::datastar/tab-state])))})
 
 (def cloak-signals-interceptor
   {:interceptor/name :app/cloak-signals
@@ -142,9 +142,9 @@
                   schedule-fx
 
                   cloak-signals-interceptor
-                  current-user-input
-                  restrict-roles-input
-                  squuid-input
-                  root-public-keychain-input
-                  db-input
-                  tab-state-input])
+                  current-user-coeffect
+                  restrict-roles-coeffect
+                  squuid-coeffect
+                  root-public-keychain-coeffect
+                  db-coeffect
+                  tab-state-coeffect])
