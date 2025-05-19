@@ -80,8 +80,7 @@
        (into [""])))
 
 (defn routes []
-  [""  {:middleware (conj hifi.mw/hypermedia-chain
-                          :app)}
+  [""  {:middleware (conj hifi.mw/hypermedia-chain :app/middleware)}
    (pages->routes pages)
    ["/cmd" {:post {:handler (d*http-kit/action-handler-async #'action-dispatch-command)}}]
    (assets/asset->route !css)

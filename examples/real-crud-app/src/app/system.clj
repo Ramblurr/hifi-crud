@@ -35,19 +35,19 @@
    :app/datomic     (datomic-sys/DatomicComponentGroup {:component-group-key :app/datomic
                                                         :migration-data      schema/migrations})
    ;; this is merged with the default :hifi/middleware comp group
-   :hifi/middleware {:app (hifi.mw/middleware-component
-                           {:name    :app
-                            :factory (fn [{:keys [conn engine]}]
-                                       (assert conn "No connection to Datomic")
-                                       (assert engine "No engine")
-                                       (fn [handler]
-                                         (fn extra-mw [req]
-                                           (handler
-                                            (assoc req
-                                                   :app/conn conn
-                                                   :app/db (d/db conn)
-                                                   :app/engine engine
-                                                   :app/current-user (effects/current-user (:sid req) conn))))))
-                            :donut.system/config
-                            {:conn   [:donut.system/ref [:app/datomic :conn]]
-                             :engine [:donut.system/ref [:app/components :engine]]}})}})
+   :hifi/middleware {:app/middleware (hifi.mw/middleware-component
+                                      {:name    :app/middleware
+                                       :factory (fn [{:keys [conn engine]}]
+                                                  (assert conn "No connection to Datomic")
+                                                  (assert engine "No engine")
+                                                  (fn [handler]
+                                                    (fn extra-mw [req]
+                                                      (handler
+                                                       (assoc req
+                                                              :app/conn conn
+                                                              :app/db (d/db conn)
+                                                              :app/engine engine
+                                                              :app/current-user (effects/current-user (:sid req) conn))))))
+                                       :donut.system/config
+                                       {:conn   [:donut.system/ref [:app/datomic :conn]]
+                                        :engine [:donut.system/ref [:app/components :engine]]}})}})
