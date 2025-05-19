@@ -6,6 +6,7 @@
 (ns hifi.system.middleware.secheaders
   "Middleware for setting default security headers"
   (:require
+   [hifi.util.crypto :as crypto]
    [hifi.system.middleware.spec :as options]
    [medley.core :as medley]
    [clojure.string :as str]))
@@ -21,17 +22,31 @@
 (def unsafe-inline "'unsafe-inline'")
 (def unsafe-eval "'unsafe-eval'")
 
+(defn nonce []
+  (crypto/rand-string 16))
+
+(defn add-nonce [csp key nonce]
+  (update csp key conj (format "'nonce-%s'" nonce)))
+
+(defn add-nonces [csp keys nonce]
+  (reduce #(add-nonce %1 %2 nonce) csp keys))
+
 (defn build-headers [{:keys [hsts?
                              content-security-policy-raw
                              content-security-policy
                              x-permitted-cross-domain-policies
                              referrer-policy
                              x-content-type-options
-                             x-frame-options]}]
+                             enable-csp-nonce
+                             x-frame-options]}
+                     nonce-val]
   (medley/remove-vals
    #(or (nil? %) (str/blank? %))
    {"Strict-Transport-Security"         (when hsts? "max-age=63072000;includeSubDomains;preload")
-    "Content-Security-Policy"           (or content-security-policy-raw (csp->str content-security-policy))
+    "Content-Security-Policy"           (or content-security-policy-raw
+                                            (cond-> content-security-policy
+                                              enable-csp-nonce (add-nonces enable-csp-nonce nonce-val)
+                                              true             (csp->str)))
     "X-Permitted-Cross-Domain-Policies" x-permitted-cross-domain-policies
     "Referrer-Policy"                   referrer-policy
     "X-Content-Type-Options"            x-content-type-options
@@ -45,13 +60,17 @@
 (defn security-headers-middleware
   "Default security headers to set in the response."
   [opts]
-  (let [sec-headers (build-headers (->secheaders-middleware-opts opts))]
-    {:name           ::security-headers
-     :options-schema options/SecHeadersMiddlewareOptions
-     :wrap           (fn wrap-security-headers [handler]
-                       (fn [request]
-                         (let [response (handler request)]
-                           (update response :headers #(merge sec-headers %)))))}))
+  {:name           ::security-headers
+   :options-schema options/SecHeadersMiddlewareOptions
+   :wrap           (fn wrap-security-headers [handler]
+                     (fn [request]
+                       (let [nonce-val   (nonce)
+                             sec-headers (build-headers (->secheaders-middleware-opts opts) nonce-val)
+                             response    (handler (assoc request
+                                                         ;; We add the security headers to the request in case a handler wants to inspect it
+                                                         :security-headers sec-headers
+                                                         :nonce nonce-val))]
+                         (update response :headers #(merge sec-headers %)))))})
 
 (def SecurityHeadersMiddlewareComponentData
   {:name           ::security-headers

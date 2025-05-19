@@ -163,6 +163,10 @@
      ContentSecurityPolicyData]
     [:content-security-policy-raw {:optional true
                                    :doc      "Raw CSP header value. This will override the content-security-policy key if both are present."} :string]
+    [:enable-csp-nonce {:optional true
+                        :default  #{}
+                        :doc      "A set of CSP keys to add a nonce to, defaults to empty. Example #{:script-src}"}
+     [:set (into [:enum] csp-keys)]]
     [:x-permitted-cross-domain-policies {:default "none"} :string]
     [:referrer-policy {:default "no-referrer"} :string]
     [:x-content-type-options {:default "nosniff"} :string]
