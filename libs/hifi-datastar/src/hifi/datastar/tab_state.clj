@@ -1,11 +1,15 @@
 ;; Copyright © 2025 Casey Link <casey@outskirtslabs.com>
 ;; SPDX-License-Identifier: EUPL-1.2
 (ns hifi.datastar.tab-state
-  (:import [java.time Instant Duration])
   (:require
+   [chime.core :as chime]
+   [clojure.tools.logging :as log]
    [com.fulcrologic.guardrails.malli.core :refer [=> >defn]]
+   [hifi.util.shutdown :as shutdown]
    [promesa.exec.csp :as sp]
-   [chime.core :as chime]))
+   [taoensso.nippy :as nippy])
+  (:import
+   [java.time Duration Instant]))
 
 (def DurationSchema [:fn #(instance? Duration %)])
 (def InstantSchema [:fn #(instance? Instant %)])
@@ -83,7 +87,7 @@
     (reduce-kv (fn [acc tab-id s]
                  (if (clean-predicate opts now tab-id s)
                    (do
-                     (tap> [:cleaning-stale tab-id])
+                     ;; (tap> [:cleaning-stale tab-id])
                      (dissoc acc tab-id))
                    acc))
                tab-state
@@ -106,17 +110,40 @@
                     (swap! !tab-state-store (partial clean-stale-tab-state opts))
                     (clean-stale-watches! !tab-state-store))))
 
+(defn load! [!store file]
+  (try
+    (reset! !store (nippy/thaw-from-file file))
+    (catch java.io.FileNotFoundException e
+      (log/warn e "tab-state file does not exist, this is expected on the first start" file))))
+
+(defn persist! [!store file]
+  (try
+    (nippy/freeze-to-file file @!store)
+    (catch Exception e
+      (log/error e "Could not save tab-state" file))))
+
 (def TabStateComponent
-  {:donut.system/start  (fn  [{{:keys [:hifi/options]} :donut.system/config}]
-                          (let [!tab-state-store (atom {})]
-                            {:!tab-state-store !tab-state-store
-                             :clean-job        (start-clean-tab-state-job (assoc options
-                                                                                 :!tab-state-store !tab-state-store))}))
-   :donut.system/stop   (fn [{{:keys [clean-job]} :donut.system/instance}]
+  {:donut.system/start (fn  [{{:keys [:hifi/options]} :donut.system/config}]
+                         (let [!tab-state-store (atom {})
+                               store-filename   (:store-filename options)]
+                           (when store-filename
+                             (load! !tab-state-store store-filename)
+                             (shutdown/add-shutdown-hook! ::persist (partial persist! !tab-state-store)))
+                           {:!tab-state-store !tab-state-store
+                            :clean-job        (start-clean-tab-state-job (assoc options
+                                                                                :!tab-state-store !tab-state-store))
+                            :store-filename   store-filename}))
+
+   :donut.system/stop   (fn [{{:keys [!tab-state-store clean-job store-filename]} :donut.system/instance}]
+                          (when store-filename
+                            (persist! !tab-state-store store-filename)
+                            (shutdown/remove-shutdown-hook! ::persist))
                           (when clean-job
                             (.close clean-job)))
    :donut.system/config {}
    :hifi/options-schema [:map {:name ::tab-state}
+                         [:store-filename {:optional true
+                                           :doc      "Path to a file that the store will be persisted to upon JVM shutdown"} :string]
                          [:clean-job-period {:default (Duration/ofSeconds 60)
                                              :doc     "The period at which the tab-state clean job runs"} DurationSchema]
                          [:clean-predicate {:default default-clean?
