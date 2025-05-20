@@ -2,6 +2,7 @@
   "Standarized logging and telemetry for HIFI applications."
   (:require
    [charred.api :as charred]
+   [hifi.logging.spec :as spec]
    [taoensso.telemere :as t]
    [taoensso.telemere.tools-logging :as taoensso.telemere.tools-logging]))
 
@@ -75,8 +76,7 @@
    :donut.system/stop   (fn  [_]
                           (t/remove-handler! ::tap-handler))
    :donut.system/config {}
-   :hifi/options-schema [:map {:name ::logging-tap}
-                         [:enabled? {:default true} :boolean]]
+   :hifi/options-schema spec/TelemereTapHandlerComponentOptions
    :hifi/options-ref    [:hifi/components :options :logging-tap]})
 
 ;; --------------------------------------------------------------------------------------------
@@ -108,8 +108,6 @@
    :donut.system/stop   (fn stop-console-logging [_]
                           (t/remove-handler! ::logging-console))
    :donut.system/config {}
-   :hifi/options-schema [:map {:name ::logging-console}
-                         [:enabled? {:default true} :boolean]
-                         [:format {:default :pretty} [:enum :json :edn :pretty]]]
+   :hifi/options-schema spec/ConsoleLoggingComponentOptions
    :hifi/options-ref    [:hifi/components :options :logging-console]})
 

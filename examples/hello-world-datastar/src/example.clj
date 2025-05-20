@@ -111,7 +111,7 @@
                :port                3000
                :debug-errors?       true
                :reload-per-request? true
-               :component-opts      {;; example of overriding builtin hifi component options, see hifi.system.spec for all options
+               :hifi/components     {;; example of overriding builtin hifi component options, see hifi.system.spec for all options
                                      :ring-handler {:default-handler-opts {:not-found (fn [_]
                                                                                         {:status  404
                                                                                          :headers {"content-type" "text/plain"}

@@ -2,9 +2,11 @@
 ;; SPDX-License-Identifier: EUPL-1.2
 (ns hifi.system.spec
   (:require
+   [hifi.datastar.spec :as d*spec]
    [hifi.error.iface :as pe]
-   [reitit.middleware :as reitit.middleware]
-   [hifi.system.middleware :as default.middleware]))
+   [hifi.logging.spec :as logging.spec]
+   [hifi.system.middleware :as default.middleware]
+   [reitit.middleware :as reitit.middleware]))
 
 (def IntoMiddleware
   [:fn #(satisfies? reitit.middleware/IntoMiddleware %)])
@@ -130,21 +132,25 @@
 (def RoutesKey [:routes {:doc           "Route definitions using reitit syntax. Can be the routes themselves or a fn/0 that returns them."
                          :error/message "should be a vector of reitit routes or zero-arity function that returns the routes"}
                 ReititRoutesLike])
+
 (def ProfileEnum [:enum :dev :test :prod])
+
 (def HifiComponentOptionsSchema
   [:map {:name ::hifi-component-options}
    RoutesKey
    [:profile {:default :dev} ProfileEnum]
    [:http-server HTTPServerOptions]
-   #_[:middleware {:default {}} MiddlewareOptions]
    [:ring-handler {:default {}} RingHandlerOptions]
-   [:router-options {:default {}} RouterOptionsOptions]])
+   [:router-options {:default {}} RouterOptionsOptions]
+   [:datastar-render-multicaster {:default {}} d*spec/DatastarRenderMulticasterOptions]
+   [:tab-state {:default {}} d*spec/TabStateComponentOptions]
+   [:logging-console {:default {}} logging.spec/ConsoleLoggingComponentOptions]
+   [:logging-tap {:default {}} logging.spec/TelemereTapHandlerComponentOptions]])
 
 (def system-opts->component-opts-path
   {:host                 [:http-server :host]
    :port                 [:http-server :port]
    :debug-errors?        [:middleware :opts :exception :debug-errors?]
-   :middleware           [:middleware]
    :reload-per-request?  [:ring-handler :reload-per-request?]
    :print-context-diffs? [:router-options :print-context-diffs?]
    :routes               [:routes]})
@@ -162,10 +168,11 @@
    #_[:middleware {:optional true :default {}} MiddlewareOptions]
    [:port {:optional true} :int]
    [:host {:default "127.0.0.1"} :string]
-   [:component-opts {:optional true} HifiComponentOptionsSchema]])
+   [:hifi/components {:optional true
+                      :doc      "Component options map merged into the donut.system hifi components."} HifiComponentOptionsSchema]])
 
 (defn system-opts->component-opts [raw-opts]
-  (let [opts (pe/coerce! HifiSystemOptionsSchema (dissoc raw-opts :component-opts))]
+  (let [opts (pe/coerce! HifiSystemOptionsSchema (dissoc raw-opts :hifi/components))]
     (->> system-opts->component-opts-path
          (map (fn [[k path]]
                 #_(tap> [:k k :path path :v (get opts k)])

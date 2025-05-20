@@ -5,6 +5,7 @@
    [chime.core :as chime]
    [clojure.tools.logging :as log]
    [com.fulcrologic.guardrails.malli.core :refer [=> >defn]]
+   [hifi.datastar.spec :as spec]
    [hifi.util.shutdown :as shutdown]
    [promesa.exec.csp :as sp]
    [taoensso.nippy :as nippy])
@@ -141,13 +142,5 @@
                           (when clean-job
                             (.close clean-job)))
    :donut.system/config {}
-   :hifi/options-schema [:map {:name ::tab-state}
-                         [:store-filename {:optional true
-                                           :doc      "Path to a file that the store will be persisted to upon JVM shutdown"} :string]
-                         [:clean-job-period {:default (Duration/ofSeconds 60)
-                                             :doc     "The period at which the tab-state clean job runs"} DurationSchema]
-                         [:clean-predicate {:default default-clean?
-                                            :doc     "The predicate used to determine if a tab state is stale, defaults to an age/last-modified based test"} fn?]
-                         [:clean-age-threshold {:default (Duration/ofHours 12)
-                                                :doc     "Tab states which were last modified more than [[:clean-age-threshold]] ago are considered stale. Used with the default [[:clean-predicate]] function"}  DurationSchema]]
+   :hifi/options-schema spec/TabStateComponentOptions
    :hifi/options-ref    [:hifi/components :options :tab-state]})

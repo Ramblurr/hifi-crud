@@ -200,14 +200,14 @@
 (defn coerce-opts [opts env]
   ;; There are 3 sources of options (in order of priority from highest to least)
   ;; 1. the "sugar" options passed in the top level opts map to hifi-system
-  ;; 2. the :component-opts options
+  ;; 2. the :hifi/components options
   ;; 3. the env.edn file
   ;;
   ;; Here we combine all three into our final HifiComponentOptionsSchema
   (pe/coerce! spec/HifiComponentOptionsSchema
               (apply medley/deep-merge
                      (:hifi/components env)
-                     (:component-opts opts)
+                     (:hifi/components opts)
                      (spec/system-opts->component-opts opts))))
 
 (defn merge-middleware-env [middleware-registry-component-group middleware-env]
@@ -230,9 +230,9 @@
                         :router-options              RouterOptionsComponent
                         :datastar-render-multicaster datastar/DatastarRenderMulticasterComponent
                         :tab-state                   tab-state/TabStateComponent
-                        :options                     options
                         :logging-console             logging/ConsoleLoggingComponent
-                        :logging-tap                 logging/TelemereTapHandlerComponent}}
+                        :logging-tap                 logging/TelemereTapHandlerComponent
+                        :options                     options}}
      ::ds/plugins [pop/options-plugin]}))
 
 (defn hifi-plugin
