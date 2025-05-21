@@ -6,7 +6,8 @@
                                            :exclusions  [metosin/muuntaja]}
 
          exoscale/cloak             {:mvn/version "0.1.10"}
-         metosin/reitit-middleware  {:mvn/version "0.8.0"}
+         metosin/reitit-middleware  {:mvn/version "0.8.0"
+                                     :exclusions  [metosin/muuntaja]}
          aero/aero                  {:mvn/version "1.1.6"}
          party.donut/system         {:mvn/version "1.0.255"
                                      :exclusions  [tailrecursion/cljs-priority-map]}
