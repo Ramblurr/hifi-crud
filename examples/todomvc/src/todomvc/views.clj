@@ -2,21 +2,22 @@
 ;; SPDX-License-Identifier: EUPL-1.2
 (ns todomvc.views
   (:require
+   [flatland.ordered.map :refer [ordered-map]]
    [starfederation.datastar.clojure.expressions :refer [->expr]]
    [hifi.datastar :as datastar]))
 
 (defn edit-view [{:keys [edit/editing-item-index edit/keyup-code]} index item]
   (when (and (= index editing-item-index)
              (not= "Escape" keyup-code))
-    [:div [:input.edit {:value                               (:item/title item)
-                        :data-signals-editaborted__ifmissing "false"
-                        :data-ref                            "editinput"
-                        :data-on-load                        "$editinput.focus()"
-                        :data-bind                           "edit"
-                        :data-on-blur                        (->expr (when (not $editaborted) (@post ("`/edit-action?action=Blur`"))))
-                        :data-on-keydown                     (->expr (when (or (= evt.key "Escape") (= evt.key "Enter"))
-                                                                       (set! $editaborted true)
-                                                                       (@post ("`/edit-action?action=${evt.key}`"))))}]]))
+    [:div [:input.edit (ordered-map :value                               (:item/title item)
+                                    :data-signals-editaborted__ifmissing "false"
+                                    :data-ref                            "editinput"
+                                    :data-on-load                        "$editinput.focus()"
+                                    :data-bind                           "edit"
+                                    :data-on-blur                        (->expr (when (not $editaborted) (@post ("`/edit-action?action=Blur`"))))
+                                    :data-on-keydown                     (->expr (when (or (= evt.key "Escape") (= evt.key "Enter"))
+                                                                                   (set! $editaborted true)
+                                                                                   (@post ("`/edit-action?action=${evt.key}`")))))]]))
 
 (defn- item-visible? [item item-filter]
   (or (= :filter/all item-filter)
@@ -102,16 +103,16 @@
    (todo-list-view state)])
 
 (defn add-view [_]
-  [:input.new-todo {:type            :text
-                    :autofocus       true
-                    :enterkeyhint    "enter"
-                    :placeholder     "What needs to be done?"
-                    :data-bind-input ""
-                    :data-on-keydown (->expr
-                                       (when (and (= evt.key "Enter")
-                                                  (.-length (.trim $input)))
-                                         (@post "/add-todo")
-                                         (set! $input "")))}])
+  [:input.new-todo (ordered-map :type            :text
+                                :autofocus       true
+                                :enterkeyhint    "enter"
+                                :placeholder     "What needs to be done?"
+                                :data-bind-input ""
+                                :data-on-keydown (->expr
+                                                   (when (and (= evt.key "Enter")
+                                                              (.-length (.trim $input)))
+                                                     (@post "/add-todo")
+                                                     (set! $input ""))))])
 
 (def clojure-logo [:svg  {:xmlns "http://www.w3.org/2000/svg", :viewBox "0 0 256 256"
                           :style "height: 1.5em; width: 1.5em; vertical-align: middle; display: inline-block;"}
