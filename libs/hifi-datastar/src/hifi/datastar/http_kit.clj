@@ -22,10 +22,10 @@
   "
   ([render-fn]
    (render-handler render-fn nil))
-  ([render-fn {:keys [init-tab-state-fn]}]
+  ([render-fn {:keys [init-tab-state-fn opts]}]
    (let [init-tab-state-fn (or init-tab-state-fn #(identity %2))]
      (fn [req]
-       (let [ctx             (datastar/long-lived-render-setup req render-fn)
+       (let [ctx             (datastar/long-lived-render-setup req render-fn opts)
              first-tab-state (tab-state/init-tab-state! req (:hifi.datastar/<render ctx) #(init-tab-state-fn req %))
              req             (assoc req :hifi.datastar/tab-state first-tab-state)]
          (hk-gen/->sse-response req
@@ -62,7 +62,7 @@
                                 hk-gen/on-open (fn [sse-gen]
                                                  (try
                                                    (handler req sse-gen)
-                                                   (catch Throwable t
+                                                   (finally
                                                      (d*/close-sse! sse-gen))))
 
                                 hk-gen/on-close     (fn [_ _])
