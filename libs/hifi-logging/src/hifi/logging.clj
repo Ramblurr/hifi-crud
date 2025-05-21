@@ -1,6 +1,9 @@
+;; Copyright © 2025 Casey Link <casey@outskirtslabs.com>
+;; SPDX-License-Identifier: EUPL-1.2
 (ns hifi.logging
   "Standarized logging and telemetry for HIFI applications."
   (:require
+   [hifi.util.shutdown :as shutdown]
    [charred.api :as charred]
    [hifi.logging.spec :as spec]
    [taoensso.telemere :as t]
@@ -71,6 +74,7 @@
 
 (def TelemereTapHandlerComponent
   {:donut.system/start  (fn [{config :donut.system/config}]
+                          (shutdown/add-shutdown-hook! ::telemere-shutdown t/stop-handlers!)
                           (when (-> config :hifi/options :enabled?)
                             (add-telemere-tap-handler!)))
    :donut.system/stop   (fn  [_]
@@ -89,6 +93,7 @@
 (def ConsoleLoggingComponent
   {:donut.system/start (fn start-console-logging [{config :donut.system/config}]
                          (t/remove-handler! :default/console)
+                         (shutdown/add-shutdown-hook! ::telemere-shutdown t/stop-handlers!)
                          (when (-> config :hifi/options :enabled?)
                            (condp = (-> config :hifi/options :format)
                              :json

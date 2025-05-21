@@ -36,7 +36,6 @@
                            sri-hash     (crypto/sha384-resource resource-path)
                            cache-buster (subs sri-hash (- 71 8))]
                        {:handler   (fn [_]
-                                     (tap> [resource-path :resp resp])
                                      resp)
                         :integrity (if (some? integrity) integrity sri-hash)
                         :href      (str route-path "?v=" cache-buster)
