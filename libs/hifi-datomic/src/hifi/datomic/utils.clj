@@ -1,3 +1,5 @@
+;; Copyright © 2025 Casey Link <casey@outskirtslabs.com>
+;; SPDX-License-Identifier: EUPL-1.2
 (ns hifi.datomic.utils
   (:require
    [cognitect.anomalies :as anomalies]))

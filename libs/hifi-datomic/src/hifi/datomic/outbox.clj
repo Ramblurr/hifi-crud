@@ -1,3 +1,5 @@
+;; Copyright © 2025 Casey Link <casey@outskirtslabs.com>
+;; SPDX-License-Identifier: EUPL-1.2
 (ns hifi.datomic.outbox
   "System plumbing for the Datomic outbox a transactional job queue"
   (:require [com.github.ivarref.yoltq :as yq]
