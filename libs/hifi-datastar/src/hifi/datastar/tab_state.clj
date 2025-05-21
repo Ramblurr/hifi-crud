@@ -15,8 +15,12 @@
 (def DurationSchema [:fn #(instance? Duration %)])
 (def InstantSchema [:fn #(instance? Instant %)])
 
-(defn tab-state! [ts-store tab-id]
-  (get @ts-store tab-id))
+(defn tab-state!
+  ([{:hifi.datastar/keys [tab-state-store tab-id] :as _req}]
+   (tab-state! tab-state-store tab-id))
+  ([ts-store tab-id]
+   (when (and tab-id ts-store)
+     (get @ts-store tab-id))))
 
 (defn transact!
   "Helper function to be used by your command/action handlers.
@@ -70,14 +74,14 @@
 
 (>defn default-clean? [{:keys [clean-age-threshold]}
                        now _ {:keys [::modified ::created]}]
-       [[:map [:clean-age-threshold DurationSchema]]
-        InstantSchema
-        :any
-        [:map
-         [::modified {:optional true} InstantSchema]
-         [::created InstantSchema]] => :boolean]
+  [[:map [:clean-age-threshold DurationSchema]]
+   InstantSchema
+   :any
+   [:map
+    [::modified {:optional true} InstantSchema]
+    [::created InstantSchema]] => :boolean]
 
-       (.isBefore (or modified created) (.minus now clean-age-threshold)))
+  (.isBefore (or modified created) (.minus now clean-age-threshold)))
 
 (defn clean-stale-tab-state
   "Removes tab-ids that are stale, where stale is defined as not having been modified or created in the last 24 hours."
@@ -129,18 +133,18 @@
                                store-filename   (:store-filename options)]
                            (when store-filename
                              (load! !tab-state-store store-filename)
-                             (shutdown/add-shutdown-hook! ::persist (partial persist! !tab-state-store)))
+                             (shutdown/add-shutdown-hook! ::persist (partial persist! !tab-state-store store-filename)))
                            {:!tab-state-store !tab-state-store
                             :clean-job        (start-clean-tab-state-job (assoc options
                                                                                 :!tab-state-store !tab-state-store))
                             :store-filename   store-filename}))
 
    :donut.system/stop   (fn [{{:keys [!tab-state-store clean-job store-filename]} :donut.system/instance}]
+                          (when clean-job
+                            (.close clean-job))
                           (when store-filename
                             (persist! !tab-state-store store-filename)
-                            (shutdown/remove-shutdown-hook! ::persist))
-                          (when clean-job
-                            (.close clean-job)))
+                            (shutdown/remove-shutdown-hook! ::persist)))
    :donut.system/config {}
    :hifi/options-schema spec/TabStateComponentOptions
    :hifi/options-ref    [:hifi/components :options :tab-state]})
