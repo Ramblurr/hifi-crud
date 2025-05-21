@@ -15,4 +15,5 @@ extra/
 demo/resources/public/datastar@1.0.0-beta.11.js
 **/.portal/
 **/datomic/storage/
+**/target
 archive
