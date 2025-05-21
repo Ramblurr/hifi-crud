@@ -17,9 +17,7 @@
 
   - `add-shutdown-hook!` - Registers a function to be executed during JVM shutdown
   - `remove-shutdown-hook!` - Removes a previously registered shutdown hook
-  - `list-hooks` - Returns all currently registered shutdown hook"
-  (:require
-   [clojure.tools.logging :as log]))
+  - `list-hooks` - Returns all currently registered shutdown hook")
 
 (defonce ^:private !hooks (atom {}))
 
@@ -29,7 +27,7 @@
       (try
         (hook)
         (catch Throwable t
-          (log/error t "Error executing shutdown hook " key))))))
+          (println t "Error executing shutdown hook " key))))))
 
 (def ^:private jvm-register-promise (promise))
 
