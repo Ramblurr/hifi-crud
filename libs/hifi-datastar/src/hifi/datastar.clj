@@ -6,6 +6,7 @@
    [hifi.datastar.brotli :as br]
    [hifi.datastar.multicast :as mult]
    [hifi.datastar.spec :as spec]
+   [hifi.datastar.tab-state :as tab-state]
    [hifi.util.assets :as assets]
    [hifi.util.codec :as codec]
    [promesa.exec.csp :as sp]
@@ -59,7 +60,8 @@
   [req render-fn & {:as   _opts
                     :keys [view-hash-fn error-report-fn merge-fragment-opts multicaster]
                     :or   {view-hash-fn        codec/digest
-                           error-report-fn     #(log/error %1 "Error in long-lived render" %2)
+                           error-report-fn     #(tap> ["Error in long-lived render" %1 %2])
+                           ;; error-report-fn     #(log/error %1 "Error in long-lived render" %2)
                            merge-fragment-opts {d*/use-view-transition false}}}]
   (let [refresh-mult (or (spec/refresh-mult multicaster) (-> req spec/multicaster spec/refresh-mult))
         ;; Dropping buffer is used here as we don't want a slow handler
@@ -77,6 +79,11 @@
      spec/view-hash-fn        view-hash-fn
      spec/error-report-fn     error-report-fn
      spec/merge-fragment-opts merge-fragment-opts}))
+
+(defn update-req [req event]
+  (-> req
+      (assoc spec/first-render? (= (first event) :first-render))
+      (assoc :hifi.datastar/tab-state (tab-state/tab-state! req))))
 
 (defn long-lived-render-on-open
   "Starts an async loop to render on changes.
@@ -101,7 +108,7 @@
         <cancel (do
                   (sp/close! <render)
                   (sp/close! <cancel))
-        <render (let [req           (assoc req spec/first-render? (= (first event) :first-render))
+        <render (let [req           (update-req req event)
                       new-view      ^String (try-log error-report-fn req (render-fn req))
                       new-view-hash ^String (view-hash-fn new-view)]
                   ;; only send an event if the view has changed
