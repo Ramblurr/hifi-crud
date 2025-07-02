@@ -8,11 +8,14 @@
 
 This is an experiment in building backend-driven web apps where `view = f(state)` is strictly enforced.
 
-It is built on top of [`hyperlith`](https://github.com/andersmurphy/hyperlith), the opinionated fullstack [Datastar](https://data-star.dev/) framework. It extends its opinions in radical directions.
+
 
 *What is this for?* HIFI CRUD is an exploration of *simple* yet scalable ways to build business applications. By "business" applications I mean not only back-office dashboards, admin apps, but also customer-facing B2B applications with zero to (tens of) thousands of users.
 
 *Who is this for?* HIFI CRUD explores how solo developers (or very small teams) can leverage Clojure's superpowers to rapidly build applications from day one without a complex stack and without having to throw everything away after the prototype phase.
+
+
+It was originally built on top of [`hyperlith`](https://github.com/andersmurphy/hyperlith) and [Datastar](https://data-star.dev/), hence the `H` in HIFI. But hyperlith wasn't really designed to be the basis for others to build on. I've implemented everything it offers, and more.
 
 ## Architecture Patterns
 
