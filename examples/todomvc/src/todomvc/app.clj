@@ -45,30 +45,6 @@
     [:main#morph {:data-signals__ifmissing (datastar/edn->json {:choice ""}) :style "font-family: sans;"}
      (views/app-view tab-state)])))
 
-(defn forwarded-remote-addr-request
-  "Change the :remote-addr key of the request map to the FIRST value present in
-  the X-Forwarded-For header. See: wrap-forwarded-remote-addr."
-  [request]
-  (if-let [forwarded-for (get-in request [:headers "x-forwarded-for"])]
-    (let [remote-addr (str/trim (re-find #"^[^,]*" forwarded-for))]
-      (assoc request :remote-addr remote-addr))
-    request))
-
-(defn wrap-correct-forwarded-remote-addr
-  "Middleware that changes the :remote-addr of the request map to the
-  FIRST value present in the X-Forwarded-For header."
-  [handler]
-  (fn
-    ([request]
-     (handler (forwarded-remote-addr-request request)))
-    ([request respond raise]
-     (handler (forwarded-remote-addr-request request) respond raise))))
-
-(defn wrap-retrieve-original-remote-address [f]
-  (fn [request]
-    (let [[_ real-remote-address] (re-matches #".*<->.*/(.*):\d+$" (str (:async-channel request)))]
-      (f (assoc request :remote-addr real-remote-address)))))
-
 (defn wrap-rate-limit [handler]
   (fn [req]
     (let [rate-limited (request-rate-limiter (get-in req [:headers "remote-addr"]))]
@@ -81,9 +57,7 @@
 (defn routes []
   ;; We use the default hifi middleware chain for hypermedia applications
   [""  {:middleware hifi.mw/hypermedia-chain}
-   [""  {:middleware [wrap-retrieve-original-remote-address
-                      wrap-correct-forwarded-remote-addr
-                      wrap-rate-limit]}
+   [""  {:middleware [wrap-rate-limit]}
     ;; Render the page shim, and then render the real view over the SSE connection
     ["/" {:get  {:handler (html/shim-handler
                            (html/shim-page-resp

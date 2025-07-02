@@ -1,7 +1,5 @@
 ;; Copyright © 2025 Casey Link <casey@outskirtslabs.com>
 ;; SPDX-License-Identifier: EUPL-1.2
-
-
 (ns app.ui.toast
   (:require
    [starfederation.datastar.clojure.expressions :refer [->expr]]

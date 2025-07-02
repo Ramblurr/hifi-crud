@@ -1,6 +1,8 @@
 (ns hifi.system.middleware
   (:require
+
    [hifi.datastar.middleware :as d*mw]
+   [hifi.system.middleware.remote-addr :as remote-addr]
    [hifi.system.middleware.reverse-route :as reverse-route]
    [hifi.system.middleware.csrf :as csrf]
    [hifi.system.middleware.session :as session]
@@ -35,10 +37,15 @@
    :datastar-tab-state          (middleware-component d*mw/DatastarTabStateMiddlewareComponentData)
    :session-cookie              (middleware-component session/SessionMiddlewareComponentData)
    :csrf-protection             (middleware-component csrf/CSRFProtectionMiddlewareComponentData)
-   :security-headers            (middleware-component secheaders/SecurityHeadersMiddlewareComponentData)})
+   :security-headers            (middleware-component secheaders/SecurityHeadersMiddlewareComponentData)
+   ;; :wrap-http-kit-set-real-remote-address (middleware-component remote-addr/HttpKitSetRealRemoteAddressComponentData)
+   ;; :wrap-parse-x-forwarded-for            (middleware-component remote-addr/ParseXForwardedForComponentData)
+   })
 
 (def hypermedia-chain
-  [:parse-raw-params
+  [;; :wrap-http-kit-set-real-remote-address
+   ;; :wrap-parse-x-forwarded-for
+   :parse-raw-params
    :reverse-route
    :exception
    :parse-multipart
