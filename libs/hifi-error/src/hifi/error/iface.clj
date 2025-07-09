@@ -16,7 +16,7 @@
 
 (def ^:private default-transformer (mt/default-value-transformer {::mt/add-optional-keys true}))
 
-(defn throw-explanation [error-msg more-ex-data {:keys [_value explain]}]
+(defn throw-explanation [opts error-msg more-ex-data {:keys [value explain]}]
   (let [explain (-> explain (me/with-error-messages))
         ei      (ex-info (or error-msg
                              (some-> more-ex-data ::id str)
@@ -44,7 +44,7 @@
   "
   [schema {:keys [error-msg more-ex-data transformer] :or {transformer default-transformer} :as opts}]
   (m/coercer (m/schema schema) transformer identity
-             (partial throw-explanation error-msg more-ex-data)
+             (partial throw-explanation opts error-msg more-ex-data)
              (dissoc opts :error-msg :more-ex-data :transformer)))
 
 (defn coerce!
@@ -54,6 +54,7 @@
   `:error-msg` - Error message to use in thrown exception
   `:more-ex-data` - Additional ex-data to merge into thrown exception
   `:transformer` - Malli transformer to use for decoding, by default uses the default-value transformer with add-optional-keys enabled
+
   All other options are passed directly to malli.
 
   Use `coercer` if performance is important.
@@ -79,7 +80,7 @@
         explainer  (m/explainer schema malli-opts)]
     (fn _validator! [value]
       (when-not (validator value)
-        (throw-explanation error-msg more-ex-data {:value value :schema schema :explain (explainer value)})))))
+        (throw-explanation opts error-msg more-ex-data {:value value :schema schema :explain (explainer value)})))))
 
 (defn validate!
   "Validate `value` against `schema` and throw exception if value is invalid.
@@ -106,3 +107,11 @@
   "Returns true if the exception `ex` is an ex-info error with the given `:hifi.error.iface/id`."
   [ex id]
   (= id (-> ex (ex-data) ::id)))
+
+(defn bling-schema-error [error]
+  (when (id? error ::schema-validation-error)
+    (let [{:as data :keys [explanation]} (ex-data error)
+          value                          (-> explanation :value)
+          schema                         (-> explanation :schema)]
+      ((requiring-resolve 'bling.explain/explain-malli)
+       schema value))))

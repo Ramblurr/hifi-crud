@@ -34,7 +34,7 @@
     (app/start))
 
 (comment
-
+  (set! *warn-on-reflection* true)
   (set! *print-namespace-maps* false)
   (clojure.repl.deps/sync-deps)
   ;;

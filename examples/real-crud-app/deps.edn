@@ -12,7 +12,7 @@
          com.taoensso/telemere       {:mvn/version "1.0.0"}
          com.taoensso/telemere-slf4j {:mvn/version "1.0.0"}
          com.lambdaworks/scrypt      {:mvn/version "1.4.0"}
-         io.github.paintparty/bling  {:mvn/version "0.5.2"}
+         io.github.paintparty/bling  {:mvn/version "0.8.4"}
          hifi/system                 {:local/root "../../libs/hifi-system"}
          hifi/datomic                {:local/root "../../libs/hifi-datomic"}
          hifi/html                   {:local/root "../../libs/hifi-html"}}

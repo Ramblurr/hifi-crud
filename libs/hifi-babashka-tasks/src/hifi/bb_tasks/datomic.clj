@@ -16,13 +16,13 @@
 ;; Usage: Add to your bb.edn
 ;;
 ;;    {:paths ["scripts"]
-;;     :deps  {io.github.paintparty/bling {:mvn/version "0.4.2"}}
+;;     :deps  {io.github.paintparty/bling {:mvn/version "0.8.4"}}
 ;;     :tasks {datomic {:task (exec 'datomic/-main)}}}
 ;;
 ;; And call with `bb datomic help`
 ;;
 ;; [0]:  https://github.com/filipesilva/datomic-pro-manager
-(ns datomic
+(ns hifi.bb-tasks.datomic
   (:refer-clojure :exclude [test])
   (:require [babashka.cli :as cli]
             [babashka.fs :as fs]
@@ -360,5 +360,6 @@ CREATE TABLE datomic_kvs (
    {:cmds ["sqlite" "delete"] :fn sqlite-delete}])
 
 (defn -main
-  [_]
-  (cli/dispatch commands *command-line-args*))
+  "Datomic Pro CLI manager. Use bb datomic help to see available commands."
+  ([& args]
+   (cli/dispatch commands args)))

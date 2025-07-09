@@ -1,0 +1,17 @@
+{:deps
+ {io.github.paintparty/bling {:mvn/version "0.8.4"
+                              :exclusions  [io.github.paintparty/lasertag]}
+  ;; lasertag version override because of https://github.com/paintparty/lasertag/issues/23
+  io.github.paintparty/lasertag {:mvn/version "0.11.1"}
+  borkdude/carve                {:git/url    "https://github.com/borkdude/carve"
+                                 :git/sha    "fdd1d0bc432f63db69e3a72167ef5e46f10dfba7"
+                                 :exclusions [clj-kondo/clj-kondo]}
+
+  hifi/error                   {:local/root "../hifi-error"}
+  aero/aero                    {:mvn/version "1.1.6"}
+  me.tagaholic/dlint           {:mvn/version "0.1.0"}
+  io.replikativ/datalog-parser {:mvn/version "0.2.30"}}
+
+ :aliases
+ {:outdated {:replace-deps {com.github.liquidz/antq {:mvn/version "RELEASE"}}
+             :main-opts    ["-m" "antq.core" "--exclude" "com.github.liquidz/antq"]}}}

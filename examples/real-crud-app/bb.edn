@@ -1,28 +1,24 @@
-{:paths ["scripts"]
- :deps  {io.github.paintparty/bling {:mvn/version "0.4.2"}}
- :tasks {:requires      ([clojure.string :as str]
-                         [babashka.tasks :refer [shell]])
-         repl           {:override-builtin true
-                         :doc              "Run the dev REPL"
-                         :task             (shell "clojure -M:repl/cider:dev")}
-         fmt            (shell "cljfmt check")
-         fmt:fix        (shell "cljfmt fix .")
-         lint           (shell (str "clj-kondo" " --fail-level error"
-                                    (if (seq *command-line-args*)
-                                      (str " --lint " (first *command-line-args*))
-                                      " --lint src --lint test")))
-         sync-clj-kondo {:doc  "Sync clj-kondo configs"
-                         :task (do
-                                 (let [cp (-> (shell {:out :string} "clj" "-A:test:dev" "-Spath") :out str/trim)]
-                                   (shell (str "clj-kondo --lint " cp " --copy-configs --skip-lint"))
-                                   (shell (str "clj-kondo --lint " cp "  --dependencies --parallel"))))}
-         clean          {:override-builtin true
-                         :doc              "Clean build artifacts"
-                         :task             (shell "clojure -T:build clean")}
-         uberjar        {:override-builtin true
-                         :doc              "Build an uberjar"
-                         :task             (shell "clojure -T:build uber")}
-         css            (shell "tailwindcss -i resources/public/main.css -o resources/public/compiled.css")
-         watch-css      (shell "tailwindcss --watch --input resources/public/main.css --output resources/public/compiled.css")
-         prod-css       (shell "tailwindcss --minify --input resources/public/main.css --output resources/public/compiled.css")
-         datomic        {:task (exec 'datomic/-main)}}}
+{:deps  {hifi/bb-tasks {:local/root "../../libs/hifi-babashka-tasks"}}
+ :pods  {clj-kondo/clj-kondo {:version "2025.06.05"}}
+ :tasks {:requires ([clojure.string :as str]
+                    [babashka.tasks :refer [shell]])
+         repl      {:override-builtin true
+                    :doc              "Run the dev REPL"
+                    :task             (shell "clojure -M:repl/cider:dev")}
+
+         fmt                hifi.bbtasks.fmt/fmt-main
+         fmt:fix            hifi.bbtasks.fmt/fmt-fix-main
+         lint               hifi.bb-tasks.lint.kondo/lint-main
+         lint:copy-configs  hifi.bb-tasks.lint.kondo/copy-configs-main
+         lint:carve         hifi.bb-tasks.lint.carve/-main
+         lint:ns-docstrings hifi.bb-tasks.lint.ns-docstrings/-main
+         datomic            hifi.bb-tasks.datomic/-main
+         css                hifi.bb-tasks.css.tailwind/build-dev
+         css:watch          hifi.bb-tasks.css.tailwind/watch-dev
+         css:prod           hifi.bb-tasks.css.tailwind/build-prod
+         clean              {:override-builtin true
+                             :doc              "Clean build artifacts"
+                             :task             (shell "clojure -T:build clean")}
+         uberjar            {:override-builtin true
+                             :doc              "Build an uberjar"
+                             :task             (shell "clojure -T:build uber")}}}
