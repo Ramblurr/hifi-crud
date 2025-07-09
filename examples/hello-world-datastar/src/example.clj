@@ -2,7 +2,7 @@
   "This is an example application showing a minimal datastar powered application using CQRS principles."
   (:require
    [hifi.datastar :as datastar]
-   [hifi.datastar.brotli :as br]
+   [starfederation.datastar.clojure.brotli :as brotli]
    [hifi.datastar.http-kit :as d*http-kit]
    [hifi.datastar.tab-state :as tab-state]
    [hifi.env :as env]
@@ -92,7 +92,7 @@
                                                               :head           (list (html/script {:defer true :type "module" :!asset !datastar})
                                                                                     (html/stylesheet {:!asset !css}))
                                                               :body-pre       [:div]})
-                            :compress-fn #(br/compress % :quality 11)
+                            :compress-fn #(brotli/compress % :quality 11)
                             :encoding    "br"}))}
          :post {:handler (d*http-kit/render-handler #'home-view {:init-tab-state-fn #(init-tab-state %2 false)})}}]
 

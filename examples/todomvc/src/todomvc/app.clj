@@ -3,9 +3,8 @@
 (ns todomvc.app
   "The classic TodoMVC but server backed."
   (:require
-   [cuerdas.core :as str]
    [hifi.datastar :as datastar]
-   [hifi.datastar.brotli :as br]
+   [starfederation.datastar.clojure.brotli :as brotli]
    [hifi.datastar.http-kit :as d*http-kit]
    [hifi.env :as env]
    [hifi.html :as html]
@@ -68,7 +67,7 @@
                                                                                      (html/stylesheet {:!asset !index-css})
                                                                                      (html/stylesheet {:!asset !extra-css :id "css-extra"}))
                                                                :body-pre       [:div]})
-                             :compress-fn #(br/compress % :quality 11)
+                             :compress-fn #(brotli/compress % :quality 11)
                              :encoding    "br"}))}
           :post {:handler (d*http-kit/render-handler #'home-view {:init-tab-state-fn #(init-tab-state %2 false)
                                                                   ;; :opts              {:d*.fragments/use-view-transition true}

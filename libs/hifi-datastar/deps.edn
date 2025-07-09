@@ -1,15 +1,17 @@
 {:paths ["src" "resources"]
- :deps  {datastar/sdk                                   {:git/url   "https://github.com/starfederation/datastar/"
-                                                         :git/sha   "4a9b1e4f15a82fcb366297c9c7da25f62ee980c7"
-                                                         :deps/root "sdk/clojure/sdk"}
-         funcool/promesa                                {:mvn/version "11.0.678"}
-         ;; Compression - Assumes you deploy uberjar on linux x86_64
-         com.aayushatharva.brotli4j/brotli4j            {:mvn/version "1.18.0"}
-         com.aayushatharva.brotli4j/native-linux-x86_64 {:mvn/version "1.18.0"}
-         org.clojure/tools.logging                      {:mvn/version "1.3.0"}
-         com.taoensso/nippy                             {:mvn/version "3.6.0-alpha1"}
-         io.netty/netty-buffer                          {:mvn/version "4.1.119.Final"}
-         com.cnuernber/charred                          {:mvn/version "1.037"}
-         com.fulcrologic/guardrails                     {:mvn/version "1.2.9"}
-         jarohen/chime                                  {:mvn/version "0.3.3"}
-         hifi/util                                      {:local/root "../hifi-util"}}}
+ :deps  {datastar/sdk               {;; :git/url   "https://github.com/starfederation/datastar/"
+                                     :git/url   "https://github.com/JeremS/datastar/"
+                                     :git/sha   "59740d5da73a0c8a760ed2b92aa1fa5f067ce34a"
+                                     :deps/root "sdk/clojure/sdk"}
+         datastar/sdk-brotli        {;; :git/url   "https://github.com/starfederation/datastar/"
+                                     :git/url   "https://github.com/JeremS/datastar/"
+                                     :git/sha   "59740d5da73a0c8a760ed2b92aa1fa5f067ce34a"
+                                     :deps/root "sdk/clojure/sdk-brotli"}
+         funcool/promesa            {:mvn/version "11.0.678"}
+         org.clojure/tools.logging  {:mvn/version "1.3.0"}
+         com.taoensso/nippy         {:mvn/version "3.6.0-alpha1"}
+         io.netty/netty-buffer      {:mvn/version "4.1.119.Final"}
+         com.cnuernber/charred      {:mvn/version "1.037"}
+         com.fulcrologic/guardrails {:mvn/version "1.2.9"}
+         jarohen/chime              {:mvn/version "0.3.3"}
+         hifi/util                  {:local/root "../hifi-util"}}}

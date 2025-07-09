@@ -3,13 +3,13 @@
   (:require
    [charred.api :as charred]
    [clojure.tools.logging :as log]
-   [hifi.datastar.brotli :as br]
    [hifi.datastar.multicast :as mult]
    [hifi.datastar.spec :as spec]
    [hifi.datastar.tab-state :as tab-state]
    [hifi.util.assets :as assets]
    [hifi.util.codec :as codec]
    [promesa.exec.csp :as sp]
+   [starfederation.datastar.clojure.brotli :as brotli]
    [starfederation.datastar.clojure.adapter.common :as d*com]
    [starfederation.datastar.clojure.api :as d*])
   (:import
@@ -25,18 +25,6 @@
     (.toString w)))
 
 (def edn->json write-json-str)
-
-(defn brotli-write-profile
-  "Constructs a write-profile for compressing D* SSE respsonses with brotli.
-
-  `opts` are passed to [[hifi.datastar.brotli/->brotli-os]]."
-
-  ([]
-   (brotli-write-profile nil))
-  ([opts]
-   {d*com/wrap-output-stream (fn [os] (-> os (br/->brotli-os opts) d*com/->os-writer))
-    d*com/content-encoding   "br"
-    d*com/write!             (d*com/->write-with-temp-buffer!)}))
 
 (defmacro try-log [report data & body]
   `(try
@@ -129,13 +117,13 @@
                                                               (long-lived-render-on-open ctx sse-gen))
                                              hk-gen/on-close (fn [_ _]
                                                                (long-lived-render-on-close ctx))
-                                             d*com/write-profile (brotli-write-profile))))}})
+                                             d*com/write-profile (brotli/->brotli-profile))))}})
 
 (def !datastar-asset (assets/static-asset false
-                                          {:resource-path "hifi-datastar/datastar@rc9.js"
+                                          {:resource-path "hifi-datastar/datastar@rc13.js"
                                            :content-type  "text/javascript"
                                            :compress-fn   (fn [body]
-                                                            (br/compress body :quality 11))
+                                                            (brotli/compress body :quality 11))
                                            :encoding      "br"
                                            :route-path    "/datastar.js"}))
 (defn rerender-all!

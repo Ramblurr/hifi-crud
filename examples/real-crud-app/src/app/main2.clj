@@ -4,7 +4,7 @@
    [app.home :as home]
    [app.system :as system]
    [hifi.datastar :as datastar]
-   [hifi.datastar.brotli :as br]
+   [starfederation.datastar.clojure.brotli :as brotli]
    [hifi.datastar.http-kit :as d*http-kit]
    [hifi.engine.shell :as shell]
    [hifi.env :as env]
@@ -65,7 +65,7 @@
                                                                                        [:circle {:class "opacity-25", :cx "12", :cy "12", :r "10", :stroke "currentColor", :stroke-width "4"}]
                                                                                        [:path {:class "opacity-75", :fill "currentColor", :d "M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"}]]])})
 
-                                         :compress-fn #(br/compress % :quality 11)
+                                         :compress-fn #(brotli/compress % :quality 11)
                                          :encoding    "br"}))
 
 (def shim-handler (html/shim-handler shim-response))

@@ -4,6 +4,7 @@
   (:require
    [hifi.datastar :as datastar]
    [hifi.datastar.tab-state :as tab-state]
+   [starfederation.datastar.clojure.brotli :as brotli]
    [starfederation.datastar.clojure.adapter.common :as d*com]
    [starfederation.datastar.clojure.adapter.ring :as ring-gen]
    [starfederation.datastar.clojure.api :as d*]))
@@ -66,4 +67,4 @@
                                                          (d*/close-sse! sse-gen))))
 
                                   ring-gen/on-close   (fn [_ _])
-                                  d*com/write-profile (datastar/brotli-write-profile)})))
+                                  d*com/write-profile (brotli/->brotli-profile)})))
