@@ -39,18 +39,18 @@
   - render-fn - arity/1 function of req to render the view, must return a string
   - view-hash-fn - arity/0 function to generate a hash of the view, must return a string, default base64 of (hash view)
   - error-report-fn - arity/2 function of throwable and req to report errors, default: prn
-  - merge-framgment-opts - a map of options to pass to the d* sdks merge-fragment see [[starfederation.datastar.clojure.api/merge-fragment!]]
+  - patch-elements-opts - a map of options to pass to the d* sdks patch-elements see [[starfederation.datastar.clojure.api/patch-elements!]]
   - multicaster - the value returned by [[start-render-multicaster]] (if nil, :hifi.datastar/multicaster is expected in the `req`)
 
   Returns a map to pass to [[long-lived-render-on-open]] and [[long-lived-render-on-close]]. The keys in this map should be considered an implementation detail
   except for :hifi.datastar/<render, a promesa channel that when written to will cause a re-render just for this connection,
   and :hifi.datastar/<cancel, a promesa channel that when written to will close the <render channel and stop the render loop."
   [req render-fn & {:as   _opts
-                    :keys [view-hash-fn error-report-fn merge-fragment-opts multicaster]
+                    :keys [view-hash-fn error-report-fn patch-elements-opts multicaster]
                     :or   {view-hash-fn        codec/digest
                            error-report-fn     #(tap> ["Error in long-lived render" %1 %2])
                            ;; error-report-fn     #(log/error %1 "Error in long-lived render" %2)
-                           merge-fragment-opts {d*/use-view-transition false}}}]
+                           patch-elements-opts {d*/use-view-transition false}}}]
   (let [refresh-mult (or (spec/refresh-mult multicaster) (-> req spec/multicaster spec/refresh-mult))
         ;; Dropping buffer is used here as we don't want a slow handler
         ;; blocking other handlers. Mult distributes each event to all
@@ -66,7 +66,7 @@
      spec/render-fn           render-fn
      spec/view-hash-fn        view-hash-fn
      spec/error-report-fn     error-report-fn
-     spec/merge-fragment-opts merge-fragment-opts}))
+     spec/patch-elements-opts patch-elements-opts}))
 
 (defn update-req [req event]
   (-> req
@@ -85,7 +85,7 @@
   The render function will be called with the original request map with ::first-render? set to true on the first render."
   #_{:clj-kondo/ignore [:unused-binding]}
   [{:as opts ::keys [<render <cancel render-fn view-hash-fn
-                     error-report-fn merge-fragment-opts]} req sse-gen]
+                     error-report-fn patch-elements-opts]} req sse-gen]
   (assert <render)
   (assert <cancel)
   (sp/go-loop [last-view-hash (get-in req [:headers "last-event-id"])]
@@ -101,7 +101,7 @@
                       new-view-hash ^String (view-hash-fn new-view)]
                   ;; only send an event if the view has changed
                   (when (and new-view (not= last-view-hash new-view-hash))
-                    (d*/merge-fragment! sse-gen new-view (assoc merge-fragment-opts d*/id new-view-hash)))
+                    (d*/patch-elements! sse-gen new-view (assoc patch-elements-opts d*/id new-view-hash)))
                   (recur new-view-hash))))))
 
 (defn long-lived-render-on-close [{::keys [<cancel]}]

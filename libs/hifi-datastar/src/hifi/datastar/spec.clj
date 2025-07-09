@@ -13,7 +13,7 @@
 (def render-fn :hifi.datastar/render-fn)
 (def view-hash-fn :hifi.datastar/view-hash-fn)
 (def error-report-fn :hifi.datastar/error-report-fn)
-(def merge-fragment-opts :hifi.datastar/merge-fragment-opts)
+(def patch-elements-opts :hifi.datastar/patch-elements-opts)
 (def first-render? :hifi.datastar/first-render?)
 
 (def DurationSchema [:fn #(instance? Duration %)])

@@ -82,7 +82,7 @@
                                                        (dissoc :d*/signals)
                                                        (f (merge signals query-params)))))
                         (when-let [signals (:d*/signals (tab-state/tab-state! req))]
-                          (d*/merge-signals! sse-gen (datastar/edn->json signals)))
+                          (d*/patch-signals! sse-gen (datastar/edn->json signals)))
                         (d*/close-sse! sse-gen)
                         nil)))}})
 

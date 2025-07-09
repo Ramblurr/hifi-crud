@@ -21,7 +21,7 @@
   (keys (-> signals form-key :touched)))
 
 (defn merge-errors
-  "Returns an effect to merge-signals to display the error messages for a form"
+  "Returns an effect to patch-signals to display the error messages for a form"
   ([signals form-key error]
    (merge-errors signals form-key error nil))
   ([signals form-key error {:as _opts :keys [only] :or {only :all}}]
@@ -31,7 +31,7 @@
                       (all-fields form-key signals))
                     (zipmap (repeat nil))
                     (assoc :_top _top))]
-     {:effect/kind :d*/merge-signals
+     {:effect/kind :d*/patch-signals
       :effect/data {form-key {:error (merge fields error)}}})))
 
 (defn clear-form-errors
@@ -81,7 +81,7 @@
 (defn validate-form
   "Validates the `signals` values against the `form-schema`, returning an error effect.
 
-  Error effect is a :effect/kind :d*/merge-signals with the error message values.
+  Error effect is a :effect/kind :d*/patch-signals with the error message values.
 
   If `clear?` is true and there are no errors, then this function will return an effect that clears out existing errors.
 

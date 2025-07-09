@@ -24,11 +24,11 @@
    :effect/handler (fn sleep-effect [_ctx {:keys [duration]}]
                      (Thread/sleep duration))})
 
-(def d*-merge-signals-fx
-  {:effect/kind    :d*/merge-signals
-   :effect/handler (fn d*-merge-signals
+(def d*-patch-signals-fx
+  {:effect/kind    :d*/patch-signals
+   :effect/handler (fn d*-patch-signals
                      [{:keys [::datastar/sse-gen] :as _ctx} data]
-                     (d*/merge-signals! sse-gen (datastar/edn->json data)))})
+                     (d*/patch-signals! sse-gen (datastar/edn->json data)))})
 
 (def d*-redirect-fx
   {:effect/kind    :d*/redirect
@@ -37,7 +37,7 @@
                      (assert (keyword? redirect-to) "redirect-to must be a keyword")
                      (let [uri (url-for redirect-to)]
                        (when uri
-                         (d*/merge-fragment! sse-gen (str "<div id=\"hifi-on-load\" data-on-load=\"window.location = '" (url-for redirect-to) "'\">")))))})
+                         (d*/patch-elements! sse-gen (str "<div id=\"hifi-on-load\" data-on-load=\"window.location = '" (url-for redirect-to) "'\">")))))})
 
 (def schedule-fx
   {:effect/kind    :app/schedule
@@ -134,7 +134,7 @@
                            ctx)))})
 
 (defn effects [] [print-fx
-                  d*-merge-signals-fx
+                  d*-patch-signals-fx
                   db-transact-fx
                   d*-redirect-fx
                   tab-transact-fx

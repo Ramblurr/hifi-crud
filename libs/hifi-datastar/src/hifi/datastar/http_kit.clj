@@ -12,7 +12,7 @@
 (defn render-handler
   "A default http-kit ring handler for rendering views over a long-lived SSE connection with datastar.
 
-    - `render-fn` is an arity-1 function of req that returns a string of HTML sent to the client with D*'s merge-fragment
+    - `render-fn` is an arity-1 function of req that returns a string of HTML sent to the client with D*'s patch-elements
 
    Opts are:
     - `init-tab-state-fn` is an arity-1 pure-function of state and returns the initialized state.
@@ -39,20 +39,20 @@
                                                        ;; otherwise tab state will be cleaned in the background after some hours
                                                        #_(when tab-id
                                                            (tab-state/remove-tab-state! req)))
-                                 d*com/write-profile (datastar/brotli-write-profile)}))))))
+                                 d*com/write-profile (brotli/->brotli-profile)}))))))
 
 (defn action-handler
-  "A default http-kit ring handler for executing commands, side effects which might return signals to be merged."
+  "A default http-kit ring handler for executing commands, side effects which might return signals to be patched."
   [handler]
   (fn [req]
     (let [{:hifi.datastar/keys [signals]} (handler req)]
       (if signals
         (hk-gen/->sse-response req {:headers            (merge (:security-headers req) {"Cache-Control" "no-store"})
                                     hk-gen/on-open      (fn [sse-gen]
-                                                          (d*/merge-signals! sse-gen (datastar/edn->json signals))
+                                                          (d*/patch-signals! sse-gen (datastar/edn->json signals))
                                                           (d*/close-sse! sse-gen))
                                     hk-gen/on-close     (fn [_ _])
-                                    d*com/write-profile (datastar/brotli-write-profile)})
+                                    d*com/write-profile (brotli/->brotli-profile)})
         {:status  204
          :headers {"Cache-Control" "no-store"}}))))
 
