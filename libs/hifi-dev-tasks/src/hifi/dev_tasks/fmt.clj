@@ -1,4 +1,4 @@
-(ns hifi.bb-tasks.fmt
+(ns hifi.dev-tasks.fmt
   (:require
    [babashka.tasks :refer [shell]]))
 

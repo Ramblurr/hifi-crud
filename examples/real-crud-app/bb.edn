@@ -1,4 +1,4 @@
-{:deps  {hifi/bb-tasks {:local/root "../../libs/hifi-babashka-tasks"}}
+{:deps  {hifi/dev-tasks {:local/root "../../libs/hifi-dev-tasks"}}
  :pods  {clj-kondo/clj-kondo {:version "2025.06.05"}}
  :tasks {:requires ([clojure.string :as str]
                     [babashka.tasks :refer [shell]])
@@ -8,14 +8,14 @@
 
          fmt                hifi.bbtasks.fmt/fmt-main
          fmt:fix            hifi.bbtasks.fmt/fmt-fix-main
-         lint               hifi.bb-tasks.lint.kondo/lint-main
-         lint:copy-configs  hifi.bb-tasks.lint.kondo/copy-configs-main
-         lint:carve         hifi.bb-tasks.lint.carve/-main
-         lint:ns-docstrings hifi.bb-tasks.lint.ns-docstrings/-main
-         datomic            hifi.bb-tasks.datomic/-main
-         css                hifi.bb-tasks.css.tailwind/build-dev
-         css:watch          hifi.bb-tasks.css.tailwind/watch-dev
-         css:prod           hifi.bb-tasks.css.tailwind/build-prod
+         lint               hifi.dev-tasks.lint.kondo/lint-main
+         lint:copy-configs  hifi.dev-tasks.lint.kondo/copy-configs-main
+         lint:carve         hifi.dev-tasks.lint.carve/-main
+         lint:ns-docstrings hifi.dev-tasks.lint.ns-docstrings/-main
+         datomic            hifi.dev-tasks.datomic/-main
+         css                hifi.dev-tasks.css.tailwind/build-dev
+         css:watch          hifi.dev-tasks.css.tailwind/watch-dev
+         css:prod           hifi.dev-tasks.css.tailwind/build-prod
          clean              {:override-builtin true
                              :doc              "Clean build artifacts"
                              :task             (shell "clojure -T:build clean")}

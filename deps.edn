@@ -1,6 +1,6 @@
 ;; This deps.edn is for testing and development of the hifi suite.
 {:paths   []
- :aliases {:dev   {:extra-paths [] #_ ["libs/hifi-babashka-tasks/src"
+ :aliases {:dev   {:extra-paths [] #_ ["libs/hifi-dev-tasks/src"
                                        "libs/hifi-config/src"
                                        "libs/hifi-datastar/src"
                                        "libs/hifi-datomic/src"
@@ -11,7 +11,7 @@
                                        "libs/hifi-logging/src"
                                        "libs/hifi-system/src"
                                        "libs/hifi-util/src"]
-                   :extra-deps  {hifi/babashka-tasks    {:local/root "libs/hifi-babashka-tasks"}
+                   :extra-deps  {hifi/babashka-tasks    {:local/root "libs/hifi-dev-tasks"}
                                  hifi/config            {:local/root "libs/hifi-config"}
                                  hifi/datastar          {:local/root "libs/hifi-datastar"}
                                  hifi/datomic           {:local/root "libs/hifi-datomic"}
@@ -25,7 +25,7 @@
                                  ;; Dev only deps
                                  org.clojure/clojure    {:mvn/version "1.12.1"}
                                  org.clojure/tools.deps {:mvn/version "0.24.1523"}}}
-           :test  {:extra-paths ["libs/hifi-babashka-tasks/test"
+           :test  {:extra-paths ["libs/hifi-dev-tasks/test"
                                  "libs/hifi-config/test"
                                  "libs/hifi-datastar/test"
                                  "libs/hifi-datomic/test"

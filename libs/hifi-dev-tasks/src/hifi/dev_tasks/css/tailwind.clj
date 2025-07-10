@@ -1,6 +1,6 @@
-(ns hifi.bb-tasks.css.tailwind
+(ns hifi.dev-tasks.css.tailwind
   (:require
-   [hifi.bb-tasks.config :as config]
+   [hifi.dev-tasks.config :as config]
    [hifi.error.iface :as pe]
    [babashka.process :refer [shell]]))
 

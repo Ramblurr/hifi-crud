@@ -1,8 +1,8 @@
 ;; Copyright © 2022 Logseq
 ;; Copyright © 2025 Casey Link <casey@outskirtslabs.com>
-;; From https://github.com/logseq/bb-tasks/blob/acb3d3d5d38c4ac16f617cb10ae6f99fe1b8de6e/src/logseq/bb_tasks/util.clj
+;; From https://github.com/logseq/dev-tasks/blob/acb3d3d5d38c4ac16f617cb10ae6f99fe1b8de6e/src/logseq/bb_tasks/util.clj
 ;; SPDX-License-Identifier: MIT
-(ns hifi.bb-tasks.util
+(ns hifi.dev-tasks.util
   "Misc util fns"
   (:require [clojure.edn :as edn]))
 

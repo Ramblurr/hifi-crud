@@ -22,7 +22,7 @@
 ;; And call with `bb datomic help`
 ;;
 ;; [0]:  https://github.com/filipesilva/datomic-pro-manager
-(ns hifi.bb-tasks.datomic
+(ns hifi.dev-tasks.datomic
   (:refer-clojure :exclude [test])
   (:require [babashka.cli :as cli]
             [babashka.fs :as fs]

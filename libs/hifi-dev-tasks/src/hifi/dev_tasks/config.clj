@@ -1,4 +1,4 @@
-(ns hifi.bb-tasks.config
+(ns hifi.dev-tasks.config
   (:require
    [aero.core :as aero]))
 

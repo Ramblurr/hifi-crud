@@ -1,4 +1,4 @@
-(ns hifi.bb-tasks.lint.kondo
+(ns hifi.dev-tasks.lint.kondo
   (:require
    [clojure.string :as str]
    [babashka.tasks :refer [shell]]))
