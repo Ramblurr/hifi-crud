@@ -1,4 +1,6 @@
-(ns app.main2
+;; Copyright © 2025 Casey Link <casey@outskirtslabs.com>
+;; SPDX-License-Identifier: EUPL-1.2
+(ns app.main
   (:require
    [app.auth :as auth]
    [app.home :as home]

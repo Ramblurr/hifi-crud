@@ -1,13 +1,12 @@
-{:deps  {hifi/dev-tasks {:local/root "../../libs/hifi-dev-tasks"}}
+{:paths ["resources"]
+ :deps  {hifi/dev-tasks {:local/root "../../libs/hifi-dev-tasks"}}
  :pods  {clj-kondo/clj-kondo {:version "2025.06.05"}}
- :tasks {:requires ([clojure.string :as str]
-                    [babashka.tasks :refer [shell]])
-         repl      {:override-builtin true
-                    :doc              "Run the dev REPL"
-                    :task             (shell "clojure -M:repl/cider:dev")}
-
-         fmt                hifi.bbtasks.fmt/fmt-main
-         fmt:fix            hifi.bbtasks.fmt/fmt-fix-main
+ :tasks {repl               {:override-builtin true
+                             :doc              "Run the dev REPL"
+                             :task             (shell "clojure -M:repl/cider:dev")}
+         dev                hifi.dev-tasks.dev/-main
+         fmt                hifi.dev-tasks.fmt/fmt-main
+         fmt:fix            hifi.dev-tasks.fmt/fmt-fix-main
          lint               hifi.dev-tasks.lint.kondo/lint-main
          lint:copy-configs  hifi.dev-tasks.lint.kondo/copy-configs-main
          lint:carve         hifi.dev-tasks.lint.carve/-main
@@ -16,9 +15,5 @@
          css                hifi.dev-tasks.css.tailwind/build-dev
          css:watch          hifi.dev-tasks.css.tailwind/watch-dev
          css:prod           hifi.dev-tasks.css.tailwind/build-prod
-         clean              {:override-builtin true
-                             :doc              "Clean build artifacts"
-                             :task             (shell "clojure -T:build clean")}
-         uberjar            {:override-builtin true
-                             :doc              "Build an uberjar"
-                             :task             (shell "clojure -T:build uber")}}}
+         clean              hifi.dev-tasks.build/clean
+         uber               hifi.dev-tasks.build/uber}}

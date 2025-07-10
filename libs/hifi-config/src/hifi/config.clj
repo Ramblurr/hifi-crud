@@ -63,7 +63,7 @@
 
 (defmethod aero/reader 'hifi/secret
   ;; Implementation for #hifi/secret tag literal in an Aero config edn
-  ;; It maskes #hifi/secret tagged values so they cannot be printed.
+  ;; It masks #hifi/secret tagged values so they cannot be printed.
   [_ _ value]
   (mask value))
 
@@ -72,16 +72,16 @@
 
    Options are passed to the underlying Aero reader."
   [filename options]
-  ;;; Why does this fn exist? Because we want to be able to provide nicer error messages.
-  (if-let [f (io/resource filename)]
+  ;;; This exists because we want to be able to provide nicer error messages.
+  (if-let [f filename]
     (aero/read-config f  options)
     (throw (ex-info (str "Config filename '" filename "' does not exist or could not be read by hifi.config/read-config") {:hifi/error :hifi.config/invalid-filename :filename filename :options options}))))
 
 (defn read-config
-  "Reads `:env-filename` (default: env.edn`) and returns the env config.
+  "Reads `:filename` (default: env.edn`) and returns the env config.
 
    Accepts key-value pairs, all are optional.
-   - `:env-filename`, a string containing a filename, the env EDN file to load
+   - `:filename`, a string containing a filename, the env EDN file to load
    - `:opts`, a map, are  extra Aero options
 
    This is a more opinionated version of `hifi.config/read-config` with a naming convention.
@@ -95,13 +95,13 @@
    ```
 
    Options are passed to the underlying Aero reader."
-  [& {:keys [env-filename opts]
-      :or   {env-filename "env.edn"
-             opts         {}}}]
+  [& {:keys [filename opts]
+      :or   {filename "env.edn"
+             opts     {}}}]
 
   (let [profile   (current-profile)
         aero-opts (merge (when profile {:profile profile}) opts)]
-    (-> (-read-config env-filename aero-opts)
+    (-> (-read-config (io/resource filename) aero-opts)
         (assoc :profile profile))))
 
 (comment

@@ -3,7 +3,7 @@
 (ns dev
   (:require
    [portal-helpers :as portal-repl]
-   [app.main2 :as app]
+   [app.main :as app]
    ;; [app.ui.core :as uic]
    [portal.colors]
    [portal.api :as p]))

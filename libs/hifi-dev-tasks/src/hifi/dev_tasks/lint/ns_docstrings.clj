@@ -6,7 +6,7 @@
   "Provides lint task to detect all desired namespaces are documented.
   Documented namespaces help teams distribute their knowledge"
   (:require [pod.borkdude.clj-kondo :as clj-kondo]
-            [hifi.dev-tasks.util :as util]))
+            [hifi.dev-tasks.config :as config]))
 
 (defn- get-undocumented-namespaces [paths {:keys [ignore-regex] :as config}]
   (let [{{:keys [namespace-definitions]} :analysis}
@@ -29,7 +29,7 @@
   []
   (merge
    {:lang :cljs}
-   (:ns-docstrings (util/read-tasks-config))))
+   (:ns-docstrings (config/read-tasks-config))))
 
 (defn -main
   "Lint given classpath for namespaces missing docstrings."

@@ -1,13 +1,16 @@
+;; Copyright © 2025 Casey Link <casey@outskirtslabs.com>
+;; SPDX-License-Identifier: EUPL-1.2
+;; NOTE: This file is data and used in the generator
 (ns build
-  (:require [clojure.tools.build.api :as b]
-            [hifi.bb-tasks.css.tailwind :as tailwind]
-            [clojure.edn :as edn]))
+  (:require
+   [hifi.dev-tasks.config :as config]
+   [clojure.tools.build.api :as b]
+   [hifi.dev-tasks.css :as css]))
 
-(def project (-> (edn/read-string (slurp "deps.edn"))
-                 :aliases :neil :project))
+(def project (config/project-meta))
 (def lib (:name project))
-
 (def version (:version project))
+
 (def class-dir "target/classes")
 (def basis (b/create-basis {:project "deps.edn"}))
 (def uber-file (format "target/%s-%s-standalone.jar" (name lib) version))
@@ -16,12 +19,15 @@
   (b/delete {:path "target"})
   (b/delete {:path "result"}))
 
-(defn tailwind [_]
-  (tailwind/build-prod))
+(defn css [_]
+  (css/build))
+
+(defn js [_])
 
 (defn uber [_]
   (clean nil)
-  (tailwind {:release true})
+  (css nil)
+  (js nil)
   (b/copy-dir {:src-dirs   ["src" "resources"]
                :target-dir class-dir})
   (b/compile-clj {:basis     basis
