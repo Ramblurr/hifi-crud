@@ -31,3 +31,11 @@
       slurp
       edn/read-string
       :tasks/config))
+
+(defn enabled-services []
+  (->> (read-config)
+       :hifi/dev
+       :services
+       (filter #(true? (second %)))
+       (map first)
+       (into #{})))

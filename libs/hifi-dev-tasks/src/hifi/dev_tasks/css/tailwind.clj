@@ -2,6 +2,10 @@
 ;; SPDX-License-Identifier: EUPL-1.2
 (ns hifi.dev-tasks.css.tailwind
   (:require
+   [clojure.string :as str]
+   [hifi.dev-tasks.util :refer [info error]]
+   [clojure.java.io :as io]
+   [babashka.process :as p]
    [bling.core :as bling]
    [babashka.fs :as fs]
    [hifi.dev-tasks.config :as config]
@@ -75,23 +79,57 @@
   (when-not (using-tailwind?)
     (exit-tailwind-not-configured)))
 
+(defn tailwind-opts [{:keys [tw-binary input output]} extra]
+  (into [] (concat
+            [tw-binary]
+            (or extra [])
+            ["--input" input
+             "--output" output])))
+
+(defn tw [conf & extra]
+  (ensure-tailwind conf)
+  (apply shell (tailwind-opts conf extra)))
+
 (defn build-dev
   "Builds Tailwind CSS in development mode."
   [& _args]
-  (let [{:keys [tw-binary input output] :as conf} (tw-config)]
-    (ensure-tailwind conf)
-    (shell tw-binary "--input" input "--output" output)))
+  (tw (tw-config)))
 
 (defn watch-dev
   "Watches Tailwind CSS files for changes and rebuilds in development mode."
   [& _args]
-  (let [{:keys [tw-binary input output] :as conf} (tw-config)]
-    (ensure-tailwind conf)
-    (shell tw-binary "--watch" "--input" input "--output" output)))
+  (tw (tw-config) "--watch"))
 
 (defn build-prod
   "Builds Tailwind CSS in production mode."
   [& _args]
-  (let [{:keys [tw-binary input output] :as conf} (tw-config)]
-    (ensure-tailwind conf)
-    (shell tw-binary "--minify" "--input" input "--output" output)))
+  (tw (tw-config) "--minify"))
+
+(defn start-tailwind []
+  (info "[tailwind] starting tailwindcss process")
+  (let [tailwind-process (apply p/process {:out      :stream
+                                           :err      :out
+                                           :shutdown p/destroy-tree}
+                                (tailwind-opts (tw-config) ["--watch"]))]
+    (with-open [rdr (io/reader (:out tailwind-process))]
+      (binding [*in* rdr]
+        (loop [last-state nil]
+          (let [line  (read-line)
+                state (cond
+                        (str/blank? line)                   nil
+                        (re-find #"^Done in .*ms$" line)    :ok
+                        (re-find #"^Error.*" line)          (do
+                                                              (error (str "[tailwind] " line))
+                                                              :error)
+                        (re-find #"^tailwindcss v.*$" line) (do
+                                                              (info (str "[tailwind] " line))
+                                                              :version)
+                        :else                               (do (info (str "[tailwind] " line))
+                                                                :ok))]
+            (when (and  (= last-state :error) (= state :ok))
+              (info "[tailwind] recovered from error"))
+            (recur (or state last-state))))))
+
+    (fn []
+      (info "[tailwind] stopping tailwindcss process")
+      (p/destroy-tree tailwind-process))))

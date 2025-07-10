@@ -1,8 +1,8 @@
 ;; Copyright © 2025 Casey Link <casey@outskirtslabs.com>
 ;; SPDX-License-Identifier: EUPL-1.2
 (ns hifi.dev-tasks.util
-  "Misc util fns"
   (:require
+   [bling.core :as bling]
    [babashka.process :as p]))
 
 (defn shell
@@ -14,3 +14,9 @@
       ;; SIGINT = 128 + 2 = 130, probably something else on Windows
       (when-not (= 130 (-> e ex-data :exit))
         (throw e)))))
+
+(defn log [style prefix & args]
+  (apply println (bling/bling [style prefix]) args))
+
+(def info  (partial log :bold.info  "info "))
+(def error (partial log :bold.error "error"))

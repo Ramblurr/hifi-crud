@@ -180,7 +180,7 @@ CREATE TABLE datomic_kvs (
       (run (format  "mkdir -p %s" (fs/parent transactor-properties-target-path)))
       (prepare-transactor-properties))))
 
-(defn datomic-delete []
+(defn datomic-delete [& _args]
   (info "Deleting Datomic config at ./datomic/config")
   (run "rm -rf ./datomic/config"))
 
@@ -311,42 +311,48 @@ CREATE TABLE datomic_kvs (
 (def help-info (partial log :blue))
 (def help-command (partial log :olive))
 
-(defn help [& _args]
-  (println (bling/bling [:bold.green "Datomic Pro Manager (DPM)"]))
-  (help-info "Datomic docs:" "https://docs.datomic.com")
-  (help-info "Datomic Peer API docs:" "https://docs.datomic.com/clojure/index.html")
-  (help-info "DPM docs:" "https://github.com/filipesilva/datomic-pro-manager")
-  (help-info "Datomic Pro Version:" (get-datomic-version))
-  (help-info "Running:" (running?))
-  (help-info "DB URI:" (:datomic-db-uri config))
-  (help-info "Deps:")
-  (println (format "  com.datomic/peer          {:mvn/version \"%s\"}" (get-datomic-version)))
-  (cond
-    sqlite?
-    (println (format "  org.xerial/sqlite-jdbc    {:mvn/version \"%s\"}" sqlite-version))
+(defn help [args]
+  (let [error? (and (some? (:args args)) (not (some #{"help" "-h" "--help"} (:args args))))]
+    (when error?
+      (println (bling/bling [:bold.error "Error: unknown arguments"]))
+      (println))
+    (println (bling/bling [:bold.green "Datomic Pro Manager (DPM)"]))
+    (help-info "Datomic docs:" "https://docs.datomic.com")
+    (help-info "Datomic Peer API docs:" "https://docs.datomic.com/clojure/index.html")
+    (help-info "DPM docs:" "https://github.com/filipesilva/datomic-pro-manager")
+    (help-info "Datomic Pro Version:" (get-datomic-version))
+    (help-info "Running:" (running?))
+    (help-info "DB URI:" (:datomic-db-uri config))
+    (help-info "Deps:")
+    (println (format "  com.datomic/peer          {:mvn/version \"%s\"}" (get-datomic-version)))
+    (cond
+      sqlite?
+      (println (format "  org.xerial/sqlite-jdbc    {:mvn/version \"%s\"}" sqlite-version))
 
-    postgresql?
-    (println (format "  org.postgresql/postgresql {:mvn/version \"%s\"}" postgresql-version)))
-  (help-info "Create a DB called 'app' and connect to it:")
-  (println (format
-            "  (require '[datomic.api :as d])
+      postgresql?
+      (println (format "  org.postgresql/postgresql {:mvn/version \"%s\"}" postgresql-version)))
+    (help-info "Create a DB called 'app' and connect to it:")
+    (println (format
+              "  (require '[datomic.api :as d])
   (def db-uri \"%s\")
   (d/create-database db-uri)
   (def conn (d/connect db-uri))
   (d/db-stats (d/db conn))
   ;; {:datoms 268 ,,,}"
-            (str/replace (:datomic-db-uri config) "{db-name}" "app")))
-  (help-info "Available commands:")
-  (help-command "  up           " "run datomic, setting it up if needed")
-  (help-command "  test         " "test connectivity")
-  (help-command "  download     " "download datomic pro")
-  (help-command "  clean        " "remove datomic pro config dir")
-  (help-command "  console      " "start datomic console")
-  (help-command "  backup <db>  " "backup db to ./backups/db")
-  (help-command "  restore <db> " "restore db from ./backups/db")
-  (when sqlite?
-    (help-command "  sqlite create" "create sqlite db at ./datomic/storage")
-    (help-command "  sqlite delete" "delete sqlite db at ./datomic/storage")))
+              (str/replace (:datomic-db-uri config) "{db-name}" "app")))
+    (help-info "Available commands:")
+    (help-command "  up           " "run datomic, setting it up if needed")
+    (help-command "  test         " "test connectivity")
+    (help-command "  download     " "download datomic pro")
+    (help-command "  clean        " "remove datomic pro config dir")
+    (help-command "  console      " "start datomic console")
+    (help-command "  backup <db>  " "backup db to ./backups/db")
+    (help-command "  restore <db> " "restore db from ./backups/db")
+    (when sqlite?
+      (help-command "  sqlite create" "create sqlite db at ./datomic/storage")
+      (help-command "  sqlite delete" "delete sqlite db at ./datomic/storage"))
+    (when error?
+      (System/exit 1))))
 
 (def commands
   [{:cmds [] :fn help}
