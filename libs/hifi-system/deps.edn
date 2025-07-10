@@ -1,30 +1,30 @@
 {:paths ["src"]
  :deps  {dev.onionpancakes/chassis        {:mvn/version "1.0.365"}
          com.widdindustries/time-literals {:mvn/version "0.1.10"}
-         metosin/reitit-core              {:mvn/version "0.8.0"}
-         metosin/reitit-ring              {:mvn/version "0.8.0"
+         metosin/reitit-core              {:mvn/version "0.9.1"}
+         metosin/reitit-ring              {:mvn/version "0.9.1"
                                            :exclusions  [metosin/muuntaja]}
-
-         exoscale/cloak             {:mvn/version "0.1.10"}
-         metosin/reitit-middleware  {:mvn/version "0.8.0"
-                                     :exclusions  [metosin/muuntaja]}
-         aero/aero                  {:mvn/version "1.1.6"}
-         party.donut/system         {:mvn/version "1.0.255"
-                                     :exclusions  [tailrecursion/cljs-priority-map]}
-         http-kit/http-kit          {:mvn/version "2.9.0-beta1"}
-         ring/ring-defaults         {:mvn/version "0.6.0"}
-         com.fulcrologic/guardrails {:mvn/version "1.2.9"}
-         datastar/adapter-http-kit  {;; :git/url    "https://github.com/starfederation/datastar/"
-                                     :git/url    "https://github.com/JeremS/datastar/"
-                                     :git/sha    "59740d5da73a0c8a760ed2b92aa1fa5f067ce34a"
-                                     :deps/root  "sdk/clojure/adapter-http-kit"
-                                     :exclusions [http-kit/http-kit]}
-         datastar/expressions       {:git/url "https://github.com/ramblurr/datastar-expressions/"
-                                     :git/sha "47e8dc6d3646278f7b67fc89f67dd86a8986977f"}
-         org.flatland/ordered       {:mvn/version "1.15.12"}
-         dev.weavejester/medley     {:mvn/version "1.8.1"}
-         hifi/error                 {:local/root "../hifi-error"}
-         hifi/engine                {:local/root "../hifi-engine"}
-         hifi/util                  {:local/root "../hifi-util"}
-         hifi/logging               {:local/root "../hifi-logging"}
-         hifi/datastar              {:local/root "../hifi-datastar"}}}
+         exoscale/cloak                   {:mvn/version "0.1.10"}
+         metosin/reitit-middleware        {:mvn/version "0.9.1"
+                                           :exclusions  [metosin/muuntaja]}
+         aero/aero                        {:mvn/version "1.1.6"}
+         party.donut/system               {:mvn/version "1.0.255"
+                                           :exclusions  [tailrecursion/cljs-priority-map]}
+         http-kit/http-kit                {:mvn/version "2.9.0-beta1"}
+         ring/ring-defaults               {:mvn/version "0.6.0"}
+         com.fulcrologic/guardrails       {:mvn/version "1.2.9"}
+         datastar/adapter-http-kit        {;; :git/url    "https://github.com/starfederation/datastar/"
+                                           :git/url    "https://github.com/JeremS/datastar/"
+                                           :git/sha    "59740d5da73a0c8a760ed2b92aa1fa5f067ce34a"
+                                           :deps/root  "sdk/clojure/adapter-http-kit"
+                                           :exclusions [http-kit/http-kit]}
+         datastar/expressions             {:git/url "https://github.com/ramblurr/datastar-expressions/"
+                                           :git/sha "47e8dc6d3646278f7b67fc89f67dd86a8986977f"}
+         org.flatland/ordered             {:mvn/version "1.15.12"}
+         dev.weavejester/medley           {:mvn/version "1.8.1"}
+         hifi/config                      {:local/root "../hifi-config"}
+         hifi/error                       {:local/root "../hifi-error"}
+         hifi/engine                      {:local/root "../hifi-engine"}
+         hifi/util                        {:local/root "../hifi-util"}
+         hifi/logging                     {:local/root "../hifi-logging"}
+         hifi/datastar                    {:local/root "../hifi-datastar"}}}

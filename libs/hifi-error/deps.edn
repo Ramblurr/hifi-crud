@@ -1,4 +1,4 @@
 {:paths   ["src" "resources"]
- :deps    {metosin/malli {:mvn/version "0.16.4"}}
+ :deps    {metosin/malli {:mvn/version "0.19.1"}}
  :aliases {:test {:extra-paths ["test"]
-                  :extra-deps  {com.github.seancorfield/expectations {:mvn/version "2.1.201"}}}}}
+                  :extra-deps  {com.github.seancorfield/expectations {:mvn/version "2.2.214"}}}}}

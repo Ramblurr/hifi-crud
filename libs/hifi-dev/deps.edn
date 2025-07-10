@@ -1,0 +1,5 @@
+{:paths ["src"]
+ :deps  {djblue/portal               {:mvn/version "0.59.1"}
+         lambdaisland/ansi           {:mvn/version "0.2.37"}
+         io.github.tonsky/clj-reload {:mvn/version "0.9.8"}
+         io.github.paintparty/bling  {:mvn/version "0.8.5"}}}
