@@ -228,9 +228,9 @@
 
 (defn app-shell [{:app/keys [tab-state] :as req} body]
   (html/compile
-    [:main#morph.main
-     (mobile-menu req)
-     (desktop-sidebar req)
-     (app-container body)
-     [toast/Notifications {::toast/notifications (:notifications tab-state)
-                           ::toast/close-command :home/clear-notification}]]))
+   [:main#morph.main
+    (mobile-menu req)
+    (desktop-sidebar req)
+    (app-container body)
+    [toast/Notifications {::toast/notifications (:notifications tab-state)
+                          ::toast/close-command :home/clear-notification}]]))

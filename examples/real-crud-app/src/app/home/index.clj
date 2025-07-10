@@ -38,18 +38,18 @@
 (defn render-home-logged-out [{:keys [url-for] :as _req}]
   (let [link-cls "text-sm font-medium text-primary underline"]
     (html/compile
-      [:main#morph.main
-       [:div {:class "mx-auto max-w-3xl px-4 py-12 sm:px-6 lg:px-8"}
-        [:div {:class "divide-y divide-gray-200 overflow-hidden rounded-lg bg-white shadow-sm"}
-         [:div {:class "px-4 py-5 sm:px-6"}
-          [:div {:class "sm:flex sm:items-center sm:justify-between"}
-           [:div {:class "sm:flex sm:space-x-5"}
-            [:div {:class "mt-4 text-center sm:mt-0 sm:pt-1 sm:text-left"}
-             [:p {:class "text-xl font-bold text-gray-900 sm:text-2xl mt-2"}
-              "You are not logged in"]
-             [:a {:href (url-for :app.auth/login) :class link-cls} "Login"]
-             " or "
-             [:a {:href (url-for :app.auth/register) :class link-cls} "Sign Up"]]]]]]]])))
+     [:main#morph.main
+      [:div {:class "mx-auto max-w-3xl px-4 py-12 sm:px-6 lg:px-8"}
+       [:div {:class "divide-y divide-gray-200 overflow-hidden rounded-lg bg-white shadow-sm"}
+        [:div {:class "px-4 py-5 sm:px-6"}
+         [:div {:class "sm:flex sm:items-center sm:justify-between"}
+          [:div {:class "sm:flex sm:space-x-5"}
+           [:div {:class "mt-4 text-center sm:mt-0 sm:pt-1 sm:text-left"}
+            [:p {:class "text-xl font-bold text-gray-900 sm:text-2xl mt-2"}
+             "You are not logged in"]
+            [:a {:href (url-for :app.auth/login) :class link-cls} "Login"]
+            " or "
+            [:a {:href (url-for :app.auth/register) :class link-cls} "Sign Up"]]]]]]]])))
 
 (defn button-gallery []
   [:div {:class "py-5 flex flex-col sm:flex-row sm:items-center gap-2 justify-end"}
@@ -71,16 +71,16 @@
 
 (defn render-home-logged-in [req]
   (html/compile
-    (shell/app-shell req
-                     #_(lay/nav {:current-nav :dashboard})
-                     [:div
-                      [:div {:class "px-4 py-5 sm:p-6"}
-                       [:p "You are logged in. You can take the following actions:"]
+   (shell/app-shell req
+                    #_(lay/nav {:current-nav :dashboard})
+                    [:div
+                     [:div {:class "px-4 py-5 sm:p-6"}
+                      [:p "You are logged in. You can take the following actions:"]
                        ;; [:pre {:data-json-signals true}]
-                       [:div {:class "py-5 flex flex-col sm:flex-row sm:items-center gap-2 justify-end"}
-                        [btn/Button {:data-on-click (uic/dispatch :home/admin)}
-                         "Admin Action"]
-                        [btn/Button {::btn/intent :primary :data-on-click (uic/dispatch :home/hello)} "Hello Action"]]]])))
+                      [:div {:class "py-5 flex flex-col sm:flex-row sm:items-center gap-2 justify-end"}
+                       [btn/Button {:data-on-click (uic/dispatch :home/admin)}
+                        "Admin Action"]
+                       [btn/Button {::btn/intent :primary :data-on-click (uic/dispatch :home/hello)} "Hello Action"]]]])))
 
 (defn render-home [{:app/keys [current-user] :as req}]
   (html/->str
