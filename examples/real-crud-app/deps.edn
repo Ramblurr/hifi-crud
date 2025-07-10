@@ -3,7 +3,7 @@
            org.clojure/clojure         {:mvn/version "1.12.0"}
            datastar/expressions        {:git/url "https://github.com/ramblurr/datastar-expressions/"
                                         :git/sha "8db9d4bf5a178912ca173f67671fd9dba6b14f90"}
-           com.datomic/peer            {:mvn/version "1.0.7364"
+           com.datomic/peer            {:mvn/version "1.0.7387"
                                         :exclusions  [org.slf4j/slf4j-api]}
            org.slf4j/slf4j-api         {:mvn/version "2.0.17"}
            org.xerial/sqlite-jdbc      {:mvn/version "3.49.1.0"}

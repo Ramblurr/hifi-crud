@@ -2,7 +2,7 @@
   description = "hifi development environment";
   inputs = {
     nixpkgs.url = "https://flakehub.com/f/NixOS/nixpkgs/0.1"; # tracks nixpkgs unstable branch
-    datomic-pro.url = "https://flakehub.com/f/Ramblurr/datomic-pro/0.6.1";
+    datomic-pro.url = "https://flakehub.com/f/Ramblurr/datomic-pro/0.7.0";
   };
   outputs =
     inputs:
@@ -48,7 +48,7 @@
         { pkgs }:
         {
           default = pkgs.mkShell {
-            DATOMIC_PRO_PEER_JAR = "${pkgs.datomic-pro-peer}/share/java/datomic-pro-peer-1.0.7364.jar";
+            DATOMIC_PRO_PEER_JAR = "${pkgs.datomic-pro-peer}/share/java/datomic-pro-peer-1.0.7387.jar";
             packages = with pkgs; [
               gum
               clojure

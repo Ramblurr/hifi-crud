@@ -28,16 +28,16 @@
         "snowfall-drift": "snowfall-drift"
       },
       "locked": {
-        "lastModified": 1747308392,
-        "narHash": "sha256-NtFyiFzux0ao8Q139+LAoq0B9v0U8Yl8AUlAt+h36Sg=",
-        "rev": "e6ae088598c87719b0451ac1bfbf278c19938da6",
-        "revCount": 43,
+        "lastModified": 1752057195,
+        "narHash": "sha256-JXgiiRTlxqSdDCVWopRM2fmo8y/p91oWfWzGbMb+iL4=",
+        "rev": "610118c562e9dc8899dd6f1b150a40bc2133e171",
+        "revCount": 46,
         "type": "tarball",
-        "url": "https://api.flakehub.com/f/pinned/Ramblurr/datomic-pro/0.6.1/0196d3b5-f869-7a11-8499-4f1dd59c5265/source.tar.gz"
+        "url": "https://api.flakehub.com/f/pinned/Ramblurr/datomic-pro/0.7.0/0197ef8e-f7d6-7596-a5f4-4692ca46a29b/source.tar.gz"
       },
       "original": {
         "type": "tarball",
-        "url": "https://flakehub.com/f/Ramblurr/datomic-pro/0.6.1"
+        "url": "https://flakehub.com/f/Ramblurr/datomic-pro/0.7.0"
       }
     },
     "devshell": {
