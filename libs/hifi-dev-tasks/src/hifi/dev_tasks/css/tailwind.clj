@@ -117,7 +117,7 @@
           (let [line  (read-line)
                 state (cond
                         (str/blank? line)                   nil
-                        (re-find #"^Done in .*ms$" line)    :ok
+                        (re-find #"^Done in .*s$" line)     :ok
                         (re-find #"^Error.*" line)          (do
                                                               (error (str "[tailwind] " line))
                                                               :error)

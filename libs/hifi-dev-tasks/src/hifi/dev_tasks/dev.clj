@@ -27,7 +27,9 @@
   (let [enabled-services (config/enabled-services)
         enabled?         (fn [s] (contains? enabled-services s))]
     (when (enabled? :datomic)
-      (start-datomic)))
+      (start-datomic)
+      ;; TODO a proper way to wait for datomic to be ready
+      (Thread/sleep 5000)))
   (when (tailwind/using-tailwind?)
     (future
       (tailwind/start-tailwind))))
@@ -44,4 +46,5 @@
         (clojure "-M:dev"))
       (do
         (start-background-tasks)
-        (clojure "-M:dev" "-e" "(dev)")))))
+        (clojure "-M:dev" "-e" (format "(dev) ((requiring-resolve (symbol \"%s\" \"-main\")))"
+                                       (str main-ns)))))))

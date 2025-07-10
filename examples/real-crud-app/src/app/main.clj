@@ -5,16 +5,17 @@
    [app.auth :as auth]
    [app.home :as home]
    [app.system :as system]
+   [hifi.config :as config]
    [hifi.datastar :as datastar]
-   [starfederation.datastar.clojure.brotli :as brotli]
    [hifi.datastar.http-kit :as d*http-kit]
    [hifi.engine.shell :as shell]
-   [hifi.config :as config]
    [hifi.html :as html]
    [hifi.system :as hifi]
    [hifi.system.middleware :as hifi.mw]
    [hifi.util.assets :as assets]
+   [nrepl.cmdline :as nrepl]
    [starfederation.datastar.clojure.api :as d*]
+   [starfederation.datastar.clojure.brotli :as brotli]
    [taoensso.telemere :as t]))
 
 (def pages
@@ -108,7 +109,12 @@
     new-system))
 
 (defn -main []
-  (start))
+  (let [system                  (start)
+        {:keys [enabled? args]} (get-in system [:donut.system/instances :env :hifi/repl])]
+    (when enabled?
+      (if args
+        (apply nrepl/-main args)
+        (t/log! "No nREPL args provided under :hifi/repl, starting without nREPL.")))))
 
 (comment
 
