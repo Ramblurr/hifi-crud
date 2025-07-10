@@ -1,19 +1,15 @@
-{:paths ["resources"]
- :deps  {hifi/dev-tasks {:local/root "../../libs/hifi-dev-tasks"}}
- :pods  {clj-kondo/clj-kondo {:version "2025.06.05"}}
- :tasks {repl               {:override-builtin true
-                             :doc              "Run the dev REPL"
-                             :task             (shell "clojure -M:repl/cider:dev")}
-         dev                hifi.dev-tasks.dev/-main
-         fmt                hifi.dev-tasks.fmt/fmt-main
-         fmt:fix            hifi.dev-tasks.fmt/fmt-fix-main
-         lint               hifi.dev-tasks.lint.kondo/lint-main
+{:deps  {hifi/dev-tasks {:local/root "../../libs/hifi-dev-tasks"}}
+ :tasks {bb-update          hifi.dev-tasks.bb/update-bb-edn
          lint:copy-configs  hifi.dev-tasks.lint.kondo/copy-configs-main
          lint:carve         hifi.dev-tasks.lint.carve/-main
-         lint:ns-docstrings hifi.dev-tasks.lint.ns-docstrings/-main
-         datomic            hifi.dev-tasks.datomic/-main
-         css                hifi.dev-tasks.css.tailwind/build-dev
+         dev                hifi.dev-tasks.dev/-main
+         clean              hifi.dev-tasks.build/clean
+         fmt                hifi.dev-tasks.fmt/fmt-main
          css:watch          hifi.dev-tasks.css.tailwind/watch-dev
          css:prod           hifi.dev-tasks.css.tailwind/build-prod
-         clean              hifi.dev-tasks.build/clean
-         uber               hifi.dev-tasks.build/uber}}
+         css                hifi.dev-tasks.css.tailwind/build-dev
+         datomic            hifi.dev-tasks.datomic/-main
+         lint:ns-docstrings hifi.dev-tasks.lint.ns-docstrings/-main
+         uber               hifi.dev-tasks.build/uber
+         fmt:fix            hifi.dev-tasks.fmt/fmt-fix-main}
+ :pods  {clj-kondo/clj-kondo {:version "2025.06.05"}}}

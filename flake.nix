@@ -50,6 +50,7 @@
           default = pkgs.mkShell {
             DATOMIC_PRO_PEER_JAR = "${pkgs.datomic-pro-peer}/share/java/datomic-pro-peer-1.0.7364.jar";
             packages = with pkgs; [
+              gum
               clojure
               clojure-lsp
               babashka
