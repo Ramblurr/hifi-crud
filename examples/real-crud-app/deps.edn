@@ -1,4 +1,4 @@
-{:paths   ["src" "resources"]
+{:paths   ["src" "resources" "target/resources"]
  :deps    {;; Hyperlith is for Immediate CRUD (HIFICRUD)
            org.clojure/clojure         {:mvn/version "1.12.0"}
            datastar/expressions        {:git/url "https://github.com/ramblurr/datastar-expressions/"
@@ -18,6 +18,8 @@
            hifi/html                   {:local/root "../../libs/hifi-html"}}
  :aliases {:dev   {:extra-paths ["dev"]
                    :extra-deps  {hifi/dev {:local/root "../../libs/hifi-dev"}}
+                   :main-opts   ["-m" "nrepl.cmdline" "--middleware"
+                                 "[refactor-nrepl.middleware/wrap-refactor,cider.nrepl/cider-middleware,portal.nrepl/middleware]"]
                    :jvm-opts
                    ["-Dhifi.profile=dev"
                     "-Djdk.attach.allowAttachSelf" ;; https://nrepl.org/nrepl/installation.html#jvmti

@@ -2,128 +2,50 @@
 ;; SPDX-License-Identifier: EUPL-1.2
 (ns dev
   (:require
-   [portal-helpers :as portal-repl]
-   [app.main :as app]
-   ;; [app.ui.core :as uic]
-   [portal.colors]
-   [portal.api :as p]))
+   [app.ui.core :as ui-core]
+   [clj-reload.core :as clj-reload]
+   [hifi.system :as hifi]
+   [app.main :as app]))
 
 ;; --------------------------------------------------------------------------------------------
-;; Portal & Logging
+;; Toggle Dev-time flags
 
-(def transforms portal-repl/recommended-transforms)
-(def tap-routing nil)
+(set! *warn-on-reflection* true)
+(set! *print-namespace-maps* false)
+(ui-core/enable-opts-validation!)
 
-(defonce my-submit (portal-repl/make-submit :transforms #'transforms :tap-routing #'tap-routing))
-(add-tap my-submit)
+;; --------------------------------------------------------------------------------------------
+;; System Control
+
+(defn restart
+  "Restart the application system."
+  []
+  (hifi/stop @app/system)
+  (app/start))
+
+(defn reset
+  "Reset the application system by stopping the system, reloading all code, then starting the system again."
+  [& args]
+  (hifi/stop @app/system)
+  (apply clj-reload/reload args)
+  (app/start))
+
+(clj-reload/init {:dirs      ["src" "dev" "test"]
+                  :no-reload #{'user 'dev}})
 (comment
-  (do
-    (remove-tap my-submit)
-    (def my-submit (portal-repl/make-submit :transforms #'transforms :tap-routing #'tap-routing))
-    (add-tap my-submit)))
 
-;; (portal.api/set-theme ::my-theme (merge (:portal.colors/gruvbox portal.colors/theme) {:font-size 8}))
-(p/open {:theme :portal.colors/gruvbox})
-;; (p/open {:theme :portal.colors/gruvbox})
-;; (add-tap portal.api/submit)
-;; (remove-tap portal.api/submit)
-;; (uic/enable-opts-validation!)
+  ;;; System Control
+  ;; Restart the system
+  (restart)
+  ;; Reset the system
+  ;; A reset is a stop, code reload, and start.
+  (reset)
+  ;; You can pass options to clj-reload to control the reload behavior.
+  (reset {:only :all})
 
-#_(defn reset []
-    (app/stop)
-    (app/start))
-
-(comment
-  (set! *warn-on-reflection* true)
-  (set! *print-namespace-maps* false)
+  ;;; Adding/Modifying Dependencies in deps.edn
+  ;; If you add or modify your dependencies, you can run this to sync them.
+  ;; This will save you a REPL restart in most cases.
   (clojure.repl.deps/sync-deps)
-  ;;
-  )
-(comment
-  (do
-    (require '[clojure.java.shell :as shell])
-
-    (defn rm-db []
-      (shell/sh "rm" "-rf" "db")
-      (shell/sh "mkdir" "db"))
-
-    (defn setup []
-      (->  {}
-           (d/ctx-start  "./db/dev1.sqlite")
-           (schema/ctx-start)))
-
-    (defn teardown [app]
-      (d/ctx-stop app)
-      (Thread/sleep 200))
-
-    (defn reset [app]
-      (when app
-        (teardown app))
-      (rm-db)
-      (Thread/sleep 300))
-
-    (defn tx-n [app n]
-      (let [d (take n (read-string (slurp "extra/data.tx")))]
-        @(d/tx! (:conn app)
-                d)
-        (tap> [:txed n])))
-
-    (defn poke-tx [app]
-      @(d/tx! (:conn app) [{:session/id (str (random-uuid))}]))
-
-    (defn test [n]
-      (reset nil)
-      (let [app (setup)]
-        (tap> [:test :n n])
-        (tx-n app n)
-        (teardown app)
-        (let [app2 (setup)]
-          (try
-            (poke-tx app2)
-            (reset app2)
-            :ok
-            (catch Exception e
-              (reset app2)
-              (tap> [:poke-failed :n n :ex e])
-              :fail)))))
-
-    (def total-tx (count (read-string (slurp "extra/data.tx"))))
-
-    ;; (def max-iterations 1000)
-
-    (def CONTINUE? (atom true)))
-
-  (do
-    (def result (promise))
-
-    (def fut
-      (future
-        (deliver result
-                 ;; Binary search  bisect
-                 (loop [low  0 ;; Known good value
-                        high total-tx
-                        iter 0] ;; Known bad value
-                   (tap> [:iteration :low low :high high])
-                   (cond
-                     (not @CONTINUE?)
-                     {:result :abort :continue false}
-
-                     ;; (>= iter max-iterations)
-                     ;; {:result :abort :max-iterations iter}
-
-                     (<= (- high low) 1)
-                     {:result :fail :threshold high} ;; high is the smallest failing n
-
-                     :else
-                     (let [mid (quot (+ low high) 2)
-                           r   (test mid)]
-                       (if (= :ok r)
-                         (recur mid high (inc iter)) ;; mid works, search higher
-                         (recur low mid (inc iter)))) ;; mid fails, search lower
-                     )))
-        (tap> [:done :result @result]))))
-  (future-cancel fut)
-  (realized? result)
-  @result
   ;;
   )

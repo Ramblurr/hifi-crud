@@ -94,30 +94,21 @@
    ["/error" {:handler (fn [_]
                          (throw (ex-info "Uhoh" {:foo :bar})))}]])
 
-(defonce ^:dynamic *system* nil)
+(defonce system (atom nil))
 
 (defn start []
-  (let [sys (hifi/start {:routes              #'routes
-                         :port                3000
-                         :debug-errors?       true
-                         :reload-per-request? true}
-                        (system/AppSystemDef))]
+  (let [new-system (hifi/start {:routes              #'routes
+                                :port                3000
+                                :debug-errors?       true
+                                :reload-per-request? true}
+                               (system/AppSystemDef))]
 
-    (alter-var-root #'*system* (constantly sys))
-    (t/log! "hifi-demo started. Visit http://localhost:3000")))
+    (reset! system new-system)
+    (t/log! "hifi-demo started. Visit http://localhost:3000")
+    new-system))
 
-(defn stop []
-  (when *system*
-    (hifi/stop *system*)
-    (t/log! "Stopped")))
-
-(defn -main [& _]
-  (routes)
-  (do
-    (stop)
-    (start))
-  ;; rcf
-  )
+(defn -main []
+  (start))
 
 (comment
 

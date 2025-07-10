@@ -10,6 +10,7 @@
 (def project (config/project-meta))
 (def lib (:name project))
 (def version (:version project))
+(def main-ns (:main-ns project))
 
 (def class-dir "target/classes")
 (def basis (b/create-basis {:project "deps.edn"}))
@@ -28,7 +29,7 @@
   (clean nil)
   (css nil)
   (js nil)
-  (b/copy-dir {:src-dirs   ["src" "resources"]
+  (b/copy-dir {:src-dirs   ["src" "resources" "target/resources"]
                :target-dir class-dir})
   (b/compile-clj {:basis     basis
                   :src-dirs  ["src"]
@@ -36,4 +37,4 @@
   (b/uber {:class-dir class-dir
            :uber-file uber-file
            :basis     basis
-           :main      'site.server}))
+           :main-ns   main-ns}))

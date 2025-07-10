@@ -15,7 +15,7 @@
    [:input {:doc     "Input CSS file for Tailwind CSS"
             :default default-input} :string]
    [:output {:doc     "Output CSS file for Tailwind CSS"
-             :default "resources/public/compiled.css"} :string]
+             :default "target/resources/public/compiled.css"} :string]
    [:tw-binary {:default "tailwindcss"
                 :desc    "Path to the Tailwind CSS binary"}
     :string]])

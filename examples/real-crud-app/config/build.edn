@@ -1,2 +1,0 @@
-{:hifi/tailwindcss {:input "resources/public/main.css"
-                    :output "resources/public/compiled.css"}}

@@ -270,4 +270,5 @@
 (defn stop
   "Stop Hifi. Accepts the system map returned by start"
   [system]
-  (ds/stop system))
+  (when system
+    (ds/stop system)))
