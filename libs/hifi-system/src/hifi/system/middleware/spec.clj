@@ -2,7 +2,7 @@
 ;; SPDX-License-Identifier: EUPL-1.2
 (ns hifi.system.middleware.spec
   (:require
-   [hifi.env :as env]
+   [hifi.config :as config]
    [malli.transform :as mt]
    [ring.middleware.cookies :as ring-cookies]
    [malli.core :as m]
@@ -102,7 +102,7 @@
 (def CSRFProtectionMiddlewareOptions
   (m/schema
    [:map
-    [:csrf-secret {:doc "A randomly generated random secret used to sign the CSRF token."} [:fn env/secret?]]
+    [:csrf-secret {:doc "A randomly generated random secret used to sign the CSRF token."} [:fn config/secret?]]
     [:cookie-name {:default "csrf" :doc "Name of the cookie holding the csrf double-submit token."} NonBlankString]
     [:cookie-attrs {:default {:same-site :lax :secure true :path "/" :host-prefix true}
                     :doc     "Map of attributes for the csrf cookie."} CookieAttrsOption]]))

@@ -7,7 +7,7 @@
          hifi/html            {:local/root "../../libs/hifi-html"}
          hifi/system          {:local/root "../../libs/hifi-system"}}
 
- :aliases {:dev     {:extra-deps {djblue/portal {:mvn/version "0.59.0"}}
+ :aliases {:dev     {:extra-deps {hifi/dev {:local/root "../../libs/hifi-dev"}}
                      :jvm-opts
                      ["-Dhifi.profile=dev"
                       "-Djdk.attach.allowAttachSelf" ;; https://nrepl.org/nrepl/installation.html#jvmti
@@ -22,7 +22,7 @@
                      :jvm-opts  ["-Dhifi.profile=dev"]}
            :neil    {:project {:name    hifi/todomvc
                                :version "0.0.1"}}
-           :build   {:deps       {io.github.clojure/tools.build {:git/tag "v0.10.9"
-                                                                 :git/sha "e405aac"}
-                                  slipset/deps-deploy           {:mvn/version "0.2.2"}}
+           :build   {:deps       {io.github.clojure/tools.build {:git/tag "v0.10.9" :git/sha "e405aac"}
+                                  babashka/process              {:mvn/version "0.6.23"}
+                                  hifi/bb-tasks                 {:local/root "../../libs/hifi-babashka-tasks"}}
                      :ns-default build}}}

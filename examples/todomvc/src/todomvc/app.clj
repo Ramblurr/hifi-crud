@@ -6,7 +6,7 @@
    [hifi.datastar :as datastar]
    [starfederation.datastar.clojure.brotli :as brotli]
    [hifi.datastar.http-kit :as d*http-kit]
-   [hifi.env :as env]
+   [hifi.config :as config]
    [hifi.html :as html]
    [hifi.system :as hifi]
    [hifi.system.middleware :as hifi.mw]
@@ -23,7 +23,7 @@
     "60 req per 1m" [100 (* 60000)]
     "350 req pr 5m" [350 (* 5 60000)]}))
 
-(def static-asset (partial assets/static-asset (env/dev?)))
+(def static-asset (partial assets/static-asset (config/dev?)))
 (def !base-css (static-asset {:resource-path "base.css" :content-type "text/css"}))
 (def !index-css (static-asset {:resource-path "index.css" :content-type "text/css"}))
 (def !extra-css (static-asset {:resource-path "extra.css" :content-type "text/css"}))
@@ -61,7 +61,7 @@
     ["/" {:get  {:handler (html/shim-handler
                            (html/shim-page-resp
                             {:body        (html/shim-document {:title          "Hello World Datastar"
-                                                               :csrf-cookie-js (when (env/dev?) html/csrf-cookie-js-dev)
+                                                               :csrf-cookie-js (when (config/dev?) html/csrf-cookie-js-dev)
                                                                :head           (list (html/script {:defer true :type "module" :!asset !datastar})
                                                                                      (html/stylesheet {:!asset !base-css})
                                                                                      (html/stylesheet {:!asset !index-css})

@@ -7,7 +7,7 @@
    [starfederation.datastar.clojure.brotli :as brotli]
    [hifi.datastar.http-kit :as d*http-kit]
    [hifi.engine.shell :as shell]
-   [hifi.env :as env]
+   [hifi.config :as config]
    [hifi.html :as html]
    [hifi.system :as hifi]
    [hifi.system.middleware :as hifi.mw]
@@ -42,7 +42,7 @@
           (d*/close-sse! sse-gen)))
       (throw (ex-info "Command not found" {:command command-name})))))
 
-(def static-asset (partial assets/static-asset (env/dev?)))
+(def static-asset (partial assets/static-asset (config/dev?)))
 (def !css (static-asset {:resource-path "public/compiled.css" :route-path "/app.css" :content-type "text/css"}))
 (def !datastar datastar/!datastar-asset)
 (def !floating-ui-core (static-asset {:resource-path "public/@floating-ui/floating-ui-core@1.6.9.js" :route-path "/@floating-ui/floating-ui-core@1.6.9.js" :content-type "application/javascript"}))
@@ -57,7 +57,7 @@
                        (html/stylesheet {:!asset !css})))
 
 (def shim-response (html/shim-page-resp {:body (html/shim-document {:title          "HIFICRUD"
-                                                                    :csrf-cookie-js (when (env/dev?) html/csrf-cookie-js-dev)
+                                                                    :csrf-cookie-js (when (config/dev?) html/csrf-cookie-js-dev)
                                                                     :head           shim-assets
                                                                     :body-post      (html/compile
                                                                                      [:svg {:style "display: none"}
@@ -134,7 +134,7 @@
   (d/find-all (d/db conn) :session/id '[*])
   (d/find-all (d/db conn) :user/id '[*])
   (->
-   (env/read-env)
+   (config/read-config)
    :app/datomic
    :outbox
    :max-execute-time

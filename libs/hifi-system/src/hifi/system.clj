@@ -3,7 +3,7 @@
             [hifi.logging :as logging]
             [hifi.datastar.tab-state :as tab-state]
             [hifi.datastar.system :as datastar]
-            [hifi.env :as env]
+            [hifi.config :as config]
             [hifi.system.middleware :as middleware]
             [org.httpkit.server :as hk-server]
             [com.fulcrologic.guardrails.malli.core :refer [=> >defn-]]
@@ -220,7 +220,7 @@
 (defn hifi-system
   "Returns a complete donut.system map intialized with the hifi system opts"
   [opts]
-  (let [env     (env/read-env)
+  (let [env     (config/read-config)
         options (coerce-opts opts env)]
     {::ds/defs
      {:env             (dissoc env :hifi/components)

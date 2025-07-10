@@ -3,7 +3,7 @@
 (ns hifi.system.middleware.csrf
   "A simple HMAC double-submit cookie implementation"
   (:require
-   [hifi.env :as env]
+   [hifi.config :as config]
    [clojure.string :as str]
    [hifi.util.crypto :as crypto]
    [hifi.system.middleware.spec :as options]))
@@ -34,7 +34,7 @@
 
 (comment
   (let [secret  "hunter2"
-        keyspec (crypto/secret-key->hmac-sha256-keyspec (env/unmask secret))
+        keyspec (crypto/secret-key->hmac-sha256-keyspec (config/unmask secret))
         token   (generate-csrf-token keyspec "12345")]
     (valid-csrf-token? keyspec token "12345")))
 
@@ -56,7 +56,7 @@
 (defn csrf-middleware
   ([options]
    (let [options      (->csrf-middleware-opts options)
-         csrf-keyspec (crypto/secret-key->hmac-sha256-keyspec (-> options :csrf-secret env/unmask!))
+         csrf-keyspec (crypto/secret-key->hmac-sha256-keyspec (-> options :csrf-secret config/unmask!))
          validate     (partial valid-csrf-token? csrf-keyspec)
          generate     (partial generate-csrf-token csrf-keyspec)]
      {:name           ::csrf

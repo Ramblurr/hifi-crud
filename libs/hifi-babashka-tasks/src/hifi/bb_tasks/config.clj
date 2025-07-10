@@ -3,5 +3,5 @@
    [aero.core :as aero]))
 
 (defn build-config []
-  (let [f "config/build.edn"]
+  (let [f "resources/env.edn"]
     (aero/read-config f)))
