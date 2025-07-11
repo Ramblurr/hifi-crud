@@ -2,20 +2,21 @@
 ;; SPDX-License-Identifier: EUPL-1.2
 (ns hifi.dev-tasks.css.tailwind
   (:require
-   [clojure.string :as str]
-   [hifi.dev-tasks.util :refer [info error]]
-   [clojure.java.io :as io]
+   [babashka.fs :as fs]
    [babashka.process :as p]
    [bling.core :as bling]
-   [babashka.fs :as fs]
+   [clojure.java.io :as io]
+   [clojure.string :as str]
    [hifi.dev-tasks.config :as config]
-   [hifi.dev-tasks.util :refer [shell]]
+   [hifi.dev-tasks.util :refer [error info shell]]
    [hifi.error.iface :as pe]))
 
 (def ^:private default-input "resources/public/tailwind.css")
 
 (def TailwindConfigSchema
   [:map {:name :hifi/tailwindcss}
+   [:enabled? {:doc     "Enable Tailwind CSS processing"
+               :default true} :boolean]
    [:input {:doc     "Input CSS file for Tailwind CSS"
             :default default-input} :string]
    [:output {:doc     "Output CSS file for Tailwind CSS"
@@ -30,22 +31,19 @@
      :tailwind-method   :path-bin}))
 
 (defn- tw-config []
-  (let [tw-conf (:hifi/tailwindcss (config/read-config) {})]
-    (try
-      (pe/coerce! TailwindConfigSchema tw-conf)
-      (catch clojure.lang.ExceptionInfo e
-        (if (pe/id?  e ::pe/schema-validation-error)
-          (do
-            (pe/bling-schema-error e)
-            (System/exit 1))
-          (throw e))))))
+  (try
+    (pe/coerce! TailwindConfigSchema (config/tailwindcss))
+    (catch clojure.lang.ExceptionInfo e
+      (if (pe/id?  e ::pe/schema-validation-error)
+        (do
+          (pe/bling-schema-error e)
+          (System/exit 1))
+        (throw e)))))
 
 (defn using-tailwind?
   "Checks if the project is using tailwind or not"
   []
-  (or
-   (some? (:hifi/tailwindcss (config/read-config)))
-   (fs/exists? (fs/file default-input))))
+  (true? (:enabled? (tw-config))))
 
 (defn exit-tailwind-not-configured []
   (bling/callout {:type  :error

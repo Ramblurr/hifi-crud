@@ -39,3 +39,6 @@
        (filter #(true? (second %)))
        (map first)
        (into #{})))
+
+(defn tailwindcss []
+  (get-in (read-config) [:hifi/dev :tailwindcss] {}))
