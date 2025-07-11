@@ -4,7 +4,7 @@
          metosin/reitit-core              {:mvn/version "0.9.1"}
          metosin/reitit-ring              {:mvn/version "0.9.1"
                                            :exclusions  [metosin/muuntaja]}
-         exoscale/cloak                   {:mvn/version "0.1.10"}
+         exoscale/cloak                   {:mvn/version "1.0.42"}
          metosin/reitit-middleware        {:mvn/version "0.9.1"
                                            :exclusions  [metosin/muuntaja]}
          aero/aero                        {:mvn/version "1.1.6"}

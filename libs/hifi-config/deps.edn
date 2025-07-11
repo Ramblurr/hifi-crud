@@ -1,5 +1,5 @@
 {:paths   ["src"]
- :deps    {exoscale/cloak                   {:mvn/version "0.1.10"}
+ :deps    {exoscale/cloak                   {:mvn/version "1.0.42"}
            com.widdindustries/time-literals {:mvn/version "0.1.10"}
            aero/aero                        {:mvn/version "1.1.6"}}
  :aliases {:test {:extra-paths ["test"]

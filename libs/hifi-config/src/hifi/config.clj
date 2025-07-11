@@ -3,6 +3,7 @@
 (ns hifi.config
   (:refer-clojure :exclude [mask])
   (:require
+   [time-literals.data-readers]
    [time-literals.read-write]
    [exoscale.cloak :as cloak]
    [aero.core :as aero]
