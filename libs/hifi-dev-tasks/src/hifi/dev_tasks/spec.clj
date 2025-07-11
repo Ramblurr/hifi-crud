@@ -4,7 +4,7 @@
   (:require
    [babashka.fs :as fs]))
 
-(def ^:private tw-default-input "resources/public/tailwind.css")
+(def ^:private tw-default-input "assets/css/tailwind.css")
 
 (def TailwindConfigSchema
   [:map {:name :hifi/tailwindcss}

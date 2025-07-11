@@ -1,0 +1,10 @@
+{:pins {"application" {:to "app.js"},
+        "@floating-ui/dom" {:version "1.6.13",
+                            :preloads true,
+                            :to "@floating-ui--dom.js"},
+        "@floating-ui/core" {:version "1.7.2",
+                             :to "@floating-ui--core.js"},
+        "@floating-ui/utils" {:version "0.2.10",
+                              :to "@floating-ui--utils.js"},
+        "@floating-ui/utils/dom" {:version "0.2.10",
+                                  :to "@floating-ui--utils--dom.js"}}}

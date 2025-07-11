@@ -31,7 +31,7 @@
                   " section in "
                   [:italic "env.edn"]
                   ", or create a "
-                  [:italic "resources/public/tailwind.css"]
+                  [:italic "assets/css/tailwind.css"]
                   " file to use the default Tailwind CSS input."))
   (System/exit 1))
 

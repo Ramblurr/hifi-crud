@@ -1,4 +1,5 @@
-const { computePosition, flip, size, apply } = window.FloatingUIDOM;
+//const { computePosition, flip, size, apply } = window.FloatingUIDOM;
+import { computePosition, flip, size, apply } from "@floating-ui/dom";
 
 /*
  * Creates a floating popover menu positioned relative to a trigger element.
