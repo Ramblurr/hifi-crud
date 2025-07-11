@@ -4,6 +4,8 @@
   (:require
    [clojure.edn :as edn]
    [hifi.config :as config]
+   [hifi.dev-tasks.spec :as spec]
+   [hifi.error.iface :as pe]
    [time-literals.data-readers]))
 
 ;; Why are these not being picked up?
@@ -32,13 +34,18 @@
       edn/read-string
       :tasks/config))
 
-(defn enabled-services []
-  (->> (read-config)
-       :hifi/dev
-       :services
-       (filter #(true? (second %)))
-       (map first)
-       (into #{})))
+(defn load [path spec]
+  (try
+    (pe/coerce! spec (get-in (read-config) path {}))
+    (catch clojure.lang.ExceptionInfo e
+      (if (pe/id?  e ::pe/schema-validation-error)
+        (do
+          (pe/bling-schema-error e)
+          (System/exit 1))
+        (throw e)))))
 
 (defn tailwindcss []
-  (get-in (read-config) [:hifi/dev :tailwindcss] {}))
+  (load [:hifi/dev :tailwindcss] spec/TailwindConfigSchema))
+
+(defn datomic []
+  (load [:hifi/dev :datomic] spec/DatomicConfigSchema))

@@ -1,11 +1,11 @@
 (ns hifi.dev-tasks.dev
   (:require
-   [hifi.dev-tasks.util :refer [info error]]
-   [babashka.process :as p]
    [babashka.fs :as fs]
+   [babashka.process :as p]
    [babashka.tasks :refer [clojure]]
+   [hifi.dev-tasks.config :as config]
    [hifi.dev-tasks.css.tailwind :as tailwind]
-   [hifi.dev-tasks.config :as config]))
+   [hifi.dev-tasks.util :refer [error info]]))
 
 (defn start-datomic []
   (info "[datomic] starting datomic in the background")
@@ -24,12 +24,10 @@
 
 (defn- start-background-tasks
   []
-  (let [enabled-services (config/enabled-services)
-        enabled?         (fn [s] (contains? enabled-services s))]
-    (when (enabled? :datomic)
-      (start-datomic)
-      ;; TODO a proper way to wait for datomic to be ready
-      (Thread/sleep 5000)))
+  (when (:enabled? (config/datomic))
+    (start-datomic)
+    ;; TODO a proper way to wait for datomic to be ready
+    (Thread/sleep 5000))
   (when (tailwind/using-tailwind?)
     (future
       (tailwind/start-tailwind))))

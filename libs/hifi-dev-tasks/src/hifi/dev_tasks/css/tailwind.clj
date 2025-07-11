@@ -8,42 +8,17 @@
    [clojure.java.io :as io]
    [clojure.string :as str]
    [hifi.dev-tasks.config :as config]
-   [hifi.dev-tasks.util :refer [error info shell]]
-   [hifi.error.iface :as pe]))
-
-(def ^:private default-input "resources/public/tailwind.css")
-
-(def TailwindConfigSchema
-  [:map {:name :hifi/tailwindcss}
-   [:enabled? {:doc     "Enable Tailwind CSS processing"
-               :default true} :boolean]
-   [:input {:doc     "Input CSS file for Tailwind CSS"
-            :default default-input} :string]
-   [:output {:doc     "Output CSS file for Tailwind CSS"
-             :default "target/resources/public/compiled.css"} :string]
-   [:tw-binary {:default "tailwindcss"
-                :desc    "Path to the Tailwind CSS binary"}
-    :string]])
+   [hifi.dev-tasks.util :refer [error info shell]]))
 
 (defn- tailwind-installation-info [binary-name]
   (let [path (fs/which binary-name)]
     {:tailwind-present? (some? path)
      :tailwind-method   :path-bin}))
 
-(defn- tw-config []
-  (try
-    (pe/coerce! TailwindConfigSchema (config/tailwindcss))
-    (catch clojure.lang.ExceptionInfo e
-      (if (pe/id?  e ::pe/schema-validation-error)
-        (do
-          (pe/bling-schema-error e)
-          (System/exit 1))
-        (throw e)))))
-
 (defn using-tailwind?
   "Checks if the project is using tailwind or not"
   []
-  (true? (:enabled? (tw-config))))
+  (true? (:enabled? (config/tailwindcss))))
 
 (defn exit-tailwind-not-configured []
   (bling/callout {:type  :error
@@ -91,24 +66,24 @@
 (defn build-dev
   "Builds Tailwind CSS in development mode."
   [& _args]
-  (tw (tw-config)))
+  (tw (config/tailwindcss)))
 
 (defn watch-dev
   "Watches Tailwind CSS files for changes and rebuilds in development mode."
   [& _args]
-  (tw (tw-config) "--watch"))
+  (tw (config/tailwindcss) "--watch"))
 
 (defn build-prod
   "Builds Tailwind CSS in production mode."
   [& _args]
-  (tw (tw-config) "--minify"))
+  (tw (config/tailwindcss) "--minify"))
 
 (defn start-tailwind []
   (info "[tailwind] starting tailwindcss process")
   (let [tailwind-process (apply p/process {:out      :stream
                                            :err      :out
                                            :shutdown p/destroy-tree}
-                                (tailwind-opts (tw-config) ["--watch"]))]
+                                (tailwind-opts (config/tailwindcss) ["--watch"]))]
     (with-open [rdr (io/reader (:out tailwind-process))]
       (binding [*in* rdr]
         (loop [last-state nil]
