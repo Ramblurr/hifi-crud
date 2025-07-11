@@ -15,7 +15,6 @@
    'css:watch          'hifi.dev-tasks.css.tailwind/watch-dev
    'datomic            'hifi.dev-tasks.datomic/-main
    'dev                'hifi.dev-tasks.dev/-main
-   'fmt:fix            'hifi.dev-tasks.fmt/fmt-fix-main
    'fmt                'hifi.dev-tasks.fmt/fmt-main
    'lint:carve         'hifi.dev-tasks.lint.carve/-main
    'lint:copy-configs  'hifi.dev-tasks.lint.kondo/copy-configs-main
