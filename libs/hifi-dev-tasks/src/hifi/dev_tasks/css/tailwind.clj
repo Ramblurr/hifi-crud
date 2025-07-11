@@ -8,7 +8,7 @@
    [clojure.java.io :as io]
    [clojure.string :as str]
    [hifi.dev-tasks.config :as config]
-   [hifi.dev-tasks.util :refer [error info shell]]))
+   [hifi.dev-tasks.util :refer [error info shell debug]]))
 
 (defn- tailwind-installation-info [binary-name]
   (let [path (fs/which binary-name)]
@@ -26,42 +26,45 @@
                  (bling/bling
                   "Project is not configured to use Tailwind CSS"
                   "\n\n"
-                  "Add a " [:italic ":hifi/tailwindcss"]
-                  " configuration to your "
+                  "Add a " [:italic ":tailwindcss"]
+                  " configuration to the your " [:italic ":hifi/dev"]
+                  " section in "
                   [:italic "env.edn"]
                   ", or create a "
                   [:italic "resources/public/tailwind.css"]
                   " file to use the default Tailwind CSS input."))
   (System/exit 1))
 
-(defn exit-tailwind-not-installed [tw-binary]
+(defn exit-tailwind-not-installed [path]
   (bling/callout {:type  :error
                   :theme :gutter}
                  (bling/bling
                   "tailwindcss is not installed on your system."
                   "\n\n"
                   "Please install the standalone tailwindcss cli binary and ensure that "
-                  [:italic tw-binary]
+                  [:italic path]
                   " is available in your PATH."))
   (System/exit 1))
 
-(defn ensure-tailwind [{:keys [tw-binary]}]
-  (let [{:keys [tailwind-present?]} (tailwind-installation-info tw-binary)]
+(defn ensure-tailwind [{:keys [path]}]
+  (let [{:keys [tailwind-present?]} (tailwind-installation-info path)]
     (when-not tailwind-present?
-      (exit-tailwind-not-installed tw-binary)))
+      (exit-tailwind-not-installed path)))
   (when-not (using-tailwind?)
     (exit-tailwind-not-configured)))
 
-(defn tailwind-opts [{:keys [tw-binary input output]} extra]
+(defn tailwind-opts [{:keys [path input output]} extra]
   (into [] (concat
-            [tw-binary]
+            [path]
             (or extra [])
             ["--input" input
              "--output" output])))
 
 (defn tw [conf & extra]
   (ensure-tailwind conf)
-  (apply shell (tailwind-opts conf extra)))
+  (let [args (tailwind-opts conf extra)]
+    (debug "[tailwind] args: " args)
+    (apply shell args)))
 
 (defn build-dev
   "Builds Tailwind CSS in development mode."

@@ -47,5 +47,8 @@
 (defn tailwindcss []
   (load [:hifi/dev :tailwindcss] spec/TailwindConfigSchema))
 
+(defn bun []
+  (load [:hifi/dev :bun] spec/BunConfigSchema))
+
 (defn datomic []
   (load [:hifi/dev :datomic] spec/DatomicConfigSchema))

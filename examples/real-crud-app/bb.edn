@@ -11,5 +11,8 @@
          lint:ns-docstrings hifi.dev-tasks.lint.ns-docstrings/-main
          uber               hifi.dev-tasks.build/uber
          fmt                hifi.dev-tasks.fmt/fmt-main
-         lint               hifi.dev-tasks.lint.kondo/lint-main}
- :pods  {clj-kondo/clj-kondo {:version "2025.06.05"}}}
+         lint               hifi.dev-tasks.lint.kondo/lint-main
+         bun                hifi.dev-tasks.bun/build-dev
+         importmap hifi.dev-tasks.importmap/-main}
+
+ :pods {clj-kondo/clj-kondo {:version "2025.06.05"}}}

@@ -51,6 +51,7 @@
             DATOMIC_PRO_PEER_JAR = "${pkgs.datomic-pro-peer}/share/java/datomic-pro-peer-1.0.7387.jar";
             packages = with pkgs; [
               gum
+              bun
               clojure
               clojure-lsp
               babashka
