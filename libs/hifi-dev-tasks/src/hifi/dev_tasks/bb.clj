@@ -1,3 +1,5 @@
+;; Copyright © 2025 Casey Link <casey@outskirtslabs.com>
+;; SPDX-License-Identifier: EUPL-1.2
 (ns hifi.dev-tasks.bb
   (:require
    [bling.core :as bling]
@@ -20,7 +22,9 @@
    'lint:copy-configs  'hifi.dev-tasks.lint.kondo/copy-configs-main
    'lint               'hifi.dev-tasks.lint.kondo/lint-main
    'lint:ns-docstrings 'hifi.dev-tasks.lint.ns-docstrings/-main
-   'uber               'hifi.dev-tasks.build/uber})
+   'uber               'hifi.dev-tasks.build/uber
+   'bun                'hifi.dev-tasks.bun/build-dev
+   'importmap          'hifi.dev-tasks.importmap/-main})
 
 (defn- read-bb-edn
   []

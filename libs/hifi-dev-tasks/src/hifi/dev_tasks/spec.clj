@@ -1,4 +1,8 @@
-(ns hifi.dev-tasks.spec)
+;; Copyright © 2025 Casey Link <casey@outskirtslabs.com>
+;; SPDX-License-Identifier: EUPL-1.2
+(ns hifi.dev-tasks.spec
+  (:require
+   [babashka.fs :as fs]))
 
 (def ^:private tw-default-input "resources/public/tailwind.css")
 

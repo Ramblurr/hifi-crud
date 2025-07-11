@@ -19,4 +19,15 @@
   (apply println (bling/bling [style prefix]) args))
 
 (def info  (partial log :bold.info  "info "))
-(def error (partial log :bold.error "error"))
+(defn debug [& args]
+  (when (System/getenv "DEBUG")
+    (apply log :bold.purple  "debug " args)))
+(def error (partial log :bold.error "error "))
+
+(defn str->keyword
+  "Convert a string to a keyword respecting that the input with or without a leading colon"
+  [s]
+  (when s
+    (if (.startsWith s ":")
+      (keyword (subs s 1))
+      (keyword s))))
