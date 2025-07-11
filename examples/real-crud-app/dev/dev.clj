@@ -2,10 +2,10 @@
 ;; SPDX-License-Identifier: EUPL-1.2
 (ns dev
   (:require
+   [app.main :as app]
    [app.ui.core :as ui-core]
    [clj-reload.core :as clj-reload]
-   [hifi.system :as hifi]
-   [app.main :as app]))
+   [hifi.system :as hifi]))
 
 ;; --------------------------------------------------------------------------------------------
 ;; Toggle Dev-time flags
@@ -16,6 +16,10 @@
 
 ;; --------------------------------------------------------------------------------------------
 ;; System Control
+
+;; Configure the paths containing clojure sources we want clj-reload to reload
+(clj-reload/init {:dirs      ["src" "dev" "test"]
+                  :no-reload #{'user 'dev}})
 
 (defn restart
   "Restart the application system."
@@ -30,8 +34,6 @@
   (apply clj-reload/reload args)
   (app/start))
 
-(clj-reload/init {:dirs      ["src" "dev" "test"]
-                  :no-reload #{'user 'dev}})
 (comment
 
   ;;; System Control
