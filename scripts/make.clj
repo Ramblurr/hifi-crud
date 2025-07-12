@@ -12,7 +12,7 @@
 (set! *warn-on-reflection* true)
 
 (defn ^:private hifi-libs []
-  (->> (slurp (or (first *command-line-args*) "deps.edn"))
+  (->> (slurp "deps.edn")
        edn/read-string
        :aliases
        :dev
@@ -47,6 +47,6 @@
   (spit ".hifi-kaocha.edn"
         (kaocha-config (hifi-libs))))
 
-(defn test-main "Run all unit tests in libs/." []
+(defn test-main "Run all unit tests in libs/." [& args]
   (build-test-config)
-  (clojure "-M:dev:test"))
+  (apply clojure "-M:dev:test" args))
