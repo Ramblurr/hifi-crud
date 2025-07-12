@@ -74,14 +74,14 @@
 
 (>defn default-clean? [{:keys [clean-age-threshold]}
                        now _ {:keys [::modified ::created]}]
-  [[:map [:clean-age-threshold DurationSchema]]
-   InstantSchema
-   :any
-   [:map
-    [::modified {:optional true} InstantSchema]
-    [::created InstantSchema]] => :boolean]
+       [[:map [:clean-age-threshold DurationSchema]]
+        InstantSchema
+        :any
+        [:map
+         [::modified {:optional true} InstantSchema]
+         [::created InstantSchema]] => :boolean]
 
-  (.isBefore (or modified created) (.minus now clean-age-threshold)))
+       (.isBefore (or modified created) (.minus now clean-age-threshold)))
 
 (defn clean-stale-tab-state
   "Removes tab-ids that are stale, where stale is defined as not having been modified or created in the last 24 hours."

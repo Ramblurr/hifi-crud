@@ -191,7 +191,7 @@
   []
   ((requiring-resolve 'taoensso.telemere/remove-handler!) :tap-handler)
   ((requiring-resolve 'taoensso.telemere/add-handler!) :tap-handler telemere->tap
-   {:min-level :debug}))
+                                                       {:min-level :debug}))
 
 (comment
   #_(do

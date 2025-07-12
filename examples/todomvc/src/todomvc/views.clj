@@ -33,13 +33,13 @@
                 :data-signals__ifmissing (datastar/edn->json {(str "_transit" id) true})
                 :data-class              (->expr {"transitioning" ($_transit ~id)})
                 :data-on-load            (->expr
-                                           (js/setTimeout #(set! ($_transit ~id) false) 100))
+                                          (js/setTimeout #(set! ($_transit ~id) false) 100))
                 :class                   (str "  " (cond
                                                      (= index editing-item-index) "editing"
                                                      (:item/completed? item)      "completed"))
                 :data-on-dblclick        (->expr
-                                           (when (not ($_transit ~id))
-                                             (@post ~(str "/start-edit?index=" index))))}
+                                          (when (not ($_transit ~id))
+                                            (@post ~(str "/start-edit?index=" index))))}
        [:div.view
         [:input.toggle
          {:type           :checkbox
@@ -49,8 +49,8 @@
         [:label (:item/title item)]
         [:button.destroy {:value               index
                           :data-on-click__stop (->expr
-                                                 (set! ($_transit ~id) true)
-                                                 (js/setTimeout #(@post ("`/destroy-todo?index=${evt.srcElement.value}`")) 250))}]]
+                                                (set! ($_transit ~id) true)
+                                                (js/setTimeout #(@post ("`/destroy-todo?index=${evt.srcElement.value}`")) 250))}]]
 
        (edit-view state index item)])))
 
@@ -109,10 +109,10 @@
                                 :placeholder     "What needs to be done?"
                                 :data-bind-input ""
                                 :data-on-keydown (->expr
-                                                   (when (and (= evt.key "Enter")
-                                                              (.-length (.trim $input)))
-                                                     (@post "/add-todo")
-                                                     (set! $input ""))))])
+                                                  (when (and (= evt.key "Enter")
+                                                             (.-length (.trim $input)))
+                                                    (@post "/add-todo")
+                                                    (set! $input ""))))])
 
 (def clojure-logo [:svg  {:xmlns "http://www.w3.org/2000/svg", :viewBox "0 0 256 256"
                           :style "height: 1.5em; width: 1.5em; vertical-align: middle; display: inline-block;"}

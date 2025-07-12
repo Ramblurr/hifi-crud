@@ -11,10 +11,10 @@
             [hifi.datomic.migrations :as migrations]))
 
 (>defn- ensure-and-connect [{:keys [db-uri]}]
-  [spec/DatomicConnectionComponentOptions => spec/DatomicConnectionSchema]
-  (when (d/create-database db-uri)
-    (log/info "Datomic database created"))
-  (d/connect db-uri))
+        [spec/DatomicConnectionComponentOptions => spec/DatomicConnectionSchema]
+        (when (d/create-database db-uri)
+          (log/info "Datomic database created"))
+        (d/connect db-uri))
 
 (defn DatomicConnectionComponent
   "Donut system component for a Datomic Database connection"

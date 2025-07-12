@@ -75,21 +75,21 @@
   (atom nil))
 
 (>defn- create-handler-fn
-  "Returns an arity 0 function that creates a ring handler"
-  [{:keys [resource-handler-opts reload-per-request? router-options routes handler-opts
-           default-handler-opts middleware-top-level]}]
-  [spec/CreateHandlerOptsSchema => fn?]
-  (fn create-handler-inner []
-    (let [router (reitit.ring/router (routes) router-options)]
-      (when reload-per-request?
-        (reset! -dev-routes-last-request router))
-      (reitit.ring/ring-handler
-       router
-       (reitit.ring/routes
-        (reitit.ring/create-resource-handler resource-handler-opts)
-        (reitit.ring/create-default-handler default-handler-opts))
-       (merge {:middleware middleware-top-level}
-              handler-opts)))))
+        "Returns an arity 0 function that creates a ring handler"
+        [{:keys [resource-handler-opts reload-per-request? router-options routes handler-opts
+                 default-handler-opts middleware-top-level]}]
+        [spec/CreateHandlerOptsSchema => fn?]
+        (fn create-handler-inner []
+          (let [router (reitit.ring/router (routes) router-options)]
+            (when reload-per-request?
+              (reset! -dev-routes-last-request router))
+            (reitit.ring/ring-handler
+             router
+             (reitit.ring/routes
+              (reitit.ring/create-resource-handler resource-handler-opts)
+              (reitit.ring/create-default-handler default-handler-opts))
+             (merge {:middleware middleware-top-level}
+                    handler-opts)))))
 
 (defn- prepare-create-handler-opts
   "Given our RingHandlerComponent config, builds and validates a map of options used to construct the ring handler"
