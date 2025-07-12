@@ -1,33 +1,23 @@
 {
   description = "hifi development environment";
+  
   inputs = {
     nixpkgs.url = "https://flakehub.com/f/NixOS/nixpkgs/0.1"; # tracks nixpkgs unstable branch
     datomic-pro.url = "https://flakehub.com/f/Ramblurr/datomic-pro/0.7.0";
+    flake-utils.url = "github:numtide/flake-utils";
+    treefmt-nix.url = "github:numtide/treefmt-nix";
   };
+  
   outputs =
-    inputs:
+    {
+      self,
+      nixpkgs,
+      datomic-pro,
+      flake-utils,
+      treefmt-nix,
+    }:
     let
       javaVersion = 21;
-      supportedSystems = [
-        "x86_64-linux"
-        "aarch64-linux"
-        "x86_64-darwin"
-        "aarch64-darwin"
-      ];
-      forEachSupportedSystem =
-        f:
-        inputs.nixpkgs.lib.genAttrs supportedSystems (
-          system:
-          f {
-            pkgs = import inputs.nixpkgs {
-              inherit system;
-              overlays = [
-                inputs.datomic-pro.overlays.${system}
-                inputs.self.overlays.default
-              ];
-            };
-          }
-        );
     in
     {
       overlays.default =
@@ -43,24 +33,39 @@
             ];
           };
         };
-
-      devShells = forEachSupportedSystem (
-        { pkgs }:
-        {
-          default = pkgs.mkShell {
-            DATOMIC_PRO_PEER_JAR = "${pkgs.datomic-pro-peer}/share/java/datomic-pro-peer-1.0.7387.jar";
-            packages = with pkgs; [
-              gum
-              bun
-              clojure
-              clojure-lsp
-              babashka
-              clj-kondo
-              datomic-pro
-              datomic-pro-peer
-            ];
-          };
-        }
-      );
-    };
+    }
+    // flake-utils.lib.eachDefaultSystem (
+      system:
+      let
+        pkgs = import nixpkgs {
+          inherit system;
+          overlays = [
+            datomic-pro.overlays.${system}
+            self.overlays.default
+          ];
+        };
+        treefmtEval = treefmt-nix.lib.evalModule pkgs ./treefmt.nix;
+      in
+      {
+        formatter = treefmtEval.config.build.wrapper;
+        
+        devShells.default = pkgs.mkShell {
+          DATOMIC_PRO_PEER_JAR = "${pkgs.datomic-pro-peer}/share/java/datomic-pro-peer-1.0.7387.jar";
+          packages = with pkgs; [
+            gum
+            bun
+            clojure
+            clojure-lsp
+            babashka
+            clj-kondo
+            datomic-pro
+            datomic-pro-peer
+          ];
+        };
+        
+        checks = {
+          formatting = treefmtEval.config.build.check self;
+        };
+      }
+    );
 }
