@@ -11,6 +11,7 @@
     cljfmt.enable = true;
   };
   settings = {
+    global.excludes = [ ".envrc" ];
     formatter = { };
   };
 }

@@ -1,5 +1,4 @@
 **/db/
-.*
 !.github
 !.gitignore
 .clj-kondo
@@ -17,3 +16,9 @@ demo/resources/public/datastar@1.0.0-beta.11.js
 **/target
 archive
 .hifi-kaocha.edn
+.lsp
+.nrepl-port
+.cpcache
+.clojure-mcp
+.claude
+.direnv

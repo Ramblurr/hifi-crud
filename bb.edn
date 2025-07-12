@@ -1,2 +1,12 @@
 {:paths ["scripts"]
- :tasks {test make/test-main}}
+ :tasks {:requires         ([clojure.string :as str]
+                            [babashka.tasks :refer [shell]])
+         test              make/test-main
+         fmt               (shell "nix fmt")
+         lint.copy-configs (let [cp (-> (shell {:out :string} "clojure -Spath -M:test:dev") :out str/trim)]
+                             (shell (str "clj-kondo --lint " cp " --dependencies --copy-configs --skip-lint")))
+         lint.kondo        (shell "clj-kondo" *command-line-args*)
+         lint              (shell (str "clj-kondo" " --fail-level error"
+                                       (if (seq *command-line-args*)
+                                         (str " --lint " (first *command-line-args*))
+                                         " --lint libs --lint examples")))}}

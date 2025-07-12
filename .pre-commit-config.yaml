@@ -1,0 +1,25 @@
+# See https://pre-commit.com for more information
+# See https://pre-commit.com/hooks.html for more hooks
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-yaml
+      - id: check-added-large-files
+      - id: mixed-line-ending
+      - id: fix-byte-order-marker
+  - repo: local
+    hooks:
+      - id: treefmt
+        name: treefmt
+        entry: bb fmt
+        language: system
+        require_serial: true
+      - id: clj-kondo linting
+        name: clj-kondo linting
+        entry: bb lint
+        language: system
+        types: [clojure]
+        require_serial: true
