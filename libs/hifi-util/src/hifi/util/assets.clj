@@ -25,21 +25,21 @@
                        (when resource-path
                          (str "/"
                               (.getName (io/as-file (io/resource resource-path))))))
-        _          (assert route-path)
-        compute    (fn []
-                     (let [resp         (cond-> {:status  200
-                                                 :headers {"Cache-Control" "max-age=31536000, immutable"
-                                                           "Content-Type"  content-type}
-                                                 :body (resource->bytes (io/resource resource-path))}
-                                          compress-fn (update :body compress-fn)
-                                          compress-fn (assoc-in [:headers "Content-Encoding"] encoding))
-                           sri-hash     (crypto/sha384-resource resource-path)
-                           cache-buster (subs sri-hash (- 71 8))]
-                       {:handler   (fn [_]
-                                     resp)
-                        :integrity (if (some? integrity) integrity sri-hash)
-                        :href      (str route-path "?v=" cache-buster)
-                        :path      route-path}))]
+        _ (assert route-path)
+        compute (fn []
+                  (let [resp (cond-> {:status 200
+                                      :headers {"Cache-Control" "max-age=31536000, immutable"
+                                                "Content-Type" content-type}
+                                      :body (resource->bytes (io/resource resource-path))}
+                               compress-fn (update :body compress-fn)
+                               compress-fn (assoc-in [:headers "Content-Encoding"] encoding))
+                        sri-hash (crypto/sri-sha384-resource resource-path)
+                        cache-buster (subs sri-hash (- 71 8))]
+                    {:handler (fn [_]
+                                resp)
+                     :integrity (if (some? integrity) integrity sri-hash)
+                     :href (str route-path "?v=" cache-buster)
+                     :path route-path}))]
 
     (if reload?
       ;; In dev mode, re-evaluate on every deref

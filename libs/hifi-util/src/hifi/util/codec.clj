@@ -9,14 +9,15 @@
   (.withoutPadding (Base64/getUrlEncoder)))
 
 (defn ->base64
-  ^String [^byte/1 b]
-  (.encodeToString base64-encoder b))
-
-(defn ->base64
-  ^String [^byte/1 b]
+  ^String [^bytes b]
   (.encodeToString base64-encoder b))
 
 (defn digest
   "Digest function based on Clojure's hash."
   ^String [data]
   (->base64 (.getBytes (str (hash data)))))
+
+(defn ->hex
+  "Converts byte array to hex string using bit manipulation."
+  ^String [^bytes b]
+  (apply str (map #(format "%02x" (Byte/toUnsignedInt %)) b)))
