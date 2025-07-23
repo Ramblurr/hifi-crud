@@ -120,7 +120,7 @@
                                              d*com/write-profile (brotli/->brotli-profile))))}})
 
 (def !datastar-asset (assets/static-asset false
-                                          {:resource-path "hifi-datastar/datastar@1.0.0-RC.1.js"
+                                          {:resource-path "hifi-datastar/datastar@1.0.0-RC.2.js"
                                            :content-type  "text/javascript"
                                            :compress-fn   (fn [body]
                                                             (brotli/compress body :quality 11))
