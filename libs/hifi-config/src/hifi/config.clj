@@ -73,10 +73,12 @@
 
    Options are passed to the underlying Aero reader."
   [filename options]
-  ;;; This exists because we want to be able to provide nicer error messages.
-  (if-let [f filename]
-    (aero/read-config f  options)
-    (throw (ex-info (str "Config filename '" filename "' does not exist or could not be read by hifi.config/read-config") {:hifi/error :hifi.config/invalid-filename :filename filename :options options}))))
+  (try
+    (if filename
+      (aero/read-config filename options)
+      (throw (ex-info "Filename passed to hifi.config/read-config was nil" {:hifi/error :hifi.config/invalid-file :filename nil :options options})))
+    (catch java.io.FileNotFoundException _
+      (throw (ex-info (str "Config filename '" filename "' does not exist or could not be read by hifi.config/read-config") {:hifi/error :hifi.config/invalid-file :filename filename :options options})))))
 
 (defn read-config
   "Reads `:filename` (default: env.edn`) and returns the env config.
