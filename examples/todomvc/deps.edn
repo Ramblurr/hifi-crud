@@ -1,9 +1,9 @@
 {:paths ["src" "resources"]
- :deps  {org.clojure/clojure  {:mvn/version "1.12.0"}
+ :deps  {org.clojure/clojure  {:mvn/version "1.12.2"}
          datastar/expressions {:git/url "https://github.com/ramblurr/datastar-expressions/"
-                               :git/sha "8db9d4bf5a178912ca173f67671fd9dba6b14f90"}
-         funcool/cuerdas      {:mvn/version "2023.11.09-407"}
-         com.taoensso/nippy   {:mvn/version "3.6.0-alpha1"}
+                               :git/sha "0cf32202c0c9bef106e8635219259affd874fa00"}
+         funcool/cuerdas      {:mvn/version "2025.06.16-414"}
+         com.taoensso/nippy   {:mvn/version "3.6.0"}
          hifi/html            {:local/root "../../libs/hifi-html"}
          hifi/system          {:local/root "../../libs/hifi-system"}}
 
@@ -22,7 +22,7 @@
                      :jvm-opts  ["-Dhifi.profile=dev"]}
            :neil    {:project {:name    hifi/todomvc
                                :version "0.0.1"}}
-           :build   {:deps       {io.github.clojure/tools.build {:git/tag "v0.10.9" :git/sha "e405aac"}
+           :build   {:deps       {io.github.clojure/tools.build {:git/tag "v0.10.10" :git/sha "deedd62"}
                                   babashka/process              {:mvn/version "0.6.23"}
-                                  hifi/dev-tasks                 {:local/root "../../libs/hifi-dev-tasks"}}
+                                  hifi/dev-tasks                {:local/root "../../libs/hifi-dev-tasks"}}
                      :ns-default build}}}
