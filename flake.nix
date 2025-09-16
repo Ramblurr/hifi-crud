@@ -3,7 +3,7 @@
 
   inputs = {
     nixpkgs.url = "https://flakehub.com/f/NixOS/nixpkgs/0.1"; # tracks nixpkgs unstable branch
-    datomic-pro.url = "https://flakehub.com/f/Ramblurr/datomic-pro/0.7.0";
+    datomic-pro.url = "https://flakehub.com/f/outskirtslabs/datomic-pro/0.8.0";
     flake-utils.url = "github:numtide/flake-utils";
     treefmt-nix.url = "github:numtide/treefmt-nix";
   };
@@ -46,7 +46,7 @@
         formatter = treefmtEval.config.build.wrapper;
 
         devShells.default = pkgs.mkShell {
-          DATOMIC_PRO_PEER_JAR = "${pkgs.datomic-pro-peer}/share/java/datomic-pro-peer-1.0.7387.jar";
+          DATOMIC_PRO_PEER_JAR = "${pkgs.datomic-pro-peer_1_0_7394}/share/java/datomic-pro-peer-1.0.7394.jar";
           packages = with pkgs; [
             gum
             bun
@@ -54,8 +54,7 @@
             clojure-lsp
             babashka
             clj-kondo
-            datomic-pro
-            datomic-pro-peer
+            datomic-pro_1_0_7394
           ];
         };
 
