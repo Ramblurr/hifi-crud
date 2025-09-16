@@ -1,6 +1,6 @@
 {:paths ["src" "resources"]
  :deps
- {io.github.paintparty/bling       {:mvn/version "0.8.5"}
+ {io.github.paintparty/bling       {:mvn/version "0.8.8"}
   borkdude/carve                   {:git/url    "https://github.com/borkdude/carve"
                                     :git/sha    "fdd1d0bc432f63db69e3a72167ef5e46f10dfba7"
                                     :exclusions [clj-kondo/clj-kondo]}
@@ -12,11 +12,11 @@
   io.replikativ/datalog-parser     {:mvn/version "0.2.30"}
   borkdude/rewrite-edn             {:mvn/version "0.4.9"}
   lambdaisland/deep-diff2          {:mvn/version "2.12.219"}
-  io.github.lispyclouds/bblgum     {:git/sha "df647fb50f32e05b26e46e58d7249b4798e469e6"}
-  dev.weavejester/medley           {:mvn/version "1.8.0"}
+  io.github.lispyclouds/bblgum     {:git/sha "2f39b2c0d5ca83054c97173207b324bf2adb8066"}
+  dev.weavejester/medley           {:mvn/version "1.9.0"}
   version-clj/version-clj          {:mvn/version "2.0.3"}
-  org.babashka/cli                 {:mvn/version "0.8.65"}
-  fipp/fipp                        {:mvn/version "0.6.27"}
+  org.babashka/cli                 {:mvn/version "0.8.66"}
+  fipp/fipp                        {:mvn/version "0.6.29"}
   dev.weavejester/cljfmt           {:mvn/version "0.13.1"}
   ;; io.github.babashka/tools.bbuild  {:git/sha "4493ba83664bdbfcaf932845fbd2f2183cdb7c1d"}
   }
