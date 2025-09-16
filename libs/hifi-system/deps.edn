@@ -8,17 +8,17 @@
          metosin/reitit-middleware        {:mvn/version "0.9.1"
                                            :exclusions  [metosin/muuntaja]}
          aero/aero                        {:mvn/version "1.1.6"}
-         party.donut/system               {:mvn/version "1.0.255"
+         party.donut/system               {:mvn/version "1.0.257"
                                            :exclusions  [tailrecursion/cljs-priority-map]}
-         http-kit/http-kit                {:mvn/version "2.9.0-beta1"}
-         ring/ring-defaults               {:mvn/version "0.6.0"}
+         http-kit/http-kit                {:mvn/version "2.9.0-beta2"}
+         ring/ring-defaults               {:mvn/version "0.7.0"}
          com.fulcrologic/guardrails       {:mvn/version "1.2.9"}
          dev.data-star.clojure/http-kit   {:mvn/version "1.0.0-RC3"
                                            :exclusions  [http-kit/http-kit]}
          datastar/expressions             {:git/url "https://github.com/ramblurr/datastar-expressions/"
                                            :git/sha "0cf32202c0c9bef106e8635219259affd874fa00"}
          org.flatland/ordered             {:mvn/version "1.15.12"}
-         dev.weavejester/medley           {:mvn/version "1.8.1"}
+         dev.weavejester/medley           {:mvn/version "1.9.0"}
          hifi/config                      {:local/root "../hifi-config"}
          hifi/error                       {:local/root "../hifi-error"}
          hifi/engine                      {:local/root "../hifi-engine"}
