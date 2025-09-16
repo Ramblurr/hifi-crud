@@ -13,13 +13,10 @@
          http-kit/http-kit                {:mvn/version "2.9.0-beta1"}
          ring/ring-defaults               {:mvn/version "0.6.0"}
          com.fulcrologic/guardrails       {:mvn/version "1.2.9"}
-         datastar/adapter-http-kit        {;; :git/url    "https://github.com/starfederation/datastar/"
-                                           :git/url    "https://github.com/JeremS/datastar/"
-                                           :git/sha    "59740d5da73a0c8a760ed2b92aa1fa5f067ce34a"
-                                           :deps/root  "sdk/clojure/adapter-http-kit"
-                                           :exclusions [http-kit/http-kit]}
+         dev.data-star.clojure/http-kit   {:mvn/version "1.0.0-RC3"
+                                           :exclusions  [http-kit/http-kit]}
          datastar/expressions             {:git/url "https://github.com/ramblurr/datastar-expressions/"
-                                           :git/sha "47e8dc6d3646278f7b67fc89f67dd86a8986977f"}
+                                           :git/sha "0cf32202c0c9bef106e8635219259affd874fa00"}
          org.flatland/ordered             {:mvn/version "1.15.12"}
          dev.weavejester/medley           {:mvn/version "1.8.1"}
          hifi/config                      {:local/root "../hifi-config"}
