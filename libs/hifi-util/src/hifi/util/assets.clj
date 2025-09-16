@@ -9,6 +9,11 @@
    [clojure.java.io :as io]
    [hifi.util.crypto :as crypto]))
 
+(defn resource [p]
+  (if-let [res (io/resource p)]
+    res
+    (throw (ex-info "Resource does not exist" {:resource-path p}))))
+
 (defn resource->bytes [resource]
   (-> resource io/input-stream InputStream/.readAllBytes))
 
@@ -30,7 +35,7 @@
                   (let [resp (cond-> {:status 200
                                       :headers {"Cache-Control" "max-age=31536000, immutable"
                                                 "Content-Type" content-type}
-                                      :body (resource->bytes (io/resource resource-path))}
+                                      :body (resource->bytes (resource resource-path))}
                                compress-fn (update :body compress-fn)
                                compress-fn (assoc-in [:headers "Content-Encoding"] encoding))
                         sri-hash (crypto/sri-sha384-resource resource-path)
