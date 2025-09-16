@@ -8,7 +8,7 @@
    [hifi.dev-tasks.importmap.npm :as npm]
    [hifi.dev-tasks.importmap.package :as pkg]))
 
-(def default-opts {:vendor-path    "assets/vendor/"
+(def default-opts {:vendor-path    "assets/builds/vendor/"
                    :assets-route   "/assets"
                    :importmap-path "assets/importmap.edn"})
 

@@ -184,7 +184,7 @@
    {:imports
     (medley/map-kv-vals (fn [name {:keys [to]}]
                           (if to
-                            (str assets-route "/" to)
-                            (str assets-route "/" name ".js")))
+                            (str assets-route "/builds/vendor/" to)
+                            (str assets-route "/builds/vendor/" name ".js")))
                         (:pins (read-importmap opts)))}
    {:pretty true}))
