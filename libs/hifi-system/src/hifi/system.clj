@@ -125,7 +125,7 @@
             (try
               [(f) nil]
               (catch Throwable t
-                [nil (ex-info "Your handler/routes function threw an exception." {:f f} t)])))
+                [nil (ex-info "Your handler/routes function threw an exception" {:f f} t)])))
 
           (error [^Throwable t]
             (.printStackTrace t)

@@ -123,7 +123,10 @@
 (defn prod? []
   (let [p (current-profile)]
     (or (nil? p)
-        (= :prod p))))
+        (= :prod p)
+        (isa? (current-profile) ::prod))))
 
 (defn dev? []
-  (= :dev (current-profile)))
+  (or
+   (= :dev (current-profile))
+   (isa? (current-profile) ::dev)))
