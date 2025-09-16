@@ -62,6 +62,7 @@
 
 (defn tw [conf & extra]
   (ensure-tailwind conf)
+  (fs/create-dirs (fs/parent (:output conf)))
   (let [args (tailwind-opts conf extra)]
     (debug "[tailwind] args: " args)
     (apply shell args)))

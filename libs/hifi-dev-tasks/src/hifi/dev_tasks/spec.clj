@@ -13,7 +13,7 @@
    [:input {:doc     "Input CSS file for Tailwind CSS"
             :default tw-default-input} :string]
    [:output {:doc     "Output CSS file for Tailwind CSS"
-             :default "target/resources/public/compiled.css"} :string]
+             :default "assets/builds/tailwind.css"} :string]
    [:path {:default "tailwindcss"
            :desc    "Path to the Tailwind CSS binary or the command if it is on the PATH"} :string]])
 

@@ -1,5 +1,5 @@
 ;; Copyright © 2025 Casey Link <casey@outskirtslabs.com>
-;; SPDX-License-Identifier: EUPL-1.2 
+;; SPDX-License-Identifier: EUPL-1.2
 
  (ns hifi.assets.scanner
    "Asset directory scanning functionality."
@@ -13,10 +13,16 @@
   (let [file (io/file path)]
     (and (.exists file) (.isDirectory file))))
 
+(def default-excluded-files
+  "Files that should be excluded from asset processing by default"
+  #{"importmap.edn" "package.json" ".gitignore" "README.md" ".DS_Store"})
+
 (defn- should-exclude?
-  "Checks if a file path should be excluded based on exclusion patterns."
+  "Checks if a file path should be excluded based on exclusion patterns and default exclusions."
   [file-path excluded-paths]
-  (boolean (some #(str/starts-with? file-path %) excluded-paths)))
+  (let [filename (last (str/split file-path #"/"))]
+    (or (contains? default-excluded-files filename)
+        (boolean (some #(str/starts-with? file-path %) excluded-paths)))))
 
 (defn- collect-files
   "Recursively collects all files from a directory."
@@ -40,7 +46,7 @@
 
 (defn scan-asset-paths
   "Scans configured asset paths and returns a collection of asset file information.
-   
+
    Returns a vector of maps with:
    {:file - Java File object
     :full-path - Absolute path to file

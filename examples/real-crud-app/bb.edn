@@ -1,18 +1,22 @@
-{:deps  {hifi/dev-tasks {:local/root "../../libs/hifi-dev-tasks"}}
+{:deps  {hifi/dev-tasks {:local/root "../../libs/hifi-dev-tasks"}
+         hifi/assets    {:local/root "../../libs/hifi-assets"}}
  :tasks {bb-update          hifi.dev-tasks.bb/update-bb-edn
          lint:copy-configs  hifi.dev-tasks.lint.kondo/copy-configs-main
          lint:carve         hifi.dev-tasks.lint.carve/-main
          dev                hifi.dev-tasks.dev/-main
          clean              hifi.dev-tasks.build/clean
-         css:watch          hifi.dev-tasks.css.tailwind/watch-dev
-         css:prod           hifi.dev-tasks.css.tailwind/build-prod
-         css                hifi.dev-tasks.css.tailwind/build-dev
+         tailwindcss:watch  hifi.dev-tasks.css.tailwind/watch-dev
+         tailwindcss:prod   hifi.dev-tasks.css.tailwind/build-prod
+         tailwindcss        hifi.dev-tasks.css.tailwind/build-dev
          datomic            hifi.dev-tasks.datomic/-main
          lint:ns-docstrings hifi.dev-tasks.lint.ns-docstrings/-main
          uber               hifi.dev-tasks.build/uber
          fmt                hifi.dev-tasks.fmt/fmt-main
          lint               hifi.dev-tasks.lint.kondo/lint-main
          bun                hifi.dev-tasks.bun/build-dev
-         importmap hifi.dev-tasks.importmap/-main}
+         importmap          hifi.dev-tasks.importmap/-main
+         assets:precompile  hifi.dev-tasks.assets/precompile
+         assets:clean       hifi.dev-tasks.assets/clean
+         assets             hifi.dev-tasks.assets/-main}
 
  :pods {clj-kondo/clj-kondo {:version "2025.06.05"}}}
