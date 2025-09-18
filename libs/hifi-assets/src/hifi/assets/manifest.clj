@@ -1,5 +1,5 @@
 ;; Copyright © 2025 Casey Link <casey@outskirtslabs.com>
-;; SPDX-License-Identifier: EUPL-1.2 
+;; SPDX-License-Identifier: EUPL-1.2
 
  (ns hifi.assets.manifest
    "Manifest generation and loading for the asset pipeline."
@@ -27,8 +27,8 @@
 
 (defn write-manifest
   "Writes the manifest to a file in EDN format."
-  [manifest output-path]
-  (let [output-file (io/file output-path)]
+  [manifest output-dir]
+  (let [output-file (io/file output-dir)]
     (io/make-parents output-file)
     (with-open [writer (io/writer output-file)]
       (pprint/write manifest :stream writer :pretty true))))

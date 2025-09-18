@@ -1,6 +1,5 @@
 ;; Copyright © 2025 Casey Link <casey@outskirtslabs.com>
 ;; SPDX-License-Identifier: EUPL-1.2
-
 (ns hifi.assets.integration-test
   (:require
    [clojure.test :refer [deftest testing is]]
@@ -35,9 +34,9 @@
         (spit (str temp-dir "/assets/js/vendor-abc12345.digested.js") "// vendor code")
 
         ;; Scan assets
-        (let [scanned (scanner/scan-asset-paths [(str temp-dir "/assets")] [])
+        (let [scanned        (scanner/scan-assets [(str temp-dir "/assets")] {:hifi.assets/excluded-paths [] :hifi.assets/project-root temp-dir})
               digest-results (map (fn [asset]
-                                    (digest/digest-file-content (:full-path asset)
+                                    (digest/digest-file-content (:abs-path asset)
                                                                 (:logical-path asset)))
                                   scanned)]
 
@@ -46,20 +45,21 @@
 
           (testing "digest results for regular files"
             (let [app-js-digest (first (filter #(= "js/app.js" (:logical-path %)) digest-results))]
-              (is (= "app.js" (:original-name app-js-digest)))
-              (is (string? (:sha256-hash app-js-digest)))
-              (is (= 64 (count (:sha256-hash app-js-digest)))) ;; SHA256 = 64 hex chars
+              (is (= {:original-name "app.js"
+                      :pre-digested? false
+                      :size          21}
+                     (select-keys app-js-digest [:original-name :pre-digested? :size])))
+              (is (= 64 (count (:sha256-hash app-js-digest))))
               (is (str/starts-with? (:sri-hash app-js-digest) "sha384-"))
-              (is (false? (:pre-digested? app-js-digest)))
-              (is (= 21 (:size app-js-digest))) ;; "console.log('hello');" = 21 bytes
               (is (str/starts-with? (:digest-name app-js-digest) "app-"))))
 
           (testing "digest results for pre-digested files"
             (let [vendor-digest (first (filter #(:pre-digested? %) digest-results))]
-              (is (= "vendor.js" (:original-name vendor-digest)))
-              (is (= "vendor-abc12345.digested.js" (:digest-name vendor-digest)))
-              (is (= "abc12345" (:sha256-hash vendor-digest)))
-              (is (true? (:pre-digested? vendor-digest)))
+              (is (= {:original-name "vendor.js"
+                      :digest-name   "vendor-abc12345.digested.js"
+                      :sha256-hash   "abc12345"
+                      :pre-digested? true}
+                     (select-keys vendor-digest [:original-name :digest-name :sha256-hash :pre-digested?])))
               (is (str/starts-with? (:sri-hash vendor-digest) "sha384-")))))))))
 
 (deftest full-pipeline-test
@@ -80,13 +80,14 @@
         (fs/create-dirs (str temp-dir "/output"))
 
         ;; Scan and digest
-        (let [config {:hifi/assets {:paths [(str temp-dir "/assets")]}
-                      :excluded-paths []}
-              scanned (scanner/scan-assets-from-config config)
-              digest-infos (map (fn [asset]
-                                  (digest/digest-file-content (:full-path asset)
-                                                              (:logical-path asset)))
-                                scanned)
+        (let [config        {:hifi.assets/paths          [(str temp-dir "/assets")]
+                             :hifi.assets/project-root   temp-dir
+                             :hifi.assets/excluded-paths []}
+              scanned       (scanner/scan-assets config)
+              digest-infos  (map (fn [asset]
+                                   (digest/digest-file-content (:abs-path asset)
+                                                               (:logical-path asset)))
+                                 scanned)
               manifest-data (manifest/generate-manifest digest-infos)
               manifest-path (str temp-dir "/output/manifest.edn")]
 
@@ -97,14 +98,11 @@
             (is (.exists (io/file manifest-path))))
 
           (testing "manifest contains all assets"
-            (is (= 3 (count manifest-data)))
-            (is (contains? manifest-data "js/app.js"))
-            (is (contains? manifest-data "css/styles.css"))
-            (is (contains? manifest-data "images/logo.png")))
+            (is (= #{"js/app.js" "css/styles.css" "images/logo.png"}
+                   (set (keys manifest-data)))))
 
           (testing "manifest entries have correct structure"
             (let [app-entry (get manifest-data "js/app.js")]
-              (is (string? (:digest-path app-entry)))
               (is (str/starts-with? (:digest-path app-entry) "app-"))
               (is (str/ends-with? (:digest-path app-entry) ".js"))
               (is (str/starts-with? (:integrity app-entry) "sha384-"))
@@ -112,10 +110,8 @@
               (is (string? (:last-modified app-entry)))))
 
           (testing "manifest can be loaded back"
-            (let [loaded-manifest (manifest/load-manifest manifest-path)]
-              (is (= (count manifest-data) (count loaded-manifest)))
-              (is (= (get-in manifest-data ["js/app.js" :digest-path])
-                     (get-in loaded-manifest ["js/app.js" :digest-path]))))))))))
+            (is (= (get-in manifest-data ["js/app.js" :digest-path])
+                   (get-in (manifest/load-manifest manifest-path) ["js/app.js" :digest-path])))))))))
 
 (deftest asset-exists-check-test
   (testing "checking if assets exist in development mode"
@@ -124,12 +120,63 @@
         (fs/create-dirs (str temp-dir "/assets/js"))
         (spit (str temp-dir "/assets/js/app.js") "// code")
 
-        (let [config {:hifi/assets {:paths [(str temp-dir "/assets")]}}
+        (let [config    {:hifi.assets/paths [(str temp-dir "/assets")]}
               asset-ctx (assets/create-asset-context {:dev-mode? true
-                                                      :config config})]
+                                                      :config    config})]
 
-          (testing "returns true for existing asset"
-            (is (assets/asset-exists? asset-ctx "js/app.js")))
+          (is (assets/asset-exists? asset-ctx "js/app.js"))
+          (is (not (assets/asset-exists? asset-ctx "js/missing.js"))))))))
 
-          (testing "returns false for non-existing asset"
-            (is (not (assets/asset-exists? asset-ctx "js/missing.js")))))))))
+(deftest path-precedence-test
+  (testing "when multiple paths contain the same asset, first path wins"
+    (with-temp-dir
+      (fn [temp-dir]
+        ;; Create two asset directories
+        (fs/create-dirs (str temp-dir "/app-assets/js"))
+        (fs/create-dirs (str temp-dir "/app-assets/css"))
+        (fs/create-dirs (str temp-dir "/app-assets/nested/dir"))
+        (fs/create-dirs (str temp-dir "/lib-assets/js"))
+        (fs/create-dirs (str temp-dir "/lib-assets/css"))
+        (fs/create-dirs (str temp-dir "/lib-assets/nested/dir"))
+
+        ;; Create conflicting files with different content
+        ;; Root-level conflicts
+        (spit (str temp-dir "/app-assets/js/shared.js") "console.log('from app');")
+        (spit (str temp-dir "/lib-assets/js/shared.js") "console.log('from lib');")
+
+        ;; Nested directory conflicts
+        (spit (str temp-dir "/app-assets/nested/dir/config.js") "// app config")
+        (spit (str temp-dir "/lib-assets/nested/dir/config.js") "// lib config")
+
+        ;; Files unique to each path
+        (spit (str temp-dir "/app-assets/css/app.css") "/* app specific */")
+        (spit (str temp-dir "/lib-assets/css/lib.css") "/* lib specific */")
+
+        ;; Scan with app-assets first
+        (let [scanned (scanner/scan-assets {:hifi.assets/paths          [(str temp-dir "/app-assets")
+                                                                         (str temp-dir "/lib-assets")]
+                                            :hifi.assets/project-root   temp-dir
+                                            :hifi.assets/excluded-paths []})]
+
+          (is (= #{"app-assets/js/shared.js" "app-assets/css/app.css" "app-assets/nested/dir/config.js" "lib-assets/css/lib.css"}
+                 (set (map :relative-path scanned))))
+
+          (is (= (str temp-dir "/app-assets/js/shared.js")
+                 (:abs-path (scanner/find-asset scanned "js/shared.js"))))
+
+          (is (= (str temp-dir "/app-assets/nested/dir/config.js")
+                 (:abs-path (scanner/find-asset scanned "nested/dir/config.js"))))
+
+          (is (= {"css/app.css" "app-assets/css/app.css"
+                  "css/lib.css" "lib-assets/css/lib.css"}
+                 {"css/app.css" (:relative-path (scanner/find-asset scanned "css/app.css"))
+                  "css/lib.css" (:relative-path (scanner/find-asset scanned "css/lib.css"))})))
+
+        ;; Test with reversed path order
+        (let [scanned (scanner/scan-assets {:hifi.assets/paths          [(str temp-dir "/lib-assets")
+                                                                         (str temp-dir "/app-assets")]
+                                            :hifi.assets/project-root   temp-dir
+                                            :hifi.assets/excluded-paths []})]
+
+          (is (= #{"app-assets/css/app.css" "lib-assets/css/lib.css" "lib-assets/js/shared.js" "lib-assets/nested/dir/config.js"}
+                 (set (map :relative-path scanned)))))))))

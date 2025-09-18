@@ -42,7 +42,7 @@
                         cache-buster (subs sri-hash (- 71 8))]
                     {:handler (fn [_]
                                 resp)
-                     :integrity (if (some? integrity) integrity sri-hash)
+                     ;; :integrity (if (some? integrity) integrity sri-hash)
                      :href (str route-path "?v=" cache-buster)
                      :path route-path}))]
 

@@ -1,5 +1,5 @@
 ;; Copyright © 2025 Casey Link <casey@outskirtslabs.com>
-;; SPDX-License-Identifier: EUPL-1.2 
+;; SPDX-License-Identifier: EUPL-1.2
 
  (ns hifi.assets.manifest-test
    (:require
@@ -13,10 +13,10 @@
                        :size 1024
                        :logical-path "app.js"}
           result (manifest/create-manifest-entry digest-info)]
-      (is (contains? result "app.js"))
-      (is (= "app-abc123.js" (get-in result ["app.js" :digest-path])))
-      (is (= "sha384-XYZ789" (get-in result ["app.js" :integrity])))
-      (is (= 1024 (get-in result ["app.js" :size])))
+      (is (= {:digest-path "app-abc123.js"
+              :integrity "sha384-XYZ789"
+              :size 1024}
+             (dissoc (get result "app.js") :last-modified)))
       (is (string? (get-in result ["app.js" :last-modified]))))))
 
 (deftest generate-manifest-test
@@ -30,9 +30,9 @@
                          :size 2048
                          :logical-path "style.css"}]
           result (manifest/generate-manifest digest-infos)]
-      (is (= 2 (count result)))
-      (is (= "app-abc123.js" (get-in result ["app.js" :digest-path])))
-      (is (= "style-def456.css" (get-in result ["style.css" :digest-path]))))))
+      (is (= {"app.js" "app-abc123.js"
+              "style.css" "style-def456.css"}
+             (update-vals result :digest-path))))))
 
 (deftest manifest-lookup-test
   (let [manifest {"app.js" {:digest-path "app-abc123.js"}
@@ -68,9 +68,10 @@
                        :size 2048
                        :logical-path "app.js"}
           result (manifest/update-manifest-entry manifest digest-info)]
-      (is (= "app-new.js" (get-in result ["app.js" :digest-path])))
-      (is (= "sha384-NEW" (get-in result ["app.js" :integrity])))
-      (is (= 2048 (get-in result ["app.js" :size])))))
+      (is (= {:digest-path "app-new.js"
+              :integrity "sha384-NEW"
+              :size 2048}
+             (dissoc (get result "app.js") :last-modified)))))
 
   (testing "adds new entry"
     (let [manifest {"app.js" {:digest-path "app-abc123.js"}}
@@ -79,5 +80,5 @@
                        :size 1024
                        :logical-path "style.css"}
           result (manifest/update-manifest-entry manifest digest-info)]
-      (is (= 2 (count result)))
-      (is (contains? result "style.css")))))
+      (is (= #{"app.js" "style.css"}
+             (set (keys result)))))))

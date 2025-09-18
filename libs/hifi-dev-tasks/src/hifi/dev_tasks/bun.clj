@@ -4,6 +4,7 @@
   (:require
    [babashka.fs :as fs]
    [bling.core :as bling]
+   [clojure.string :as str]
    [hifi.dev-tasks.config :as config]
    [hifi.dev-tasks.util :refer [debug shell str->keyword]]))
 
@@ -72,7 +73,14 @@
   (if-let [profile (bun-profile conf profile-name)]
     (let [{:keys [cd env args prod dev]} profile
           target-args                    (:args (if (= target :prod) prod dev))
-          final-args                     (apply conj ["build"] (apply conj  target-args args))]
+          final-args                     (apply conj ["build"] (apply conj  target-args args))
+          outdir-arg                     (->> (concat args target-args)
+                                              (filter #(str/starts-with? % "--outdir="))
+                                              first)
+          outdir                         (when outdir-arg
+                                           (subs outdir-arg 9))]
+      (when outdir
+        (fs/create-dirs (fs/path cd outdir)))
       (debug "[bun] env :" env)
       (debug "[bun] cd  :" cd)
       (debug "[bun] args:" target-args)

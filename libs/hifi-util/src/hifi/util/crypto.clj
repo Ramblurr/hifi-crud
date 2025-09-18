@@ -18,6 +18,7 @@
    - -hex suffix for hex string output"
   (:refer-clojure :exclude [bytes])
   (:require
+   [babashka.fs :as fs]
    [clojure.java.io :as io]
    [crypto.equality :as equality]
    [hifi.util.codec :as codec])
@@ -92,8 +93,8 @@
 (defn hash-file
   "Hashes file with algorithm. Returns nil if file doesn't exist."
   ^bytes [^String algo file-path]
-  (let [file (io/file file-path)]
-    (when (.exists file)
+  (let [file (fs/file file-path)]
+    (when (fs/exists? file)
       (with-open [in (io/input-stream file)]
         (.digest (hash-stream-data algo in))))))
 
@@ -186,8 +187,8 @@
   "Computes SRI hash of file for given algorithm.
    Only accepts W3C SRI spec algorithms: sha256, sha384, sha512."
   [algo file-path]
-  (let [file (io/file file-path)]
-    (when (.exists file)
+  (let [file (fs/file file-path)]
+    (when (fs/exists? file)
       (with-open [in (io/input-stream file)]
         (sri-hash-stream algo in)))))
 

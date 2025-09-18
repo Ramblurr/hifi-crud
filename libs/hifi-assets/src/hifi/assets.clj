@@ -12,17 +12,14 @@
 (defn create-asset-context
   "Creates an asset context map containing configuration, manifest data,
    and environment settings. This context is passed to all asset functions.
-   
+
    Options:
-   - :config - Configuration map or file path  
-   - :dev-mode? - Whether to run in development mode (default: false)
-   - :manifest-path - Path to manifest.edn file"
+   - :config - Assets configuration map
+   - :dev-mode? - Whether to run in development mode (default: false) "
   ([opts]
-   (let [config (config/load-and-validate-config (:config opts))
+   (let [config (config/load-config (:config opts))
          dev-mode? (boolean (:dev-mode? opts))
-         manifest-path (or (:manifest-path opts)
-                           (get-in config [:hifi/assets :manifest-path])
-                           "target/resources/public/assets/manifest.edn")
+         manifest-path (:hifi.assets/manifest-path config)
          manifest (when-not dev-mode?
                     (manifest/load-manifest manifest-path))]
      {:config config
@@ -42,15 +39,6 @@
     (or (get-in (:manifest asset-ctx) [logical-path :digest-path])
         logical-path)))
 
-(defn asset-url
-  "Like asset-path but prefixes with a base URL if provided in config."
-  ([asset-ctx logical-path]
-   (asset-url asset-ctx logical-path nil))
-  ([asset-ctx logical-path base-url]
-   (let [path (asset-path asset-ctx logical-path)
-         base (or base-url (get-in (:config asset-ctx) [:hifi/assets :base-url]) "")]
-     (str base "/" path))))
-
 (defn asset-integrity
   "Returns the SRI (Subresource Integrity) hash for an asset.
    Returns nil in development mode or if no integrity hash exists."
@@ -63,16 +51,16 @@
   [asset-ctx logical-path]
   (if (:dev-mode? asset-ctx)
     ;; In dev mode, check if file exists in any configured path
-    (let [paths (get-in (:config asset-ctx) [:hifi/assets :paths] ["assets"])]
-      (some #(let [full-path (str % "/" logical-path)]
-               (.exists (io/file full-path)))
+    (let [paths (get-in asset-ctx [:config :hifi.assets/paths])]
+      (some #(let [abs-path (str % "/" logical-path)]
+               (.exists (io/file abs-path)))
             paths))
     ;; In production, check manifest
     (contains? (:manifest asset-ctx) logical-path)))
 
 (defn stylesheet-link-tag
   "Generates a hiccup :link element for a CSS stylesheet.
-   
+
    Options:
    - :integrity - Include SRI integrity attribute (default: false)
    - :media - CSS media attribute (default: 'all')
@@ -94,7 +82,7 @@
 
 (defn script-tag
   "Generates a hiccup :script element for JavaScript.
-   
+
    Options:
    - :integrity - Include SRI integrity attribute (default: false)
    - :async - Add async attribute (default: false)
@@ -117,7 +105,7 @@
 
 (defn image-tag
   "Generates a hiccup :img element for images.
-   
+
    Options:
    - :alt - Alt text for the image
    - :width - Image width
@@ -133,7 +121,7 @@
 
 (defn preload-link-tag
   "Generates a hiccup :link element for asset preloading.
-   
+
    Options:
    - :as - Resource type (e.g., 'script', 'style', 'image')
    - :type - MIME type

@@ -47,6 +47,8 @@
   (spit ".hifi-kaocha.edn"
         (kaocha-config (hifi-libs))))
 
-(defn test-main "Run all unit tests in libs/." [& args]
+(defn -main
+  "Run all unit tests in libs/."
+  [& args]
   (build-test-config)
   (apply clojure "-M:dev:test" args))
