@@ -4,6 +4,7 @@
   "Configuration loading and validation for the asset pipeline."
   (:require
    [babashka.fs :as fs]
+   [hifi.assets.processors :as processors]
    [hifi.assets.spec :as spec]
    [hifi.error.iface :as pe]))
 
@@ -12,7 +13,12 @@
   [config]
   (try
     (-> (pe/coerce! spec/AssetConfigSchema (or config {}))
-        (update :hifi.assets/project-root fs/canonicalize))
+        (update :hifi.assets/project-root fs/canonicalize)
+        (update :hifi.assets/processors
+                (fn [processors]
+                  (if (empty? processors)
+                    processors/default-processors
+                    processors))))
     (catch clojure.lang.ExceptionInfo e
       (if (pe/id? e ::pe/schema-validation-error)
         (do

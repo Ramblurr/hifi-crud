@@ -2,10 +2,9 @@
 ;; SPDX-License-Identifier: EUPL-1.2
 (ns hifi.assets.scanner-test
   (:require
-   [clojure.test :refer [deftest testing is are]]
-   [clojure.java.io :as io]
-   [clojure.string :as str]
    [babashka.fs :as fs]
+   [clojure.java.io :as io]
+   [clojure.test :refer [are deftest is testing]]
    [hifi.assets.scanner :as scanner]))
 
 (defn with-temp-dir
@@ -58,22 +57,22 @@
       (testing "collects all files recursively"
         (let [collected (scanner/collect-files (str temp-dir "/assets") temp-dir)]
           (is (= 4 (count collected)))
-          (is (= #{{:abs-path (str temp-dir "/assets/js/app.js")
+          (is (= #{{:abs-path      (str temp-dir "/assets/js/app.js")
                     :relative-path "assets/js/app.js"
-                    :file (io/file (str temp-dir "/assets/js/app.js"))
-                    :logical-path "js/app.js"}
-                   {:abs-path (str temp-dir "/assets/js/vendor.js")
+                    :file          (io/file (str temp-dir "/assets/js/app.js"))
+                    :logical-path  "js/app.js"}
+                   {:abs-path      (str temp-dir "/assets/js/vendor.js")
                     :relative-path "assets/js/vendor.js"
-                    :file (io/file (str temp-dir "/assets/js/vendor.js"))
-                    :logical-path "js/vendor.js"}
-                   {:abs-path (str temp-dir "/assets/css/main.css")
+                    :file          (io/file (str temp-dir "/assets/js/vendor.js"))
+                    :logical-path  "js/vendor.js"}
+                   {:abs-path      (str temp-dir "/assets/css/main.css")
                     :relative-path "assets/css/main.css"
-                    :file (io/file (str temp-dir "/assets/css/main.css"))
-                    :logical-path "css/main.css"}
-                   {:abs-path (str temp-dir "/assets/images/logo.png")
+                    :file          (io/file (str temp-dir "/assets/css/main.css"))
+                    :logical-path  "css/main.css"}
+                   {:abs-path      (str temp-dir "/assets/images/logo.png")
                     :relative-path "assets/images/logo.png"
-                    :file (io/file (str temp-dir "/assets/images/logo.png"))
-                    :logical-path "images/logo.png"}}
+                    :file          (io/file (str temp-dir "/assets/images/logo.png"))
+                    :logical-path  "images/logo.png"}}
                  (set collected))))))))
 
 (deftest scan-asset-paths-test
@@ -97,18 +96,18 @@
                            (str temp-dir "/vendor/assets")
                            (str temp-dir "/public")]
               scanned     (scanner/scan-assets asset-paths {:hifi.assets/excluded-paths [] :hifi.assets/project-root temp-dir})]
-          (is (= #{{:abs-path (str temp-dir "/assets/js/app.js")
+          (is (= #{{:abs-path      (str temp-dir "/assets/js/app.js")
                     :relative-path "assets/js/app.js"
-                    :file (io/file (str temp-dir "/assets/js/app.js"))
-                    :logical-path "js/app.js"}
-                   {:abs-path (str temp-dir "/vendor/assets/lib/jquery.js")
+                    :file          (io/file (str temp-dir "/assets/js/app.js"))
+                    :logical-path  "js/app.js"}
+                   {:abs-path      (str temp-dir "/vendor/assets/lib/jquery.js")
                     :relative-path "vendor/assets/lib/jquery.js"
-                    :file (io/file (str temp-dir "/vendor/assets/lib/jquery.js"))
-                    :logical-path "lib/jquery.js"}
-                   {:abs-path (str temp-dir "/public/css/styles.css")
+                    :file          (io/file (str temp-dir "/vendor/assets/lib/jquery.js"))
+                    :logical-path  "lib/jquery.js"}
+                   {:abs-path      (str temp-dir "/public/css/styles.css")
                     :relative-path "public/css/styles.css"
-                    :file (io/file (str temp-dir "/public/css/styles.css"))
-                    :logical-path "css/styles.css"}}
+                    :file          (io/file (str temp-dir "/public/css/styles.css"))
+                    :logical-path  "css/styles.css"}}
                  (set scanned)))))
 
       (testing "excludes specified paths"
@@ -116,20 +115,20 @@
                               (str temp-dir "/vendor/assets")]
               excluded-paths [(str temp-dir "/vendor/assets")]
               scanned        (scanner/scan-assets asset-paths {:hifi.assets/excluded-paths excluded-paths :hifi.assets/project-root temp-dir})]
-          (is (= [{:abs-path (str temp-dir "/assets/js/app.js")
+          (is (= [{:abs-path      (str temp-dir "/assets/js/app.js")
                    :relative-path "assets/js/app.js"
-                   :file (io/file (str temp-dir "/assets/js/app.js"))
-                   :logical-path "js/app.js"}]
+                   :file          (io/file (str temp-dir "/assets/js/app.js"))
+                   :logical-path  "js/app.js"}]
                  scanned))))
 
       (testing "handles non-existent paths gracefully"
         (let [asset-paths [(str temp-dir "/non-existent")
                            (str temp-dir "/assets")]
               scanned     (scanner/scan-assets asset-paths {:hifi.assets/excluded-paths [] :hifi.assets/project-root temp-dir})]
-          (is (= [{:abs-path (str temp-dir "/assets/js/app.js")
+          (is (= [{:abs-path      (str temp-dir "/assets/js/app.js")
                    :relative-path "assets/js/app.js"
-                   :file (io/file (str temp-dir "/assets/js/app.js"))
-                   :logical-path "js/app.js"}]
+                   :file          (io/file (str temp-dir "/assets/js/app.js"))
+                   :logical-path  "js/app.js"}]
                  scanned))))
 
       (testing "returns empty when no valid paths"
@@ -143,11 +142,11 @@
                         {:file (io/file "logo.png") :logical-path "logo.png"}
                         {:file (io/file "README") :logical-path "README"}]]
     (testing "groups assets by file extension"
-      (is (= {"js" [{:file (io/file "app.js") :logical-path "app.js"}
-                    {:file (io/file "vendor.js") :logical-path "vendor.js"}]
+      (is (= {"js"  [{:file (io/file "app.js") :logical-path "app.js"}
+                     {:file (io/file "vendor.js") :logical-path "vendor.js"}]
               "css" [{:file (io/file "main.css") :logical-path "main.css"}]
               "png" [{:file (io/file "logo.png") :logical-path "logo.png"}]
-              "" [{:file (io/file "README") :logical-path "README"}]}
+              ""    [{:file (io/file "README") :logical-path "README"}]}
              (scanner/group-by-extension scanned-assets))))))
 
 (deftest filter-by-extension-test

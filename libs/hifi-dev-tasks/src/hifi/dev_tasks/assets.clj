@@ -1,6 +1,5 @@
 ;; Copyright © 2025 Casey Link <casey@outskirtslabs.com>
 ;; SPDX-License-Identifier: EUPL-1.2
-
 (ns hifi.dev-tasks.assets
   "Asset precompilation tasks for the HIFI asset pipeline"
   (:require
@@ -10,17 +9,19 @@
    [hifi.assets.config :as config]
    [hifi.assets.digest :as digest]
    [hifi.assets.manifest :as manifest]
+   [hifi.assets.process :as process]
    [hifi.assets.scanner :as scanner]
    [hifi.dev-tasks.config :as dev-config]))
 
 (defn- copy-digested-file!
-  "Copies a file to the output directory with its digested name"
+  "Copies a file to the output directory with its digested name, using processed content if available"
   [asset digest-info output-dir]
-  (let [source-path (:abs-path asset)
-        target-path (str output-dir "/" (:digest-name digest-info))
+  (let [target-path (str output-dir "/" (:digest-name digest-info))
         target-file (io/file target-path)]
     (fs/create-dirs (fs/parent target-file))
-    (fs/copy source-path target-path {:replace-existing true})))
+    (if-let [processed-content (:processed-content asset)]
+      (spit target-path processed-content)
+      (fs/copy (:abs-path asset) target-path {:replace-existing true}))))
 
 (defn print-compile-head [{:hifi.assets/keys [paths excluded-paths output-dir]}]
   (println "Asset Precompilation")
@@ -44,7 +45,7 @@
     (println "  " logical-path "→" (:digest-path entry))))
 
 (defn precompile
-  "Precompiles assets by scanning, digesting, copying to target, and generating manifest.
+  "Precompiles assets by scanning, processing, digesting, copying to target, and generating manifest.
 
    Options:
    - :output-dir - Output directory (default: target/resources/public/assets)
@@ -53,41 +54,49 @@
   ([]
    (precompile {}))
   ([opts]
-   (let [{:as config :hifi.assets/keys [manifest-path  output-dir]} (config/load-config (:hifi/assets (dev-config/read-config)))
-         verbose?       (:verbose opts true)]
+   (let [{:as config :hifi.assets/keys [manifest-path output-dir]} (config/load-config (:hifi/assets (dev-config/read-config)))
+         verbose?                                                  (:verbose opts true)]
      (when verbose? (print-compile-head config))
-     (let [assets (scanner/scan-assets config)]
+     (let [scanned-assets (scanner/scan-assets config)]
        (when verbose?
-         (print-scan-result assets))
-       (when (zero? (count assets))
+         (print-scan-result scanned-assets))
+       (when (zero? (count scanned-assets))
          (System/exit 0))
 
        (fs/create-dirs output-dir)
        (when verbose?
          (println "\nProcessing assets..."))
-       (let [digest-infos (mapv (fn [asset]
-                                  (let [digest-info (digest/digest-file-content
-                                                     (:abs-path asset)
-                                                     (:logical-path asset))]
-                                    (copy-digested-file! asset digest-info output-dir)
-                                    (when verbose?
-                                      (println "  " (str (:logical-path asset)) "→" (:digest-name digest-info)))
-                                    digest-info))
-                                assets)]
+
+       (let [digest-infos               (mapv #(digest/digest-file-content (:abs-path %) (:logical-path %)) scanned-assets)
+             manifest-data              (manifest/generate-manifest digest-infos)
+             processing-ctx             {:config     config
+                                         :manifest   manifest-data
+                                         :find-asset (fn [path] (scanner/find-asset scanned-assets path))}
+             {warnings         :warnings
+              processed-assets :assets} (process/process-assets processing-ctx scanned-assets)]
+
+         (doseq [[asset digest-info] (map vector processed-assets digest-infos)]
+           (copy-digested-file! asset digest-info output-dir)
+           (when verbose?
+             (println "  " (str (:logical-path asset)) "→" (:digest-name digest-info))))
 
          (when verbose?
            (println "\nGenerating manifest..."))
-         (let [manifest-data (manifest/generate-manifest digest-infos)]
-           (manifest/write-manifest manifest-data manifest-path)
-           (when verbose?
-             (print-manifest-result manifest-path manifest-data digest-infos))))))))
+         (manifest/write-manifest manifest-data manifest-path)
+         (when verbose?
+           (print-manifest-result manifest-path manifest-data digest-infos))
+
+         (when (seq warnings)
+           (println "\nWarnings:")
+           (doseq [warning warnings]
+             (println "  " (:type warning) "in" (:asset warning) ":" (:missing-path warning)))))))))
 
 (defn clean
   "Removes the compiled assets directory"
   ([]
    (clean {}))
   ([opts]
-   (let [config (config/load-config (dev-config/read-config))
+   (let [config     (config/load-config (dev-config/read-config))
          output-dir (or (:output-dir opts)
                         (get-in config [:hifi/assets :output-dir])
                         "target/resources/public/assets")]
@@ -100,6 +109,6 @@
 (defn -main
   [& args]
   (case (first args)
-    "clean" (clean)
+    "clean"      (clean)
     "precompile" (precompile {:verbose true})
     (precompile {:verbose true})))
