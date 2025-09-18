@@ -1,0 +1,6 @@
+SPDXVersion: SPDX-2.1
+DataLicense: CC0-1.0
+PackageName: hyperlith-is-for-crud
+PackageOriginator: Casey Link <casey@outskirtslabs.com>
+PackageHomePage: https://github.com/Ramblurr/hifi-crud
+PackageLicenseDeclared: EUPL-1.2

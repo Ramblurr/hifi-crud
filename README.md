@@ -26,7 +26,7 @@ HIFI CRUD distinguishes itself from your standard Clojure CRUD web application w
 - **Strict CQRS** - Commands are strictly separate from the page render functions.
 - **Strict FC/IS** - Functional Core/Imperative Shell. Your functional core cannot[^1] cause side effects, all core functions are pure. The shell contains no logic.
 
-Pages are rendered with a single top-level function that takes state as input 
+Pages are rendered with a single top-level function that takes state as input
 
 ## The View
 
@@ -51,9 +51,9 @@ There are two sources of backend state:
 
 The example uses [datahike][datahike], an in-process Datomic like database. Why not datalevin? Because the database must implement value semantics, this is non-negotiable [^2].
 
-Entity state, jobs, and sessions, are stored in the database. Every time the database changes, all clients pages are re-rendered and pushed to the client if they changed. This sounds dumb. But rendering the views is fast, and you can always add smart culling later on. This requires a big shift in UX thinking, the page can change underneath the user. You must design appropriately. 
+Entity state, jobs, and sessions, are stored in the database. Every time the database changes, all clients pages are re-rendered and pushed to the client if they changed. This sounds dumb. But rendering the views is fast, and you can always add smart culling later on. This requires a big shift in UX thinking, the page can change underneath the user. You must design appropriately.
 
-Ephemeral UI state is stored in an in-memory map (atom), this is useful for things like modals, popups, and other UI elements that are not part of the page. This state is not persisted to the database, and is not shared between tabs. 
+Ephemeral UI state is stored in an in-memory map (atom), this is useful for things like modals, popups, and other UI elements that are not part of the page. This state is not persisted to the database, and is not shared between tabs.
 
 I waffle on this feature. The state stored in this map could easily be moved to the database, but it doesn't add much complexity to the code and keeps potentially noisy txs out of the database.
 
@@ -71,7 +71,7 @@ https://github.com/Ramblurr/hifi-crud/blob/e2b1f3fb72814801c770cc2296c7f65f7c8be
 
 ## The Effect
 
-If the command returns a description of what *should* be done, the effect is the responsible for *doing* it. Every effect has an [effect handler][src-fx]. The effect handler touches the world and makes things happen. 
+If the command returns a description of what *should* be done, the effect is the responsible for *doing* it. Every effect has an [effect handler][src-fx]. The effect handler touches the world and makes things happen.
 
 Examples of effects are:
 
@@ -85,7 +85,7 @@ https://github.com/Ramblurr/hifi-crud/blob/e2b1f3fb72814801c770cc2296c7f65f7c8be
 
 ## The Co-effect
 
-~~Sometimes~~ Often a command handler needs a value that is not part of the State and not part of the command data, but is nevertheless required to compute the outcome of the command. Obtaining this value requires an impure operation. 
+~~Sometimes~~ Often a command handler needs a value that is not part of the State and not part of the command data, but is nevertheless required to compute the outcome of the command. Obtaining this value requires an impure operation.
 
 These values are called co-effects. The command declares what co-effects it requires. They are prepared and passed to the command handler as values along with the State and command data.
 
@@ -121,11 +121,11 @@ The imperative shell is the engine that drives the application forward. It media
 
 ## License: European Union Public License 1.2
 
-Copyright © 2025 Casey Link. Distributed under the [EUPL-1.2](https://spdx.org/licenses/EUPL-1.2.html).
+Copyright © 2025 Casey Link //  Outskirts Labs e.Ua.
+Distributed under the [EUPL-1.2](https://spdx.org/licenses/EUPL-1.2.html).
 
 
 [^1]: well, this is isn't Haskell, if you call `(random-uuid)` in your pure function, that's on you. Shame!
 [^2]: ... for me! Please don't take anything personally. If you disagree I would love to hear your thoughts.
 [datahike]: https://github.com/replikativ/datahike
 [src-fx]: ./src/app/effects.clj
-
