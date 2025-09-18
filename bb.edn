@@ -1,12 +1,10 @@
 {:paths ["scripts"]
  :tasks {:requires         ([clojure.string :as str]
                             [babashka.tasks :refer [shell]])
-         test              make/test-main
+         dev               {:doc "Start a local development server" :task (apply clojure "-M:dev:repl/dev" *command-line-args*)}
+         test              (apply clojure "-M:dev:test" *command-line-args*)
          fmt               (shell "nix fmt")
-         lint.copy-configs (let [cp (-> (shell {:out :string} "clojure -Spath -M:test:dev") :out str/trim)]
-                             (shell (str "clj-kondo --lint " cp " --dependencies --copy-configs --skip-lint")))
-         lint.kondo        (shell "clj-kondo" *command-line-args*)
-         lint              (shell (str "clj-kondo" " --fail-level error"
-                                       (if (seq *command-line-args*)
-                                         (str " --lint " (first *command-line-args*))
-                                         " --lint libs --lint examples")))}}
+         lint.copy-configs (shell "clj-kondo" "--lint" (-> (shell {:out :string} "clojure -Spath -M:test:dev") :out str/trim) "--dependencies" "--copy-configs" "--skip-lint")
+         lint              (if (seq *command-line-args*)
+                             (apply shell "clj-kondo" "--lint" *command-line-args*)
+                             (shell "clj-kondo" "--lint" "src" "test"))}}

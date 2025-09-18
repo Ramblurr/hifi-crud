@@ -1,0 +1,49 @@
+#kaocha/v1
+ {:bindings {kaocha.stacktrace/*stacktrace-stop-list* ["kaocha.runner"
+                                                       "kaocha.plugin.capture_output"
+                                                       "kaocha.testable"]}
+  :plugins [:kaocha.plugin.alpha/info
+            :kaocha.plugin/randomize
+            :kaocha.plugin/filter
+            :kaocha.plugin/capture-output]
+
+  :kaocha/reporter
+  [kaocha.report/documentation]
+
+  :tests
+  [{:id :dev
+    :kaocha/source-paths ["libs/hifi-dev/src"]
+    :kaocha/test-paths ["libs/hifi-dev/test"]}
+   {:id :html
+    :kaocha/source-paths ["libs/hifi-html/src"]
+    :kaocha/test-paths ["libs/hifi-html/test"]}
+   {:id :error
+    :kaocha/source-paths ["libs/hifi-error/src"]
+    :kaocha/test-paths ["libs/hifi-error/test"]}
+   {:id :system
+    :kaocha/source-paths ["libs/hifi-system/src"]
+    :kaocha/test-paths ["libs/hifi-system/test"]}
+   {:id :config
+    :kaocha/source-paths ["libs/hifi-config/src"]
+    :kaocha/test-paths ["libs/hifi-config/test"]}
+   {:id :assets
+    :kaocha/source-paths ["libs/hifi-assets/src"]
+    :kaocha/test-paths ["libs/hifi-assets/test"]}
+   {:id :datastar
+    :kaocha/source-paths ["libs/hifi-datastar/src"]
+    :kaocha/test-paths ["libs/hifi-datastar/test"]}
+   {:id :logging
+    :kaocha/source-paths ["libs/hifi-logging/src"]
+    :kaocha/test-paths ["libs/hifi-logging/test"]}
+   {:id :babashka-tasks
+    :kaocha/source-paths ["libs/hifi-dev-tasks/src"]
+    :kaocha/test-paths ["libs/hifi-dev-tasks/test"]}
+   {:id :util
+    :kaocha/source-paths ["libs/hifi-util/src"]
+    :kaocha/test-paths ["libs/hifi-util/test"]}
+   {:id :datomic
+    :kaocha/source-paths ["libs/hifi-datomic/src"]
+    :kaocha/test-paths ["libs/hifi-datomic/test"]}
+   {:id :engine
+    :kaocha/source-paths ["libs/hifi-engine/src"]
+    :kaocha/test-paths ["libs/hifi-engine/test"]}]}
