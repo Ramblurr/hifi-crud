@@ -1,8 +1,8 @@
 {:paths ["src"]
- :deps  {dev.weavejester/medley          {:mvn/version "1.9.0"}
-         babashka/fs      {:mvn/version "0.5.27"}
-         babashka/process {:mvn/version "0.6.23"}
-         hifi/error                       {:local/root "../hifi-error"}
-         org.clojure/tools.logging       {:mvn/version "1.3.0"}
-         hifi/util                        {:local/root "../hifi-util"}
-         }}
+ :deps  {dev.weavejester/medley    {:mvn/version "1.9.0"}
+         babashka/fs               {:mvn/version "0.5.27"}
+         babashka/process          {:mvn/version "0.6.23"}
+         hifi/error                {:local/root "../hifi-error"}
+         org.clojure/tools.logging {:mvn/version "1.3.0"}
+         hifi/util                 {:local/root "../hifi-util"}
+         hifi/html                 {:local/root "../hifi-html"}}}

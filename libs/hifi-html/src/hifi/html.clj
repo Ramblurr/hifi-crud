@@ -2,15 +2,137 @@
   (:refer-clojure :exclude [compile])
   (:require
    [medley.core :as medley]
+   [hifi.html.impl :as impl]
    [hifi.util.codec :as codec]
    [dev.onionpancakes.chassis.core :as chassis]
    [dev.onionpancakes.chassis.compiler :as cc]))
 
+;; TODO move to dev-time only
 (cc/set-warn-on-ambig-attrs!)
 
-(def ->str
-  "Returns HTML string given a HTML Node tree."
-  chassis/html)
+(defn ->str
+  "Converts a Hiccup-style HTML node tree into an HTML string.
+
+  This function processes asset-marked elements (stylesheet links, scripts, images)
+  and resolves their paths through the asset pipeline before rendering.
+
+  Arguments:
+    ctx  - (optional) Context map containing:
+           {:hifi/assets asset-resolver} - Asset resolver for path resolution
+    root - Hiccup-style HTML data structure to render
+
+  Returns:
+    String of rendered HTML with asset paths resolved.
+
+  Examples:
+    ;; Simple rendering without assets
+    (->str [:div \"Hello World\"])
+    ;; => \"<div>Hello World</div>\"
+
+    ;; Rendering with asset resolution
+    (->str {:hifi/assets asset-resolver}
+           [:head
+            ^{:hifi.html/asset-marker {:type :hifi.html/stylesheet}}
+            [:link {:href \"app.css\"}]])
+    ;; => \"<head><link href='/assets/app-abc123.css'></head>\"
+
+  Notes:
+    - Asset elements must have :hifi.html/asset-marker metadata to be processed
+    - Uses Chassis for HTML compilation under the hood
+    - Automatically escapes content to prevent XSS (use `raw` for unescaped HTML)"
+  ([ctx root]
+   (impl/->str ctx root))
+  ([root]
+   (impl/->str nil root)))
+
+(defn render
+  "Renders Hiccup HTML with asset path resolving and preloads support.
+
+  This function provides a sophisticated hiccup -> html rendering:
+  1. Collects asset preloads from the HTML tree for Link preload headers and HTTP 103 Early Hints
+  2. Resolves asset paths through the asset pipeline
+  3. Optionally delays rendering for performance optimization
+
+  Arguments:
+    ctx    - Context map containing:
+             :asset-resolver - Asset resolver for path resolution
+
+             all other keys are ignored
+
+    hiccup - hiccup data structure to render
+
+    opts   - (optional) Rendering options map:
+             {:collect-preloads? true   - Collect and resolve preload hints (default: true)
+              :delay-render?     false} - Delay HTML rendering until deref (default: false)
+
+  Returns:
+    Map containing:
+      {:preloads [...] - Vector of resolved preload hints for HTTP 103 Early Hints
+       :html     \"...\" - Rendered HTML string (nil if delay-render? is true)
+       :render_  delay} - Delayed HTML rendering (only if delay-render? is true)
+
+  Examples:
+    ;; Basic rendering with preload collection
+    (render {:asset-resolver resolver}
+            [:html
+             [:head
+              [:link {:href \"app.css\" :rel \"preload\" :as \"style\"}]]
+             [:body \"Content\"]])
+    ;; => {:preloads [{:path \"/assets/app-abc123.css\" :rel \"preload\" :as \"style\"}]
+    ;;     :html \"<html>...</html>\"}
+
+    ;; Delayed rendering for streaming responses
+    (render ctx hiccup {:delay-render? true})
+    ;; => {:preloads [...] :render_ #<Delay ...>}
+    ;; Later: (force (:render_ result)) to get HTML
+
+  Notes:
+    - Preloads are extracted from all <link> and <script> tags in <head>
+    - Supports integrity attributes for subresource integrity
+    - Delay rendering is useful for streaming responses or lazy evaluation"
+  ([ctx hiccup]
+   (impl/render ctx hiccup nil))
+  ([ctx hiccup opts]
+   (impl/render ctx hiccup opts)))
+
+(defn preloads->header
+  "Converts preload data into an HTTP Link header value.
+
+  Formats preload directives for HTTP 103 Early Hints (and final response Link headers).
+  Builds the header incrementally, stopping when the size limit is reached to
+  respect proxy and client header size limits.
+
+  Arguments:
+    preloads - Vector of preload maps, each containing:
+               {:path \"/path/to/resource\" or :href \"/resolved/path\"
+                :rel \"preload\" or \"modulepreload\"
+                :as \"style\", \"script\", \"font\", etc. (optional)
+                :type \"text/css\", \"font/woff2\", etc. (optional)
+                :crossorigin \"anonymous\" (optional)
+                :integrity \"sha256-...\" (optional)}
+    opts     - (optional) Options map:
+               {:max-size 1000} - Maximum header size in bytes (default: 1000)
+
+  Returns:
+    String formatted as HTTP Link header value, or nil for empty input.
+
+  Examples:
+    (preloads->header [{:path \"/app.css\" :rel \"preload\" :as \"style\"}])
+    ;; => \"</app.css>; rel=preload; as=style\"
+
+    (preloads->header [{:path \"/app.css\" :rel \"preload\" :as \"style\"}
+                       {:path \"/app.js\" :rel \"preload\" :as \"script\"}])
+    ;; => \"</app.css>; rel=preload; as=style, </app.js>; rel=preload; as=script\"
+
+  Notes:
+    - Respects header size limits per HTTP best practices (default 1KB)
+    - Includes as many links as possible without exceeding the limit
+    - Remember max-size is just for this particular value, not all headers
+    - Compatible with HTTP 103 Early Hints and standard responses"
+  ([preloads]
+   (impl/preloads->header preloads nil))
+  ([preloads opts]
+   (impl/preloads->header preloads opts)))
 
 (defmacro compile
   "Compiles the node form, returning a compacted equivalent form.
@@ -34,47 +156,46 @@
   `more` - Additional values to be concatenated"
   chassis/raw-string)
 
-(def doctype-html5 chassis/doctype-html5)
+(def doctype-html5
+  "RawString for <!DOCTYPE html>"
+  chassis/doctype-html5)
 
-(defmacro script
-  "Emits a [:script] tag for an [[hifi.util.assets/static-asset]].
+(defmethod chassis/resolve-alias ::stylesheet-link
+  [_ attrs content]
+  (with-meta
+    [:link attrs content]
+    {::asset-marker {:type ::stylesheet}}))
 
-  Expects `:!asset` key in the map of attributes, all other vals will be merged into the scrip tag's attributes."
-  [attrs]
-  (let [asset-sym   (:!asset attrs)
-        other-attrs (dissoc attrs :!asset)]
-    `[:script (merge {:src       (:href @~asset-sym)
-                      :integrity (:integrity @~asset-sym)}
-                     ~other-attrs)]))
+(defmethod chassis/resolve-alias ::preload-link
+  [_ attrs content]
+  (with-meta
+    [:link attrs content]
+    {::asset-marker {:type ::preload}}))
 
-(defmacro stylesheet
-  "Emits a [:link {:rel \"stylesheet\"}] tag for an [[hifi.util.assets/static-asset]].
+(defmethod chassis/resolve-alias ::javascript-include
+  [_ attrs content]
+  (with-meta
+    [:script attrs content]
+    {::asset-marker {:type ::javascript}}))
 
-  Expects `:!asset` key in the map of attributes, all other vals will be merged into the link tag's attributes."
-  [attrs]
-  (let [asset-sym   (:!asset attrs)
-        other-attrs (dissoc attrs :!asset)]
-    `[:link (merge {:rel       "stylesheet"
-                    :type      "text/css"
-                    :href      (:href @~asset-sym)
-                    :integrity (:integrity @~asset-sym)}
-                   ~other-attrs)]))
+(defmethod chassis/resolve-alias ::image
+  [_ attrs content]
+  (with-meta
+    [:img attrs content]
+    {::asset-marker {:type ::image :opts attrs}}))
 
-(defmacro icon
-  "Emits a [:link {:rel \"icon\"}] tag for an [[hifi.util.assets/static-asset]].
+(defmethod chassis/resolve-alias ::audio
+  [_ attrs content]
+  (with-meta
+    [:audio attrs content]
+    {::asset-marker {:type ::audio :opts attrs}}))
 
-  Expects `:!asset` key in the map of attributes, all other vals will be merged into the link tag's attributes."
-  [attrs]
-  (let [asset-sym   (:!asset attrs)
-        other-attrs (dissoc attrs :!asset)]
-    `[:link (merge {:rel  "icon"
-                    :href (:href @~asset-sym)}
-                   ~other-attrs)]))
+;; TODO future tags: video, picture
 
 (defn csrf-token-input
   "Returns hiccup for <input type=\"hidden\" /> field with the anti-forgery token name and value"
   [req]
-  [:input {:type "hidden" :name "__anti-forgery-token" :value (:pink.interceptors.csrf/token req)}])
+  [:input {:type "hidden" :name "__anti-forgery-token" :value (:hifi/csrf-token req)}])
 
 (def csrf-cookie-js-prod
   "document.cookie.match(/(^| )__Host-csrf=([^;]+)/)?.[2]")

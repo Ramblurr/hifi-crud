@@ -1,3 +1,5 @@
 {:paths ["src" "resources"]
  :deps  {dev.weavejester/medley    {:mvn/version "1.9.0"}
-         dev.onionpancakes/chassis {:mvn/version "1.0.365"}}}
+         dev.onionpancakes/chassis {:mvn/version "1.0.365"}}
+ :aliases {:test {:extra-paths ["test"]
+                  :extra-deps {org.clojure/test.check {:mvn/version "1.1.1"}}}}}

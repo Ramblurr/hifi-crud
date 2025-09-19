@@ -1,9 +1,14 @@
 # hifi-assets
 
-hifi-assets is a Clojure asset pipeline inspired by Rails' Propshaft.
-Designed for simplicity and maintainability.
+> hifi-assets is a Clojure asset pipeline inspired by Rails' Propshaft.
+> Designed for simplicity and maintainability.
 
-It provides digest-based asset management for cache busting and efficient delivery, but also developer friendly ergonomics.
+
+hifi-assets provides digest-based asset management for cache busting and efficient delivery with developer friendly ergonomics.
+
+It is designed for modern development where transpilation, bundling and compression have become less essential for the types of web applications built with hifi.
+Browsers have evolved with better native capabilities, network speeds have increased, and HTTP/2 is become widespread.
+
 
 
 <!-- markdown-toc start - Don't edit this section. Run M-x markdown-toc-refresh-toc -->

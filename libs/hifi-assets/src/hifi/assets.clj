@@ -1,6 +1,5 @@
 ;; Copyright © 2025 Casey Link <casey@outskirtslabs.com>
 ;; SPDX-License-Identifier: EUPL-1.2
-
 (ns hifi.assets
   "Asset pipeline for HIFI framework - provides digest-based asset management,
    HTML helpers, and development/production asset serving."
