@@ -1,17 +1,6 @@
 ;; This deps.edn is for testing and development of the hifi suite.
 {:paths   []
- :aliases {:dev   {:extra-paths [] #_ ["libs/hifi-dev-tasks/src"
-                                       "libs/hifi-config/src"
-                                       "libs/hifi-assets/src"
-                                       "libs/hifi-datastar/src"
-                                       "libs/hifi-datomic/src"
-                                       "libs/hifi-dev/src"
-                                       "libs/hifi-engine/src"
-                                       "libs/hifi-error/src"
-                                       "libs/hifi-html/src"
-                                       "libs/hifi-logging/src"
-                                       "libs/hifi-system/src"
-                                       "libs/hifi-util/src"]
+ :aliases {:dev   {:extra-paths ["dev"]
                    :extra-deps  {hifi/babashka-tasks    {:local/root "libs/hifi-dev-tasks"}
                                  hifi/config            {:local/root "libs/hifi-config"}
                                  hifi/assets            {:local/root "libs/hifi-assets"}
