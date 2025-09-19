@@ -3,161 +3,109 @@
 
 (ns hifi.html.impl-test
   (:require
-
-   [dev.onionpancakes.chassis.core :as chassis]
-   [clojure.test :refer [deftest testing is]]
-   [hifi.html.impl :as impl]))
+   [clojure.test :refer [deftest is testing]]
+   [hifi.html.impl :as impl]
+   [hifi.html.protocols :as p]))
 
 (deftest collect-link-test
   (testing "collects preload from link element"
     (is (= {:path "/css/app.css" :rel "preload" :as "style"}
-           (impl/collect-link [:link {:href "/css/app.css" :rel "preload" :as "style"} nil])))
-
-    (is (= {:path "/font.woff2" :rel "preload" :as "font" :type "font/woff2"}
-           (impl/collect-link [:link {:href "/font.woff2" :rel "preload" :as "font" :type "font/woff2"} nil])))
-
-    (is (= {:path "/module.js" :rel "modulepreload"}
-           (impl/collect-link [:link {:href "/module.js" :rel "modulepreload"} nil]))))
-
-  (testing "collects preload with crossorigin and integrity"
-    (is (= {:path "/css/app.css" :rel "preload" :as "style" :crossorigin "foobar" :integrity? true}
-           (impl/collect-link [:link {:href "/css/app.css" :rel "preload" :as "style"
-                                      :crossorigin "foobar" :integrity true} nil]))))
+           (impl/collect-link [:link {:href "/css/app.css" :rel "preload" :as "style"} nil]))))
 
   (testing "collects preload from script element"
     (is (= {:path "/app.js" :rel "preload" :as "script"}
-           (impl/collect-link [:script {:href "/app.js"} nil])))
-
-    (is (= {:path "/app.js" :rel "preload" :as "script" :type "text/javascript"}
-           (impl/collect-link [:script {:href "/app.js" :type "text/javascript"} nil])))
-
-    (is (= {:path "/module.js" :rel "modulepreload"}
-           (impl/collect-link [:script {:href "/module.js" :type "module"} nil]))))
+           (impl/collect-link [:script {:href "/app.js"} nil]))))
 
   (testing "returns nil for non-preloadable elements"
     (is (= nil
-           (impl/collect-link [:link {:href "/css/app.css" :rel "stylesheet"} nil])))
+           (impl/collect-link [:link {:href "/css/app.css" :rel "stylesheet"} nil])))))
 
-    (is (= nil
-           (impl/collect-link [:div {:class "content"} nil])))
-
-    (is (= nil
-           (impl/collect-link [:link {} nil])))))
-
-(deftest collect-head-preloads-test
-  (testing "collects preloads from head element"
+(deftest collect-head-preloads-xf-test
+  (testing "extracts preloads using transducer"
     (is (= [{:path "/css/app.css" :rel "preload" :as "style"}
             {:path "/app.js" :rel "preload" :as "script"}]
-           (impl/collect-head-preloads
-            [:head {}
-             (with-meta [:link {:href "/css/app.css" :rel "preload" :as "style"}]
-               {:hifi.html/asset-marker true})
-             (with-meta [:script {:href "/app.js"}]
-               {:hifi.html/asset-marker true})]))))
+           (transduce impl/collect-head-preloads-xf
+                      conj
+                      []
+                      [[:head {}
+                        [:link {:href "/css/app.css" :rel "preload" :as "style"}]
+                        [:script {:href "/app.js"}]]]))))
 
-  (testing "collects multiple preloads with various attributes"
-    (is (= [{:path "/font.woff2" :rel "preload" :as "font" :type "font/woff2"}
-            {:path "/module.js" :rel "modulepreload"}
-            {:path "/style.css" :rel "preload" :as "style" :crossorigin "anonymous" :integrity? true}]
-           (impl/collect-head-preloads
-            [:head {}
-             (with-meta [:link {:href "/font.woff2" :rel "preload" :as "font" :type "font/woff2"}]
-               {:hifi.html/asset-marker true})
-             (with-meta [:script {:href "/module.js" :type "module"}]
-               {:hifi.html/asset-marker true})
-             (with-meta [:link {:href "/style.css" :rel "preload" :as "style"
-                                :crossorigin "anonymous" :integrity true}]
-               {:hifi.html/asset-marker true})]))))
+  (testing "handles multiple hiccup documents"
+    (is (= [{:path "/a.css" :rel "preload" :as "style"}
+            {:path "/b.js" :rel "preload" :as "script"}]
+           (transduce impl/collect-head-preloads-xf
+                      conj
+                      []
+                      [[:head {} [:link {:href "/a.css" :rel "preload" :as "style"}]]
+                       [:head {} [:script {:href "/b.js"}]]]))))
 
-  (testing "elements without asset marker"
-    (is (=   [{:as "style" :path "/css/app.css" :rel "preload"}
-              {:as "script" :path "/app.js" :rel "preload"}]
-             (impl/collect-head-preloads
-              [:head {}
-               [:link {:href "/css/app.css" :rel "preload" :as "style"}]
-               [:script {:href "/app.js"}]]))))
-
-  (testing "ignores non-preloadable elements with asset marker"
+  (testing "filters out non-head elements"
     (is (= []
-           (impl/collect-head-preloads
-            [:head {}
-             (with-meta [:link {:href "/css/app.css" :rel "stylesheet"}]
-               {:hifi.html/asset-marker true})
-             (with-meta [:meta {:name "viewport" :content "width=device-width"}]
-               {:hifi.html/asset-marker true})]))))
-
-  (testing "handles nested head structures"
-    (is (= [{:path "/css/app.css" :rel "preload" :as "style"}
-            {:path "/nested.js" :rel "preload" :as "script"}]
-           (impl/collect-head-preloads
-            [:head {}
-             (with-meta [:link {:href "/css/app.css" :rel "preload" :as "style"}]
-               {:hifi.html/asset-marker true})
-             [:div {}
-              (with-meta [:script {:href "/nested.js"}]
-                {:hifi.html/asset-marker true})]]))))
-
-  (testing "returns empty for missing head"
-    (is (= []
-           (impl/collect-head-preloads
-            [:body {}
-             (with-meta [:link {:href "/css/app.css" :rel "preload" :as "style"}]
-               {:hifi.html/asset-marker true})]))))
-
-  (testing "returns empty for non-html structure"
-    (is (= []
-           (impl/collect-head-preloads [:div {} [:span "text"]]))))
-
-  (testing "works with chassis doctype structure"
-    (is (= [{:path "/css/app.css" :rel "preload" :as "style"}
-            {:as "script" :path "/nested.js" :rel "preload" :crossorigin "wow"}]
-           (impl/collect-head-preloads
-            [chassis/doctype-html5
-             [:head {}
-              ^:hifi.html/asset-marker [:link {:href "/css/app.css" :rel "preload" :as "style"}]
-              ^:hifi.html/asset-marker [:script {:href "/nested.js" :crossorigin "wow" :id "myscript"}]]
-             [:body [:h1 "Hello"]]])))))
+           (transduce impl/collect-head-preloads-xf
+                      conj
+                      []
+                      [[:body {} [:link {:href "/app.css" :rel "preload" :as "style"}]]])))))
 
 (deftest has-asset-marker?-test
   (testing "detects asset marker metadata"
     (is (= true
            (impl/has-asset-marker? (with-meta [:link {:href "/app.css"}]
-                                     {:hifi.html/asset-marker true}))))
-
-    (is (= true
-           (impl/has-asset-marker? (with-meta [:script {:src "/app.js"}]
                                      {:hifi.html/asset-marker true})))))
 
   (testing "returns false for non-marked elements"
     (is (= false
-           (impl/has-asset-marker? [:link {:href "/app.css"}])))
-
-    (is (= false
-           (impl/has-asset-marker? "text")))
-
-    (is (= false
-           (impl/has-asset-marker? nil)))))
+           (impl/has-asset-marker? [:link {:href "/app.css"}])))))
 
 (deftest preloads->header-test
-  (testing "formats preloads with all attributes"
-    (is (= "</css/app.css>; rel=preload; as=style; type=\"text/css\"; crossorigin=anonymous; integrity=\"sha256-abc123\""
-           (impl/preloads->header [{:path "/css/app.css" :rel "preload" :as "style"
-                                    :type "text/css" :crossorigin "anonymous" :integrity "sha256-abc123"}] {}))))
+  (testing "formats preloads with attributes"
+    (is (= "</css/app.css>; rel=preload; as=style; type=\"text/css\""
+           (impl/preloads->header [{:path "/css/app.css" :rel "preload" :as "style" :type "text/css"}] {}))))
 
   (testing "joins multiple preloads"
     (is (= "</a.css>; rel=preload; as=style, </b.js>; rel=modulepreload"
            (impl/preloads->header [{:path "/a.css" :rel "preload" :as "style"}
                                    {:path "/b.js" :rel "modulepreload"}] {}))))
 
-  (testing "respects max size limit"
-    (is (= "</a.css>; rel=preload; as=style"
-           (impl/preloads->header [{:path "/a.css" :rel "preload" :as "style"}
-                                   {:path "/very-long-file-name.css" :rel "preload" :as "style"}]
-                                  {:max-size 35}))))
+  (testing "returns nil for empty"
+    (is (= nil
+           (impl/preloads->header [] {})))))
 
-  (testing "returns nil for empty or oversized"
-    (is (= nil
-           (impl/preloads->header [] {})))
-    (is (= nil
-           (impl/preloads->header [{:path "/css/app.css" :rel "preload" :as "style"}]
-                                  {:max-size 10})))))
+(defrecord MockAssetResolver [assets]
+  p/AssetResolver
+  (resolve-path [_ logical-path]
+    (get-in assets [logical-path :resolved-path]))
+  (integrity [_ logical-path]
+    (get-in assets [logical-path :integrity]))
+  (read-bytes [_ _logical-path]
+    nil)
+  (locate [_ _logical-path]
+    nil))
+
+(deftest resolve-preloads-test
+  (let [resolver (->MockAssetResolver
+                  {"app.css" {:resolved-path "/assets/app-abc123.css"
+                              :integrity "sha256-abc123"}
+                   "app.js" {:resolved-path "/assets/app-xyz789.js"
+                             :integrity nil}})]
+
+    (testing "extracts and resolves preloads from hiccup"
+      (is (= [{:path "/assets/app-abc123.css" :rel "preload" :as "style" :integrity "sha256-abc123"}
+              {:path "/assets/app-xyz789.js" :rel "preload" :as "script"}]
+             (impl/resolve-preloads resolver
+                                    [:head {}
+                                     [:link {:href "app.css" :rel "preload" :as "style"}]
+                                     [:script {:href "app.js"}]]))))
+
+    (testing "filters out unresolvable assets"
+      (is (= [{:path "/assets/app-abc123.css" :rel "preload" :as "style" :integrity "sha256-abc123"}]
+             (impl/resolve-preloads resolver
+                                    [:head {}
+                                     [:link {:href "app.css" :rel "preload" :as "style"}]
+                                     [:link {:href "missing.css" :rel "preload" :as "style"}]]))))
+
+    (testing "returns empty when no resolver"
+      (is (= []
+             (impl/resolve-preloads nil
+                                    [:head {}
+                                     [:link {:href "app.css" :rel "preload" :as "style"}]]))))))

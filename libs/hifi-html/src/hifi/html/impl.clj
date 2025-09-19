@@ -1,10 +1,10 @@
 (ns hifi.html.impl
   (:require
-   [hifi.html.util :as u]
-   [hifi.html.protocols :refer [rewrite-asset-element resolve-preloads]]
    [clojure.string]
    [clojure.walk :as walk]
-   [dev.onionpancakes.chassis.core :as chassis]))
+   [dev.onionpancakes.chassis.core :as chassis]
+   [hifi.html.protocols :as p]
+   [hifi.html.util :as u]))
 
 (defn has-asset-marker? [node]
   (and
@@ -15,38 +15,37 @@
 (defn collect-link
   [[tag {:keys [href src rel as type crossorigin integrity]} _]]
   (let [logical-path (or href src)
-        integrity?   (some? integrity)]
+        integrity? (some? integrity)]
     (when logical-path
       (cond
         (= tag :link)
         (when (#{"preload" "modulepreload"} rel)
           (cond-> {:path href :rel rel}
             (and (= rel "preload") as) (assoc :as as)
-            type                       (assoc :type type)
-            crossorigin                (assoc :crossorigin crossorigin)
-            integrity?                 (assoc :integrity? true)))
+            type (assoc :type type)
+            crossorigin (assoc :crossorigin crossorigin)
+            integrity? (assoc :integrity? true)))
 
         (= tag :script)
         (let [module? (= "module" type)
-              rel*    (if module? "modulepreload" "preload")]
+              rel* (if module? "modulepreload" "preload")]
           (cond-> {:path href :rel rel*}
-            (not module?)                    (assoc :as "script")
+            (not module?) (assoc :as "script")
             (and (not module?) (some? type)) (assoc :type type)
-            crossorigin                      (assoc :crossorigin crossorigin)
-            integrity?                       (assoc :integrity? true)))))))
+            crossorigin (assoc :crossorigin crossorigin)
+            integrity? (assoc :integrity? true)))))))
 
-(defn collect-head-preloads
-  "Return [{:path \"css/app.css\" :as \"style\" :type \"text/css\" :integrity? true :crossorigin \"anonymous\"} ...]
-   Two-pass using clojure.walk: (1) find <head> with prewalk-reduced, (2) postwalk only that subtree."
-  [hiccup]
-  (if-let [head (u/find-first-element #(= :head (first %)) hiccup)]
-    (transduce
-     (comp (map collect-link)
-           (filter some?))
-     conj
-     []
-     (u/hiccup-seq head))
-    []))
+(def collect-head-preloads-xf
+  "Returns a transducer that extracts preloads from hiccup elements.
+
+   Processes hiccup documents by finding <head> elements and extracting
+   preload information from <link> and <script> tags within them."
+  (comp (mapcat (fn [hiccup]
+                  (if-let [head (u/find-first-element #(= :head (first %)) hiccup)]
+                    (u/hiccup-seq head)
+                    [])))
+        (map collect-link)
+        (filter some?)))
 
 (defn process-asset-tags
   "Walks hiccup tree and resolves asset paths in the elements with asset metadata"
@@ -54,7 +53,7 @@
   (if assets
     (walk/prewalk (fn [node]
                     (if (has-asset-marker? node)
-                      (rewrite-asset-element assets node)
+                      (p/rewrite-asset-element assets node)
                       node))
                   hiccup)
     hiccup))
@@ -67,16 +66,35 @@
   ([root]
    (->str nil root)))
 
+(defn resolve-preloads
+  "Extracts preloads from hiccup and resolves their asset paths. Returns a vector of resolved preloads."
+  [asset-resolver hiccup]
+  (if asset-resolver
+    (transduce (comp collect-head-preloads-xf
+                     (map (fn [preload]
+                            (let [logical-path (:path preload)
+                                  resolved-path (p/resolve-path asset-resolver logical-path)
+                                  integrity (p/integrity asset-resolver logical-path)]
+                              (when resolved-path
+                                (cond-> (assoc preload :path resolved-path)
+                                  integrity (assoc :integrity integrity))))))
+                     (filter some?))
+               conj
+               []
+               [hiccup])
+    []))
+
 (defn render
-  ([{:keys [asset-resolver] :as ctx} hiccup {:as   _opts
+  ([{:keys [asset-resolver] :as ctx} hiccup {:as _opts
                                              :keys [collect-preloads?
                                                     delay-render?]
-                                             :or   {collect-preloads? true
-                                                    delay-render?     false}}]
-   {:preloads (when collect-preloads? (resolve-preloads asset-resolver (collect-head-preloads hiccup)))
-    :html     (when-not delay-render? (->str ctx hiccup))
-    :render_  (when delay-render?
-                (delay (->str ctx hiccup)))}))
+                                             :or {collect-preloads? true
+                                                  delay-render? false}}]
+   {:preloads (when collect-preloads?
+                (resolve-preloads asset-resolver hiccup))
+    :html (when-not delay-render? (->str ctx hiccup))
+    :render_ (when delay-render?
+               (delay (->str ctx hiccup)))}))
 
 (defn- append-link-to-builder!
   [^StringBuilder sb {:keys [href path rel as type crossorigin integrity]}]
