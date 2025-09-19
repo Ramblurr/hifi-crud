@@ -64,17 +64,17 @@
       :wrap           (fn csrf-middleware-wrap [handler]
                         (fn csrf-middleware
                           ([request]
-                           (let [submitted-csrf-token (:submitted-csrf-token request) ;; whichever middleware parses the body is responsible for adding this
+                           (let [submitted-csrf-token (:hifi/submitted-csrf-token request) ;; whichever middleware parses the body is responsible for adding this
                                  sid                  (:sid request)
                                  valid-token?         (when submitted-csrf-token (validate submitted-csrf-token sid))]
                              (cond
                                (and sid valid-token?)
-                               (handler (-> request (assoc :csrf-token submitted-csrf-token)
-                                            (dissoc :submitted-csrf-token)))
+                               (handler (-> request (assoc :hifi/csrf-token submitted-csrf-token)
+                                            (dissoc :hifi/submitted-csrf-token)))
 
                                (and sid (= (:request-method request) :get))
                                (let [new-csrf-token (generate sid)
-                                     response       (handler (assoc request :csrf-token new-csrf-token))]
+                                     response       (handler (assoc request :hifi/csrf-token new-csrf-token))]
                                  (update-csrf-cookie response new-csrf-token options))
 
                                :else {:status  403

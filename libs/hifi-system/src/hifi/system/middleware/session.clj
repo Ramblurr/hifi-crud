@@ -58,7 +58,7 @@
 
   - **Session middleware** must be configured to run before this middleware (from [[hifi.system.middleware.session]])
   - The request must have a valid `:sid` (session ID) for token generation
-  - **Body-parsing middleware** must extract the token from request body and add it as `:submitted-csrf-token`
+  - **Body-parsing middleware** must extract the token from request body and add it as `:hifi/submitted-csrf-token`
   - The client must extract and submit the CSRF token with all non-GET requests"
   ([] (session-middleware {}))
   ([options]

@@ -15,7 +15,7 @@
    This middleware adds these keys to the request map:
     :hifi.datastar/signals - a map of datastar signals
     :hifi.datastar/tab-id - the tab-id sent from the client
-    :submitted-csrf-token - the csrf token sent from the client
+    :hifi/submitted-csrf-token - the csrf token sent from the client
 
   The middleware options are:
     - read-json - an arity/1 function accepting the raw signal data and returning the parsed json as edn. defaults to a charred parse fn"
@@ -30,7 +30,7 @@
                    (handler (assoc req
                                    :hifi.datastar/signals signals-edn
                                    :hifi.datastar/tab-id (:tab-id signals-edn)
-                                   :submitted-csrf-token (:csrf signals-edn))))
+                                   :hifi/submitted-csrf-token (:csrf signals-edn))))
                  (handler req))
                (handler req))))})
 
@@ -49,7 +49,7 @@
   "Creates a middleware that adds the multicaster to the request map.
 
   Adds the key :hifi.datastar/multicaster to the request map with the value of the multicaster"
-  [{:keys [datastar-render-multicaster_] :as config}]
+  [{:keys [datastar-render-multicaster_] :as _config}]
   (assert datastar-render-multicaster_)
   {:name ::datastar-render-multicaster
    :wrap (fn wrap-datastar-render-multicaster [handler]
@@ -67,7 +67,7 @@
 
 (defn datastar-tab-state-middleware
   "Creates a middleware that adds :hifi.datastar/tab-state-store and tab-state to the request map."
-  [{:keys [tab-state] :as config}]
+  [{:keys [tab-state] :as _config}]
   (let [!tab-state-store (:!tab-state-store tab-state)]
     (assert !tab-state-store)
     {:name ::datastar-tab-state
