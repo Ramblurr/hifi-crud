@@ -114,18 +114,15 @@
                    (get-in (manifest/load-manifest manifest-path) ["js/app.js" :digest-path])))))))))
 
 (deftest asset-exists-check-test
-  (testing "checking if assets exist in development mode"
-    (with-temp-dir
-      (fn [temp-dir]
-        (fs/create-dirs (str temp-dir "/assets/js"))
-        (spit (str temp-dir "/assets/js/app.js") "// code")
+  (testing "checking if assets exist using manifest"
+    (let [asset-ctx (assets/create-asset-context)]
+      ;; Asset not in manifest - should return false
+      (is (not (assets/asset-exists? asset-ctx "js/app.js")))
 
-        (let [config    {:hifi.assets/paths [(str temp-dir "/assets")]}
-              asset-ctx (assets/create-asset-context {:dev-mode? true
-                                                      :config    config})]
-
-          (is (assets/asset-exists? asset-ctx "js/app.js"))
-          (is (not (assets/asset-exists? asset-ctx "js/missing.js"))))))))
+      ;; Asset in manifest - should return true
+      (let [ctx-with-manifest (assoc asset-ctx :manifest {"js/app.js" {:digest-path "js/app-abc123.js"}})]
+        (is (assets/asset-exists? ctx-with-manifest "js/app.js"))
+        (is (not (assets/asset-exists? ctx-with-manifest "js/missing.js")))))))
 
 (deftest path-precedence-test
   (testing "when multiple paths contain the same asset, first path wins"

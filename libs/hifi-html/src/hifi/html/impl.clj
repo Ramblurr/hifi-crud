@@ -6,6 +6,60 @@
    [hifi.html.protocols :as p]
    [hifi.html.util :as u]))
 
+(defn integrity? [attrs]
+  (some? (:integrity attrs)))
+
+(defn with-integrity [{:keys [href src crossorigin] :as attrs} asset-ctx]
+  (assoc attrs :integrity (p/integrity asset-ctx (or src href))
+         :crossorigin (or crossorigin "anonymous")))
+
+(defn rewrite-stylesheet [asset-ctx [_ {:keys [href] :as attrs} & content]]
+  (let [digest-path (p/resolve-path asset-ctx href)]
+    [:link (cond-> (assoc attrs
+                          :href digest-path
+                          :rel "stylesheet")
+             (integrity? attrs) (with-integrity asset-ctx))
+     content]))
+
+(defn rewrite-preload [asset-ctx [_ {:keys [href] :as attrs} & content]]
+  (let [digest-path (p/resolve-path asset-ctx href)]
+    [:link (cond-> (assoc attrs
+                          :href digest-path
+                          :rel "preload")
+             (integrity? attrs) (with-integrity asset-ctx))
+     content]))
+
+(defn rewrite-javascript [asset-ctx [_ {:keys [src] :as attrs} & content]]
+  (let [digest-path (p/resolve-path asset-ctx src)]
+    [:script (cond-> (assoc attrs :src digest-path)
+               (integrity? attrs) (with-integrity asset-ctx))
+     content]))
+
+(defn rewrite-image [asset-ctx [tag attrs & content]]
+  (let [logical-path (:src attrs)
+        digest-path (p/resolve-path asset-ctx logical-path)]
+    [tag (assoc attrs :src digest-path) content]))
+
+(defn rewrite-audio [asset-ctx [tag attrs & content]]
+  (let [logical-path (:src attrs)
+        digest-path (p/resolve-path asset-ctx logical-path)]
+    [tag (assoc attrs :src digest-path) content]))
+
+(defn rewrite-asset-element [asset-ctx el]
+  (let [metadata (meta el)]
+    (if (::p/processed? metadata)
+      el
+      (let [asset-type (-> metadata :hifi.html/asset-marker :type)
+            processed-el (case asset-type
+                           :hifi.html/stylesheet (rewrite-stylesheet asset-ctx el)
+                           :hifi.html/preload    (rewrite-preload asset-ctx el)
+                           :hifi.html/javascript (rewrite-javascript asset-ctx el)
+                           :hifi.html/image      (rewrite-image asset-ctx el)
+                           :hifi.html/audio      (rewrite-audio asset-ctx el)
+                           el)]
+        (with-meta processed-el
+          (assoc metadata ::p/processed? true))))))
+
 (defn has-asset-marker? [node]
   (and
    (vector? node)
@@ -53,7 +107,7 @@
   (if assets
     (walk/prewalk (fn [node]
                     (if (has-asset-marker? node)
-                      (p/rewrite-asset-element assets node)
+                      (rewrite-asset-element assets node)
                       node))
                   hiccup)
     hiccup))
