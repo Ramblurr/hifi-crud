@@ -1,15 +1,12 @@
 (ns hifi.system.middleware
   (:require
-
-   [hifi.datastar.middleware :as d*mw]
-   [hifi.system.middleware.remote-addr :as remote-addr]
-   [hifi.system.middleware.reverse-route :as reverse-route]
    [hifi.system.middleware.csrf :as csrf]
-   [hifi.system.middleware.session :as session]
-   [hifi.system.middleware.secheaders :as secheaders]
    [hifi.system.middleware.exception :as exception]
-   [reitit.ring.middleware.parameters :as reitit.params]
-   [reitit.ring.middleware.multipart :as reitit.multipart]))
+   [hifi.system.middleware.reverse-route :as reverse-route]
+   [hifi.system.middleware.secheaders :as secheaders]
+   [hifi.system.middleware.session :as session]
+   [reitit.ring.middleware.multipart :as reitit.multipart]
+   [reitit.ring.middleware.parameters :as reitit.params]))
 
 (def ParametersMiddlewareComponentData
   {:name           :parse-raw-params
@@ -21,10 +18,12 @@
    :factory        #(reitit.multipart/create-multipart-middleware %)
    :options-schema nil})
 
-(defn middleware-component [{:keys [_name factory _options-schema :donut.system/config] :as _component-data}]
+(defn middleware-component [{:keys [name factory options-schema :donut.system/config] :as _component-data}]
   {:donut.system/start  (fn [{:keys [:donut.system/config]}]
                           (factory config))
-   :donut.system/config (merge {} config)})
+   :donut.system/config (merge {} config)
+   :hifi/config-spec options-schema
+   :hifi/config-key  name})
 
 (def MiddlewareRegistryComponentGroup
   {:parse-raw-params            (middleware-component ParametersMiddlewareComponentData)
@@ -32,9 +31,9 @@
    :reverse-route               (middleware-component reverse-route/ReititReverseRouteMiddlewareComponentData)
    :exception                   (middleware-component exception/ExceptionMiddlewareComponentData)
    :exception-backstop          (middleware-component exception/ExceptionBackstopMiddlewareComponentData)
-   :datastar-signals            (middleware-component d*mw/DatastarSignalsMiddlewareComponentData)
-   :datastar-render-multicaster (middleware-component d*mw/DatastarRenderMulticasterMiddlewareComponentData)
-   :datastar-tab-state          (middleware-component d*mw/DatastarTabStateMiddlewareComponentData)
+   ;; :datastar-signals            (middleware-component d*mw/DatastarSignalsMiddlewareComponentData)
+   ;; :datastar-render-multicaster (middleware-component d*mw/DatastarRenderMulticasterMiddlewareComponentData)
+   ;; :datastar-tab-state          (middleware-component d*mw/DatastarTabStateMiddlewareComponentData)
    :session-cookie              (middleware-component session/SessionMiddlewareComponentData)
    :csrf-protection             (middleware-component csrf/CSRFProtectionMiddlewareComponentData)
    :security-headers            (middleware-component secheaders/SecurityHeadersMiddlewareComponentData)
@@ -49,9 +48,9 @@
    :reverse-route
    :exception
    :parse-multipart
-   :datastar-signals
-   :datastar-render-multicaster
-   :datastar-tab-state
+   ;; :datastar-signals
+   ;; :datastar-render-multicaster
+   ;; :datastar-tab-state
    :session-cookie
    :csrf-protection
    :security-headers])

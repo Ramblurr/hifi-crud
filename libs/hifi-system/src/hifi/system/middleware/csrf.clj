@@ -82,7 +82,7 @@
                                       :body    "Invalid csrf"})))))})))
 
 (def CSRFProtectionMiddlewareComponentData
-  {:name           :csrf-protection
+  {:name           :hifi.middleware/csrf-protection
    :factory        #(csrf-middleware %)
    :options-schema options/CSRFProtectionMiddlewareOptions})
 

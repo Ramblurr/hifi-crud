@@ -38,7 +38,9 @@
    (m/parse patterns [e])))
 
 (defn match-handler [{:keys [patterns default]} e]
-  (let [handler (parse patterns (or (ex-data e) e))]
+  (let [res (parse patterns (or (ex-data e) e))
+        ;; 2025-09 the following branch is to handle different malli versions
+        handler (if (map-entry? res) (val res) res)]
     (if (= :default handler)
       default
       handler)))
@@ -74,7 +76,7 @@
 (defn default-exception-handler
   [^Exception _e _]
   {:status  500
-   :headers {"Content-Type" "text/plain"}
+   :headers {"Content-Type"           "text/plain"}
    :body    "Internal server error"})
 
 (defn default-not-found-handler
@@ -156,7 +158,8 @@
       (catch Throwable _)))
   {:status  500
    :body    "Internal Server Error"
-   :headers {"Content-Type" "text/plain"}})
+   :headers {"Content-Type" "text/plain"
+             "Hifi-Exception-Handler" (str ::exception-backstop-middleware)}})
 
 (defn- wrap-backstop [report]
   (fn [handler]
@@ -186,7 +189,7 @@
   ([] (exception-backstop-middleware {}))
   ([{:keys [report]
      :or   {report (fn [e req]
-                     (prn e)
+                     (prn :exception-backstop e)
                      (tap> [:exception-backstop :error e :request req]))}}]
    {:name           ::exception-backstop-middleware
     :options-schema options/ExceptionBackstopMiddlewareOptions

@@ -3,6 +3,7 @@
  :aliases {:dev   {:extra-paths ["dev"]
                    :extra-deps  {hifi/babashka-tasks    {:local/root "libs/hifi-dev-tasks"}
                                  hifi/config            {:local/root "libs/hifi-config"}
+                                 hifi/core              {:local/root "libs/hifi-core"}
                                  hifi/assets            {:local/root "libs/hifi-assets"}
                                  hifi/datastar          {:local/root "libs/hifi-datastar"}
                                  hifi/datomic           {:local/root "libs/hifi-datomic"}
@@ -15,9 +16,11 @@
                                  hifi/util              {:local/root "libs/hifi-util"}
                                  ;; Dev only deps
                                  org.clojure/clojure    {:mvn/version "1.12.1"}
-                                 org.clojure/tools.deps {:mvn/version "0.24.1523"}}}
+                                 org.clojure/tools.deps {:mvn/version "0.24.1523"}}
+                   :jvm-opts    ["-Dguardrails.enabled=true"]}
            :test  {:extra-paths ["libs/hifi-dev-tasks/test"
                                  "libs/hifi-config/test"
+                                 "libs/hifi-core/test"
                                  "libs/hifi-assets/test"
                                  "libs/hifi-datastar/test"
                                  "libs/hifi-datomic/test"

@@ -1,0 +1,4 @@
+{:paths ["src"]
+ :deps  {hifi/config                      {:local/root "../hifi-config"}
+         hifi/error                       {:local/root "../hifi-error"}
+         hifi/util                 {:local/root "../hifi-util"}}}

@@ -1,0 +1,15 @@
+{:hooks          {:analyze-call {hifi.core/defcallback
+                                 hifi.core.clj-kondo-hooks/defcallback}}
+ :config-in-call {hifi.core/deftemplate {:linters {:inline-def                    {:level :off}
+                                                   :clojure-lsp/unused-public-var {:level :off}
+                                                   :unresolved-symbol             {:level :off}
+                                                   :unresolved-namespace          {:level :off}}}
+                  hifi.core/extend-ns   {:linters {:unknown-require-option {:level :off}}}}
+ :linters        {:clj-kondo.hifi.core.defcallback/invalid-gspec {:level :error}}
+ :lint-as        {hifi.core/defcallback       clojure.spec.alpha/def
+                  hifi.core/defcallback-macro clojure.spec.alpha/def
+                  hifi.backtick/defquote      clojure.core/def
+                  hifi.core/deftemplate       clojure.core/do
+                  hifi.core/extend-ns         clojure.core/require
+                  hifi.core/defplugin         clojure.core/def
+                  hifi.core/defplugin*        clojure.core/def}}

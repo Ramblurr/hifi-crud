@@ -16,7 +16,7 @@
 
 (def ^:private default-transformer (mt/default-value-transformer {::mt/add-optional-keys true}))
 
-(defn throw-explanation [opts error-msg more-ex-data {:keys [value explain]}]
+(defn throw-explanation [_opts error-msg more-ex-data {:keys [_value explain]}]
   (let [explain (-> explain (me/with-error-messages))
         ei      (ex-info (or error-msg
                              (some-> more-ex-data ::id str)
@@ -43,9 +43,19 @@
   All other options are passed directly to malli.
   "
   [schema {:keys [error-msg more-ex-data transformer] :or {transformer default-transformer} :as opts}]
-  (m/coercer (m/schema schema) transformer identity
-             (partial throw-explanation opts error-msg more-ex-data)
-             (dissoc opts :error-msg :more-ex-data :transformer)))
+  (try
+    (m/coercer (m/schema schema) transformer identity
+               (partial throw-explanation opts error-msg more-ex-data)
+               (dissoc opts :error-msg :more-ex-data :transformer))
+    (catch clojure.lang.ExceptionInfo e
+      (if (= :malli.core/invalid-schema (:type  (ex-data e)))
+        (throw (ex-info "Malli schema definition is invalid"
+                        {::anom/category ::anom/incorrect
+                         ::id ::invalid-schema
+                         ::url (url ::invalid-schema)
+                         :schema schema}))
+
+        (throw e)))))
 
 (defn coerce!
   "Decode `value` with `schema` and throw exception if value is invalid.
@@ -110,7 +120,7 @@
 
 (defn bling-schema-error [error]
   (when (id? error ::schema-validation-error)
-    (let [{:as data :keys [explanation]} (ex-data error)
+    (let [{:as _data :keys [explanation]} (ex-data error)
           value                          (-> explanation :value)
           schema                         (-> explanation :schema)]
       ((requiring-resolve 'bling.explain/explain-malli)

@@ -58,9 +58,16 @@
       v)))
 
 (defn secret?
-  "Returns true if x is a value wrapped by the Secret type, false otherwise"
+  "Returns true if x is a value wrapped by the Secret type"
   [x]
   (cloak/secret? x))
+
+(defn secret-present?
+  "Returns true if x is a value wrapped by the Secret type and the wrapped value is not nil, false otherwise"
+  [x]
+  (and
+   (secret? x)
+   (some? (unmask x))))
 
 (defmethod aero/reader 'hifi/secret
   ;; Implementation for #hifi/secret tag literal in an Aero config edn
@@ -99,12 +106,12 @@
 
    Options are passed to the underlying Aero reader."
   [& {:keys [filename opts]
-      :or   {filename "env.edn"
+      :or   {filename (io/resource "env.edn")
              opts     {}}}]
 
   (let [profile   (current-profile)
         aero-opts (merge (when profile {:profile profile}) opts)]
-    (-> (-read-config (io/resource filename) aero-opts)
+    (-> (-read-config filename aero-opts)
         (assoc :profile profile))))
 
 (comment

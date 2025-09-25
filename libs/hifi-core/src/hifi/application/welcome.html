@@ -1,0 +1,409 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Welcome to HiFi</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      :root {
+        --bg: #ffffff;
+        --fg: #1a1a1a;
+        --accent: #0066cc;
+        --surface: #f8f9fa;
+        --border: rgba(0, 0, 0, 0.06);
+        --subtle: rgba(0, 0, 0, 0.4);
+        --particle: rgba(0, 102, 204, 0.05);
+      }
+
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --bg: #0a0a0a;
+          --fg: #e5e5e5;
+          --accent: #4d9fff;
+          --surface: #1a1a1a;
+          --border: rgba(255, 255, 255, 0.06);
+          --subtle: rgba(255, 255, 255, 0.4);
+          --particle: rgba(77, 159, 255, 0.05);
+        }
+      }
+
+      body {
+        font-family:
+          -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue",
+          Arial, sans-serif;
+        background: var(--bg);
+        color: var(--fg);
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+        overflow: hidden;
+        transition:
+          background 0.3s ease,
+          color 0.3s ease;
+      }
+
+      /* Subtle animated background */
+      .particles {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        top: 0;
+        left: 0;
+      }
+
+      .particle {
+        position: absolute;
+        width: 4px;
+        height: 4px;
+        background: var(--particle);
+        border-radius: 50%;
+        animation: float-up 20s linear infinite;
+      }
+
+      @keyframes float-up {
+        0% {
+          transform: translateY(100vh) translateX(0);
+          opacity: 0;
+        }
+        10% {
+          opacity: 1;
+        }
+        90% {
+          opacity: 1;
+        }
+        100% {
+          transform: translateY(-100vh) translateX(100px);
+          opacity: 0;
+        }
+      }
+
+      /* Generate random particles */
+      .particle:nth-child(1) {
+        left: 10%;
+        animation-delay: 0s;
+        animation-duration: 25s;
+      }
+      .particle:nth-child(2) {
+        left: 20%;
+        animation-delay: 2s;
+        animation-duration: 22s;
+      }
+      .particle:nth-child(3) {
+        left: 30%;
+        animation-delay: 4s;
+        animation-duration: 28s;
+      }
+      .particle:nth-child(4) {
+        left: 40%;
+        animation-delay: 6s;
+        animation-duration: 20s;
+      }
+      .particle:nth-child(5) {
+        left: 50%;
+        animation-delay: 8s;
+        animation-duration: 24s;
+      }
+      .particle:nth-child(6) {
+        left: 60%;
+        animation-delay: 10s;
+        animation-duration: 26s;
+      }
+      .particle:nth-child(7) {
+        left: 70%;
+        animation-delay: 12s;
+        animation-duration: 21s;
+      }
+      .particle:nth-child(8) {
+        left: 80%;
+        animation-delay: 14s;
+        animation-duration: 23s;
+      }
+      .particle:nth-child(9) {
+        left: 90%;
+        animation-delay: 16s;
+        animation-duration: 27s;
+      }
+      .particle:nth-child(10) {
+        left: 15%;
+        animation-delay: 18s;
+        animation-duration: 25s;
+      }
+
+      /* Main container */
+      .container {
+        width: 100%;
+        max-width: 500px;
+        padding: 2rem;
+        text-align: center;
+        position: relative;
+        z-index: 1;
+      }
+
+      /* Logo section */
+      .logo-section {
+        margin-bottom: 2rem;
+      }
+
+      .logo {
+        font-size: clamp(3rem, 10vw, 5rem);
+        font-weight: 800;
+        letter-spacing: -0.05em;
+        position: relative;
+        display: inline-block;
+      }
+
+      /* Subtle sound wave animation next to logo */
+      .sound-bars {
+        display: inline-flex;
+        align-items: center;
+        gap: 3px;
+        margin-left: 1rem;
+        vertical-align: middle;
+      }
+
+      .sound-bar {
+        width: 3px;
+        background: var(--accent);
+        opacity: 0.6;
+        border-radius: 3px;
+        animation: wave 1.2s ease-in-out infinite;
+      }
+
+      .sound-bar:nth-child(1) {
+        height: 12px;
+        animation-delay: 0s;
+      }
+      .sound-bar:nth-child(2) {
+        height: 20px;
+        animation-delay: 0.1s;
+      }
+      .sound-bar:nth-child(3) {
+        height: 16px;
+        animation-delay: 0.2s;
+      }
+      .sound-bar:nth-child(4) {
+        height: 24px;
+        animation-delay: 0.3s;
+      }
+      .sound-bar:nth-child(5) {
+        height: 14px;
+        animation-delay: 0.4s;
+      }
+
+      @keyframes wave {
+        0%,
+        100% {
+          transform: scaleY(0.5);
+          opacity: 0.6;
+        }
+        50% {
+          transform: scaleY(1);
+          opacity: 1;
+        }
+      }
+
+      .tagline {
+        color: var(--subtle);
+        font-size: clamp(0.9rem, 2.5vw, 1.1rem);
+        margin-top: 0.5rem;
+      }
+
+      /* Status indicator */
+      .status {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.4rem 0.8rem;
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 100px;
+        margin-bottom: 2rem;
+        font-size: 0.85rem;
+      }
+
+      .status-dot {
+        width: 6px;
+        height: 6px;
+        background: var(--accent);
+        border-radius: 50%;
+        animation: pulse 2s infinite;
+      }
+
+      @keyframes pulse {
+        0%,
+        100% {
+          opacity: 1;
+        }
+        50% {
+          opacity: 0.5;
+        }
+      }
+
+      /* Version info */
+      .versions {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+      }
+
+      .version-item {
+        padding: 0.75rem 0;
+        border-bottom: 1px solid var(--border);
+        display: flex;
+        flex-direction: column;
+        gap: 0.3rem;
+      }
+
+      .version-item:last-child {
+        border-bottom: none;
+      }
+
+      .version-label {
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: var(--subtle);
+      }
+
+      .version-value {
+        font-family: "SF Mono", Monaco, "Cascadia Code", monospace;
+        font-size: 0.9rem;
+        word-break: break-all;
+      }
+
+      /* CTA Button */
+      .cta-button {
+        display: inline-block;
+        padding: 0.75rem 2rem;
+        background: var(--accent);
+        color: white;
+        text-decoration: none;
+        border-radius: 8px;
+        font-weight: 500;
+        transition:
+          transform 0.2s ease,
+          box-shadow 0.2s ease;
+        box-shadow: 0 2px 8px rgba(0, 102, 204, 0.2);
+      }
+
+      .cta-button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 102, 204, 0.3);
+      }
+
+      .cta-button:active {
+        transform: translateY(0);
+      }
+
+      /* Responsive adjustments */
+      @media (max-width: 480px) {
+        .container {
+          padding: 1rem;
+        }
+
+        .sound-bars {
+          margin-left: 0.5rem;
+        }
+
+        .versions {
+          padding: 1rem;
+        }
+
+        .cta-button {
+          display: block;
+          width: 100%;
+        }
+      }
+
+      /* High contrast mode support */
+      @media (prefers-contrast: high) {
+        :root {
+          --accent: #0052cc;
+          --border: rgba(0, 0, 0, 0.2);
+        }
+
+        @media (prefers-color-scheme: dark) {
+          :root {
+            --accent: #66b3ff;
+            --border: rgba(255, 255, 255, 0.2);
+          }
+        }
+      }
+
+      /* Reduce motion support */
+      @media (prefers-reduced-motion: reduce) {
+        .particle,
+        .sound-bar,
+        .status-dot {
+          animation: none;
+        }
+
+        .cta-button {
+          transition: none;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="particles">
+      <div class="particle"></div>
+      <div class="particle"></div>
+      <div class="particle"></div>
+      <div class="particle"></div>
+      <div class="particle"></div>
+      <div class="particle"></div>
+      <div class="particle"></div>
+      <div class="particle"></div>
+      <div class="particle"></div>
+      <div class="particle"></div>
+    </div>
+
+    <div class="container">
+      <div class="logo-section">
+        <h1 class="logo">
+          HiFi
+          <span class="sound-bars">
+            <span class="sound-bar"></span>
+            <span class="sound-bar"></span>
+            <span class="sound-bar"></span>
+            <span class="sound-bar"></span>
+            <span class="sound-bar"></span>
+          </span>
+        </h1>
+        <p class="tagline">Clojure Web Framework</p>
+      </div>
+
+      <div class="status">
+        <span class="status-dot"></span>
+        <span>Running</span>
+      </div>
+
+      <div class="versions">
+        <div class="version-item">
+          <span class="version-label">HiFi</span>
+          <span class="version-value">@V-HIFI@</span>
+        </div>
+        <div class="version-item">
+          <span class="version-label">Clojure</span>
+          <span class="version-value">@V-CLOJURE@</span>
+        </div>
+        <div class="version-item">
+          <span class="version-label">Java</span>
+          <span class="version-value">@V-JAVA@</span>
+        </div>
+      </div>
+
+      <a href="https://hifi.software/start" class="cta-button">Get Started →</a>
+    </div>
+  </body>
+</html>

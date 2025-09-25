@@ -5,7 +5,6 @@
    [hifi.datastar.spec :as d*spec]
    [hifi.error.iface :as pe]
    [hifi.logging.spec :as logging.spec]
-   [hifi.system.middleware :as default.middleware]
    [reitit.middleware :as reitit.middleware]))
 
 (def IntoMiddleware
@@ -70,7 +69,8 @@
    [:channel-factory {:doc "Function that takes java.net.SocketAddress and returns java.nio.channels.SocketChannel for UDS support" :optional true} fn?]])
 
 (def HTTPServerOptions
-  [:map {:error/message "should be a map of HTTPServerOptions"}
+  [:map {;; :error/message "should be a map of HTTPServerOptions"
+         :name ::http-server}
    [:port {:doc "Which port to listen on for incoming requests"} pos-int?]
    [:host {:doc "Which IP to bind"} :string]
    [:http-kit {:optional true} HTTPKitServerOptions]])
@@ -92,16 +92,12 @@
 
 (def RingHandlerOptions
   [:map {:error/message "should be a valid hifi system ring handler component options map"}
-   [:reload-per-request? {:doc "Reload the routes and handler on every request, useful for most (but not all) dev situations. You must pass the `routes` as a function var (i.e, `:routes #routes`" :default false} :boolean]
-   [:resource-handler-opts {:doc      "Options for the resource handler"
-                            :default  {:path "/"}
-                            :optional true} ResourceHandlerOptions]
    [:default-handler-opts {:doc      "Options for the default handler"
                            :optional true} DefaultHandlerOptions]
    [:handler-opts
     {:doc           "The options map passed to the ring-handler function."
      :error/message "should be a valid ring handler component options map"
-     :default       {}}
+     :default       {:middleware [[:donut.system/ref [:hifi/middleware :exception-backstop]]]}}
     :map]])
 
 (def CreateHandlerOptsSchema

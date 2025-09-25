@@ -28,6 +28,11 @@
   (fn [x]
     (and (string? x) (str/starts-with? x "/"))))
 
+(def Secret
+  [:and
+   [:fn {:error/message "should be a secret value"} config/secret?]
+   [:fn {:error/message "should be a secret value that isn't nil"} config/secret-present?]])
+
 (def NonBlankString
   [:and
    [:string {:min 1}]
@@ -57,7 +62,7 @@
 
 (def CookieAttrs
   (m/schema
-   [:map
+   [:map {:name ::cookie-attributes}
     [:value NonBlankString]
     [:path {:optional true} UriPath]
     [:domain {:optional true} NonBlankString]
@@ -73,7 +78,7 @@
 
 #_(def PrettyExceptionsPageOptions
     (m/schema
-     [:map
+     [:map {:name ::pretty-exceptions-page-options}
       [:app-namespaces
        {:optional true
         :doc      "Controls which namespaces show up on the pretty errors page as \"application\" frames. All frames from namespaces prefixed with the names in the list will be marked as application frames."}
@@ -84,7 +89,7 @@
 
 (def ExceptionMiddlewareOptions
   (m/schema
-   [:map
+   [:map {:name ::exception-middleware-options}
     [:debug-errors? {:doc     "When true uses hifi.system.middleware.errors functionality for debugging application failures."
                      :default false} :boolean]
     [:error-handlers {:doc      "TODO"
@@ -94,22 +99,22 @@
 
 (def ExceptionBackstopMiddlewareOptions
   (m/schema
-   [:map
+   [:map {:name ::exception-backstop-middleware-options}
     [:report {:optional true
               :doc      "A side-effecting function that takes [exception request] for logging/reporting. Defaults to a function that uses tap> to report the error. The return value is discarded."}
      [:fn fn?]]]))
 
 (def CSRFProtectionMiddlewareOptions
   (m/schema
-   [:map
-    [:csrf-secret {:doc "A randomly generated random secret used to sign the CSRF token."} [:fn config/secret?]]
+   [:map {:name ::csrf-protection-middleware-options}
+    [:csrf-secret {:doc "A randomly generated random secret used to sign the CSRF token."} Secret]
     [:cookie-name {:default "csrf" :doc "Name of the cookie holding the csrf double-submit token."} NonBlankString]
     [:cookie-attrs {:default {:same-site :lax :secure true :path "/" :host-prefix true}
                     :doc     "Map of attributes for the csrf cookie."} CookieAttrsOption]]))
 
 (def SessionMiddlewareOptions
   (m/schema
-   [:map
+   [:map {:name ::session-middleware-options}
     [:cookie-name {:default "sid" :doc "Name of the cookie holding the session key."} NonBlankString]
     [:cookie-attrs {:default {:same-site :lax :http-only true :secure true :path "/" :host-prefix true}
                     :doc     "Map of attributes for the session cookie."} CookieAttrsOption]]))
@@ -140,14 +145,14 @@
 
 (def ContentSecurityPolicyData
   (m/schema
-   (into [:map]
+   (into [:map {:name ::content-security-policy-data}]
          (mapv (fn [k]
                  [k {:optional true} [:vector :string]])
                csp-keys))))
 
 (def SecHeadersMiddlewareOptions
   (m/schema
-   [:map
+   [:map {:name ::sec-headers-middleware-options}
     [:hsts? {:default true :doc "The HTTP Strict-Transport-Security (HSTS) response header makes sure the browser automatically upgrades to HTTPS for current and future connections."} :boolean]
     [:content-security-policy {:default {:font-src        ["'self'"]
                                          :script-src      ["'self'" "'unsafe-eval'"]

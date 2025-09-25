@@ -1,10 +1,39 @@
 (ns user)
 
 (comment
-  (require '[hifi.dev.portal-helpers :as portal-repl]
-           '[portal.colors]
-           '[portal.api :as p])
-  (p/open {:theme :portal.colors/gruvbox})
-  (add-tap portal.api/submit)
+  (do
+    (require '[hifi.dev.portal-helpers :as portal-repl]
+             '[hifi.config]
+             '[portal.colors]
+             '[portal.api :as p])
+    (def transforms portal-repl/recommended-transforms)
+    (def tap-routing nil)
+    (defonce my-submit (portal-repl/make-submit :transforms #'transforms :tap-routing #'tap-routing))
+    (p/open {:theme :portal.colors/gruvbox})
+    (add-tap my-submit))
+
+  (clojure.repl.deps/sync-deps)
+
+  (do
+    (hifi.config/set-env! :dev)
+    (require '[clj-reload.core :as clj-reload])
+    (clj-reload/init {:dirs
+                      ["examples/hello-world/src"
+                       "libs/hifi-config/src"
+                       "libs/hifi-core/src"
+                       "libs/hifi-assets/src"
+                       "libs/hifi-datastar/src"
+                       "libs/hifi-datomic/src"
+                       "libs/hifi-dev/src"
+                       "libs/hifi-engine/src"
+                       "libs/hifi-error/src"
+                       "libs/hifi-html/src"
+                       "libs/hifi-logging/src"
+                       "libs/hifi-system/src"
+                       "libs/hifi-util/src"]
+                      :no-reload #{'user 'dev}}))
+  (clj-reload/reload :all)
+  (System/getProperty "guardrails.enabled")
+  (System/setProperty "guardrails.enabled" "")
   ;;
   )

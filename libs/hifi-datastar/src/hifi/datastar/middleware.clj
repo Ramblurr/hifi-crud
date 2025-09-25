@@ -36,10 +36,11 @@
 
 (def DatastarSignalsMiddlewareComponentData
   {:name           ::datastar-signals
-   :options-schema [:map
+   :options-schema [:map {:name ::datastar-signals-schema}
                     [:read-json
-                     {:doc "An arity/1 function accepting the raw signal data and returning the parsed json as edn. defaults to a charred parese fn"}
-                     (fn? default-read-json)]]
+                     {:doc "An arity/1 function accepting the raw signal data and returning the parsed json as edn. defaults to a charred parese fn"
+                      :default default-read-json}
+                     fn?]]
    :factory        #(datastar-signals-middleware %)})
 
 ;; -----------------------------------------------------------------------------
@@ -58,7 +59,6 @@
 
 (def DatastarRenderMulticasterMiddlewareComponentData
   {:name                ::datastar-render-multicaster
-   :options-schema      nil
    :donut.system/config {:datastar-render-multicaster_ [:donut.system/ref [:hifi/components :datastar-render-multicaster]]}
    :factory             #(datastar-render-multicaster-middleware %)})
 
@@ -80,6 +80,5 @@
 
 (def DatastarTabStateMiddlewareComponentData
   {:name                ::datastar-tab-state
-   :options-schema      nil
    :donut.system/config {:tab-state [:donut.system/ref [:hifi/components :tab-state]]}
    :factory             #(datastar-tab-state-middleware %)})
