@@ -4,6 +4,7 @@
   (:require
    [app.auth :as auth]
    [app.home :as home]
+   [hifi.core :as h]
    [app.system :as system]
    [hifi.config :as config]
    [hifi.datastar :as datastar]
@@ -45,7 +46,7 @@
           (d*/close-sse! sse-gen)))
       (throw (ex-info "Command not found" {:command command-name})))))
 
-(def static-asset (partial assets/static-asset (config/dev?)))
+(def static-asset (partial assets/static-asset (h/dev?)))
 (def !css (static-asset {:resource-path "public/compiled.css" :route-path "/app.css" :content-type "text/css"}))
 (def !datastar datastar/!datastar-asset)
 (def !floating-ui-core (static-asset {:resource-path "public/@floating-ui/floating-ui-core@1.6.9.js" :route-path "/@floating-ui/floating-ui-core@1.6.9.js" :content-type "application/javascript"}))
@@ -60,7 +61,7 @@
                        (html/stylesheet {:!asset !css})))
 
 (def shim-response (html/shim-page-resp {:body (html/shim-document {:title          "HIFICRUD"
-                                                                    :csrf-cookie-js (when (config/dev?) html/csrf-cookie-js-dev)
+                                                                    :csrf-cookie-js (when (h/dev?) html/csrf-cookie-js-dev)
                                                                     :head           shim-assets
                                                                     :body-post      (html/compile
                                                                                      [:svg {:style "display: none"}

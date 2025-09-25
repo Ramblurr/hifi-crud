@@ -5,7 +5,6 @@
    [clojure.string :as str]
    [hifi.assets.impl :as assets]
    [hifi.assets.process :as process]
-   [hifi.config :as config]
    [hifi.core :as h]
    [hifi.system.middleware :as h.mw])
   (:import
@@ -108,7 +107,7 @@
   "Middleware that serves assets as configured by the :hifi/assets config key. "
   ([opts]
    (let [config (:hifi.assets/config opts)]
-     (if (config/dev?)
+     (if (h/dev?)
        (dynamic-assets-middleware config)
        (static-assets-middleware config)))))
 

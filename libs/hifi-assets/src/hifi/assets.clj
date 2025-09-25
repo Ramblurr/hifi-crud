@@ -4,7 +4,6 @@
   "Asset pipeline for HIFI framework - provides digest-based asset management,
    HTML helpers, and development/production asset serving."
   (:require
-   [hifi.config :as config]
    [hifi.assets.spec :as spec]
    [hifi.assets.config :as assets.config]
    [hifi.assets.watcher :as watcher]
@@ -70,7 +69,7 @@
 (h/defcomponent AssetsWatcherComponent
   "Watches for changes in the watch paths and triggers a assets pipeline build. "
   {:donut.system/start  (fn  [{:donut.system/keys [config]}]
-                          (when (if (nil? (::watcher/enable? config)) (config/dev?) (::watcher/enable? config))
+                          (when (if (nil? (::watcher/enable? config)) (h/dev?) (::watcher/enable? config))
                             (watcher/start config)))
    :donut.system/stop   (fn [{instance :donut.system/instance}]
                           (when instance
@@ -82,7 +81,7 @@
 (h/defcomponent AssetsResolverComponent
   "Provides a [[hifi.html.protocols/AssetResolver]] that resolves asset content and data"
   {:donut.system/start  (fn [{:donut.system/keys [config]}]
-                          (if (config/dev?)
+                          (if (h/dev?)
                             (dynamic-assets-resolver (:hifi.assets/config config))
                             (static-assets-resolver (:hifi.assets/config config))))
    :donut.system/config {:hifi.assets/config [:donut.system/local-ref [:hifi.assets/config]]}})

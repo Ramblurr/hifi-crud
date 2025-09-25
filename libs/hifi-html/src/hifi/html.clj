@@ -2,13 +2,13 @@
   (:refer-clojure :exclude [compile])
   (:require
    [medley.core :as medley]
-   [hifi.config :as config]
    [hifi.html.impl :as impl]
+   [hifi.core :as h]
    [hifi.util.codec :as codec]
    [dev.onionpancakes.chassis.core :as chassis]
    [dev.onionpancakes.chassis.compiler :as cc]))
 
-(when (config/dev?)
+(when (h/dev?)
   (cc/set-warn-on-ambig-attrs!))
 
 (defn ->str

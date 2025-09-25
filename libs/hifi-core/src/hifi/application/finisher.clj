@@ -3,7 +3,6 @@
    [clojure.java.io :as io]
    [clojure.string :as str]
    [donut.system :as ds]
-   [hifi.config :as config]
    [hifi.core :as h :refer [defplugin*]]
    [hifi.html :as html]
    [hifi.http :as hifi.http]
@@ -105,7 +104,7 @@
 
     system))
 (defn maybe-add-internal [system]
-  (if (config/dev?)
+  (if (h/dev?)
     (assoc-in system [::ds/defs :hifi/routes ::internal-routes] (hifi.http/route-component internal-routes {:route-name ::internal-routes :path-prefix "/hifi"}))
     system))
 

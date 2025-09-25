@@ -3,6 +3,7 @@
 (ns hifi.config
   (:refer-clojure :exclude [mask])
   (:require
+   [hifi.core :as h]
    [time-literals.data-readers]
    [time-literals.read-write]
    [exoscale.cloak :as cloak]
@@ -10,32 +11,6 @@
    [clojure.java.io :as io]))
 
 (time-literals.read-write/print-time-literals-clj!)
-
-(def ^:dynamic *env*
-  nil)
-
-(defn set-env!
-  "Sets the current profile for the REPL. This is useful for development
-  when you want to change the profile without restarting the REPL."
-  [profile]
-  (alter-var-root #'*env* (constantly profile)))
-
-(defn current-profile
-  "Returns the current profile value or nil if it does not exist
-
-  The profile can be set via (in priority order):
-  - `HIFI_PROFILE` environment variablex
-  - `hifi.profile` JVM property
-  - [[*env*]] - a dynamic var for use during REPL driven development, so you don't have to restart your REPL to change your profile
-
-  Possible options are:
-    - `nil` or `:prod` for production
-    - `:dev` for development"
-  []
-  (or
-   *env*
-   (keyword (System/getenv "HIFI_PROFILE"))
-   (keyword (System/getProperty "hifi.profile"))))
 
 (defn mask
   "Mask a value behind the `Secret` type, hiding its real value when printing"
@@ -109,7 +84,7 @@
       :or   {filename (io/resource "env.edn")
              opts     {}}}]
 
-  (let [profile   (current-profile)
+  (let [profile   (h/current-profile)
         aero-opts (merge (when profile {:profile profile}) opts)]
     (-> (-read-config filename aero-opts)
         (assoc :profile profile))))
@@ -128,14 +103,3 @@
       (throw (ex-info (str "Missing env in .env.edn: " k)
                       {:hifi/error :hifi.config/missing-env
                        :env-key    k})))))
-
-(defn prod? []
-  (let [p (current-profile)]
-    (or (nil? p)
-        (= :prod p)
-        (isa? (current-profile) ::prod))))
-
-(defn dev? []
-  (or
-   (= :dev (current-profile))
-   (isa? (current-profile) ::dev)))

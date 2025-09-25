@@ -5,7 +5,7 @@
    [starfederation.datastar.clojure.brotli :as brotli]
    [hifi.datastar.http-kit :as d*http-kit]
    [hifi.datastar.tab-state :as tab-state]
-   [hifi.config :as config]
+   [hifi.core :as h]
    [hifi.html :as html]
    [hifi.system :as hifi]
    [hifi.system.middleware :as hifi.mw]
@@ -13,7 +13,7 @@
   (:import
    [java.time Duration]))
 
-(def static-asset (partial assets/static-asset (config/dev?)))
+(def static-asset (partial assets/static-asset (h/dev?)))
 (def !css (static-asset {:resource-path "demo.css" :content-type "text/css"}))
 (def !datastar datastar/!datastar-asset)
 
@@ -88,7 +88,7 @@
    ["/" {:get  {:handler (html/shim-handler
                           (html/shim-page-resp
                            {:body        (html/shim-document {:title          "Hello World Datastar"
-                                                              :csrf-cookie-js (when (config/dev?) html/csrf-cookie-js-dev)
+                                                              :csrf-cookie-js (when (h/dev?) html/csrf-cookie-js-dev)
                                                               :head           (list (html/script {:defer true :type "module" :!asset !datastar})
                                                                                     (html/stylesheet {:!asset !css}))
                                                               :body-pre       [:div]})

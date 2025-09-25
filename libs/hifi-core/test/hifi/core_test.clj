@@ -1,8 +1,7 @@
 (ns hifi.core-test
   (:require
    [clojure.test :refer [deftest is testing]]
-   [hifi.config :as config]
-   [hifi.core]))
+   [hifi.core :as h]))
 
 (def routes-form
   '(hifi.core/defroutes sample-routes
@@ -19,7 +18,7 @@
         value-expr (first (if (string? (first body))
                             (rest body)
                             body))]
-    (with-redefs [config/dev? (constantly dev?)]
+    (with-redefs [h/dev? (constantly dev?)]
       (eval value-expr))))
 
 (deftest defroutes-annotates-when-dev

@@ -8,9 +8,45 @@
    [clojure.tools.reader.reader-types :as reader-types]
    [donut.system :as ds]
    [donut.system.plugin :as dsp]
-   [hifi.config :as config]
    [hifi.backtick :as backtick]
    [hifi.error.iface :as pe]))
+
+(def ^:dynamic *env*
+  nil)
+
+(defn set-env!
+  "Sets the current profile for the REPL. This is useful for development
+  when you want to change the profile without restarting the REPL."
+  [profile]
+  (alter-var-root #'*env* (constantly profile)))
+
+(defn current-profile
+  "Returns the current profile value or nil if it does not exist
+
+  The profile can be set via (in priority order):
+  - `HIFI_PROFILE` environment variablex
+  - `hifi.profile` JVM property
+  - [[*env*]] - a dynamic var for use during REPL driven development, so you don't have to restart your REPL to change your profile
+
+  Possible options are:
+    - `nil` or `:prod` for production
+    - `:dev` for development"
+  []
+  (or
+   *env*
+   (keyword (System/getenv "HIFI_PROFILE"))
+   (keyword (System/getProperty "hifi.profile"))))
+
+(defn prod? []
+  (let [p (current-profile)]
+    (or (nil? p)
+        (= :prod p)
+        (isa? (current-profile) ::prod))))
+
+(defn dev? []
+  (or
+   (= :dev (current-profile))
+   (isa? (current-profile) ::dev)))
 
 (def DonutPlugin
   "Our enhanced donut.system plugin schema, more strict than ds/Plugin"
@@ -319,7 +355,7 @@
                      :symbol sym
                      :entry form})))
   (let [line          (or (route-form-line form) fallback-line)
-        annotation    `(when (config/dev?)
+        annotation    `(when (dev?)
                          {:ns '~current-ns
                           :line ~line})
         [path & rest*] form
@@ -364,7 +400,7 @@
                      [nil body])
         route-form (first body)
         source-meta (merge {:file *file*} (meta &form))
-        effective-route-form (if (config/dev?) (enrich-route-form sym route-form source-meta) route-form)]
+        effective-route-form (if (dev?) (enrich-route-form sym route-form source-meta) route-form)]
     (when-not route-form
       (throw (ex-info "defroutes requires a route vector"
                       {:hifi/error ::missing-route-vector
