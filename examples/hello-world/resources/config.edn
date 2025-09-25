@@ -7,4 +7,7 @@
                                                  :secure      #profile {:dev false :default true}
                                                  :host-prefix #profile {:dev false :default true}}}
  :hifi.middleware/csrf-protection {:csrf-secret #hifi/secret #profile     {:dev     "stebJ-BjAvs8THKz_UgwSL8f0rDzrEem_LWJb4qZ9q4"
-                                                                           :default #env "CSRF_SECRET"}}}
+                                                                           :default #env "CSRF_SECRET"}}
+
+ :hifi/assets #:hifi.assets{:excluded-paths ["assets/js"]
+                            :project-root "examples/hello-world"}}

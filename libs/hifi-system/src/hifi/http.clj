@@ -39,8 +39,7 @@
                        (let [{:keys [router handler-opts default-handler-opts]} config]
                          (reitit.ring/ring-handler
                           router
-                          (reitit.ring/routes
-                           (reitit.ring/create-default-handler default-handler-opts))
+                          (reitit.ring/routes (reitit.ring/create-default-handler default-handler-opts))
                           handler-opts)))
 
    :hifi/config-spec spec/RingHandlerOptions
@@ -101,7 +100,7 @@
                  (assoc group route-name (route-component routes opts)))
                {} components))
 
-(h/defplugin defaults
+(h/defplugin Defaults
   "The default, and recommended, component for HTTP applications"
   {:hifi/http {:hifi.http/server         HTTPServerComponent
                :hifi.http/root-handler   RootRingHandlerComponent

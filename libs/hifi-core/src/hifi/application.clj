@@ -42,7 +42,8 @@
   (cond
     (he/error? config) config
     (nil? config)      component
-    (map? config)      (update component ::ds/config medley/deep-merge config)
+    (map? config)
+    (update component ::ds/config medley/deep-merge config)
     :else
     (assoc component ::ds/config config)))
 
@@ -81,16 +82,16 @@
   "Configures and validates components from the config.edn"
   {h/system-update configure-components})
 
-(defcallback components "The components to start" ([] [=> :vector]))
+(defcallback plugins "The system plugins to load" ([] [=> :vector]))
 (defcallback initialize "Build the system map" ([] [=> :map]))
 (defcallback config "Load configuration" ([] [=> :map]))
 (defcallback start "Start the application" ([] [=> :map]))
 (defcallback stop "Stop the application" ([] [=> :map]))
 
 (defn build-system
-  "Given config map and vector of component plugins, build a donut.system defs map"
-  [config components]
-  (let [plugins (conj components finisher/hifi-finisher-plugin hifi-config-plugin)]
+  "Given config map and vector of plugins, build a donut.system defs map"
+  [config initial-plugins]
+  (let [plugins (conj initial-plugins finisher/hifi-finisher-plugin hifi-config-plugin)]
     (run! h/validate-plugin plugins)
     (dsp/apply-plugins
      {::ds/defs    {:config config}
@@ -110,7 +111,7 @@
     (hifi.config/read-config))
 
   (hifi.core/defn-default ::marker initialize []
-    (hifi.application/build-system (config) components))
+    (hifi.application/build-system (config) plugins))
 
   (hifi.core/defn-default ::marker start
     "Start the application"
@@ -124,8 +125,8 @@
   (hifi.core/defn-default ::marker stop
     "Stop the application"
     []
-    (reset! running-system_
-            (donut.system/stop @running-system_))))
+    (when @running-system_
+      (reset! running-system_ (donut.system/stop @running-system_)))))
 
 (comment
   (do

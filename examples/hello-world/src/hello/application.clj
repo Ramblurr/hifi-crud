@@ -1,5 +1,6 @@
 (ns hello.application
   (:require
+   [hifi.assets :as assets]
    [hifi.config :as hifi.config]
    [hifi.http :as http]
    [hello.routes :as hello.routes]
@@ -7,11 +8,11 @@
 
 (defplugin hello-app
   "My application"
-  {:hifi/routes (http/route-group {:routes hello.routes/routes
-                                   :route-name ::app})})
+  {:hifi/routes (http/route-group hello.routes/app)})
 
-(def components
-  [hifi.http/defaults
+(def plugins
+  [hifi.http/Defaults
+   hifi.assets/Pipeline
    hello-app])
 
 (defn config []

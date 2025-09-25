@@ -1,17 +1,14 @@
 (ns hifi.assets.middleware
+  "TODO: ns docs"
   (:require
    [babashka.fs :as fs]
    [clojure.string :as str]
-   [hifi.assets :as assets]
-   [hifi.assets.process :as process])
+   [hifi.assets.impl :as assets]
+   [hifi.assets.process :as process]
+   [hifi.config :as config]
+   [hifi.system.middleware :as h.mw])
   (:import
    (java.net URLDecoder)))
-
-(def ^:private not-found-response
-  {:status  404
-   :headers {"Content-Type"   "text/plain"
-             "Content-Length" "9"}
-   :body    "Not found"})
 
 (defn- request-digest-path [prefix uri]
   (let [without-prefix (subs uri (count prefix))
@@ -47,7 +44,7 @@
     (when (and uri (#{:get :head} method) (str/starts-with? uri prefix))
       (let [digest-path (request-digest-path prefix uri)
             entry       (find-manifest-entry manifest digest-path)]
-        (if (and entry (= digest-path (:digest-path entry)))
+        (when (and entry (= digest-path (:digest-path entry)))
           (let [logical-path (:logical-path entry)
                 headers      (build-headers entry logical-path)
                 etag         (get headers "ETag")
@@ -66,26 +63,66 @@
                :body    nil}
 
               :else
-              (if-let [stream (assets/asset-read asset-ctx logical-path)]
+              (when-let [stream (assets/asset-read asset-ctx logical-path)]
                 {:status  200
                  :headers headers
-                 :body    stream}
-                not-found-response)))
-          not-found-response)))))
+                 :body    stream}))))))))
+
+(defn- shared-assets-middleware
+  "Serves the assets as-is from the manifest"
+  [asset-ctx prefix handler]
+  (fn
+    ([request]
+     (tap> [::shared asset-ctx prefix request])
+     (or (asset-response asset-ctx prefix request)
+         (handler request)))
+    ([request respond raise]
+     (tap> [::shared asset-ctx prefix request])
+     (if-let [resp (asset-response asset-ctx prefix request)]
+       (respond resp)
+       (handler request respond raise)))))
+
+(defn static-assets-middleware
+  "Serves the assets from the static manifest"
+  [opts]
+  (let [asset-ctx (assets/create-asset-context opts)
+        prefix    (get-in asset-ctx [:config :hifi.assets/prefix])]
+    {:name ::assets
+     :wrap (partial shared-assets-middleware asset-ctx prefix)}))
+
+(defn dynamic-assets-middleware
+  "Serves the assets from the manifest, reloading the manifest file on every request"
+  [config]
+  {:name ::assets
+   :wrap (fn wrap-dynamic-assets-middleware [handler]
+           (let [asset-ctx (assets/create-asset-context config)
+                 prefix    (get-in asset-ctx [:config :hifi.assets/prefix])]
+             (tap> [:wrap-dyn :config config :asset-ctx asset-ctx prefix])
+             (shared-assets-middleware asset-ctx prefix handler)))})
 
 (defn assets-middleware
-  ([] (assets-middleware {}))
+  "Middleware that serves assets as configured by the :hifi/assets config key. "
   ([opts]
-   (let [asset-ctx (or (:asset-ctx opts)
-                       (assets/create-asset-context opts))
-         prefix    (or (get-in asset-ctx [:config :hifi.assets/prefix]) "/assets")]
-     {:name ::assets
-      :wrap (fn assets-wrap [handler]
-              (fn
-                ([request]
-                 (or (asset-response asset-ctx prefix request)
-                     (handler request)))
-                ([request respond raise]
-                 (if-let [resp (asset-response asset-ctx prefix request)]
-                   (respond resp)
-                   (handler request respond raise)))))})))
+   (tap> [:assetsmwctor :opts opts])
+   (let [config (:hifi.assets/config opts)]
+     (if (config/dev?)
+       (dynamic-assets-middleware config)
+       (static-assets-middleware config)))))
+
+(def DynamicAssetsMiddlewareComponent
+  (h.mw/middleware-component
+   {:name                :hifi/assets-dynamic-resolve
+    :factory             #(dynamic-assets-middleware %)
+    :donut.system/config {:hifi.assets/config [:donut.system/ref [:hifi/assets :hifi.assets/config]]}}))
+
+(def StaticAssetsMiddlewareComponent
+  (h.mw/middleware-component
+   {:name                :hifi/assets-static-resolve
+    :factory             #(static-assets-middleware %)
+    :donut.system/config {:hifi.assets/config [:donut.system/ref [:hifi/assets :hifi.assets/config]]}}))
+
+(def AssetsMiddlewareComponent
+  (h.mw/middleware-component
+   {:name                :hifi/assets
+    :factory             #(assets-middleware %)
+    :donut.system/config {:hifi.assets/config [:donut.system/ref [:hifi/assets :hifi.assets/config]]}}))

@@ -97,7 +97,8 @@
    [:handler-opts
     {:doc           "The options map passed to the ring-handler function."
      :error/message "should be a valid ring handler component options map"
-     :default       {:middleware [[:donut.system/ref [:hifi/middleware :exception-backstop]]]}}
+     :default       {:middleware [[:donut.system/ref [:hifi/middleware :hifi/assets]]
+                                  [:donut.system/ref [:hifi/middleware :exception-backstop]]]}}
     :map]])
 
 (def CreateHandlerOptsSchema

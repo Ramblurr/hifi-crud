@@ -65,13 +65,13 @@
            [:td.mono path]
            [:td (when route-name (str route-name))]
            [:td.route-data (when (seq route-data)
-                             (str/join ", " (map name route-data)))]
+                             (str/join ", " (map str route-data)))]
            [:td
             (when (seq middleware)
 
               (for [mw-key middleware
                     :let [mw-info (get registry mw-key)
-                          mw-name (name mw-key)
+                          mw-name (str mw-key)
                           mw-doc (:doc mw-info)
                           mw-link (:doc-link mw-info)]]
                 [:span.mw-item {:key mw-key}
