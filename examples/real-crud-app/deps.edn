@@ -19,7 +19,8 @@
  :aliases {:dev   {:extra-paths ["dev"]
                    :extra-deps  {hifi/dev {:local/root "../../libs/hifi-dev"}}
                    :jvm-opts
-                   ["-Dhifi.profile=dev"
+                   ["-Dguardrails.enabled=true"
+                    "-Dhifi.profile=dev"
                     "-Djdk.attach.allowAttachSelf" ;; https://nrepl.org/nrepl/installation.html#jvmti
                     "-Duser.timezone=UTC"
                     "-XX:+UseZGC"
