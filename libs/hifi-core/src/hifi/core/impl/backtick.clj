@@ -1,7 +1,7 @@
 ;; Copyright © 2012 Brandon Bloom
 ;; Distributed under the Eclipse Public License, the same as Clojure.
 ;; src: https://github.com/brandonbloom/backtick/tree/master
-(ns hifi.backtick
+(ns ^:no-doc hifi.core.impl.backtick
   (:refer-clojure :exclude [resolve]))
 
 #_{:clj-kondo/ignore [:uninitialized-var]}

@@ -8,7 +8,7 @@
    [clojure.tools.reader.reader-types :as reader-types]
    [donut.system :as ds]
    [donut.system.plugin :as dsp]
-   [hifi.backtick :as backtick]
+   [hifi.core.impl.backtick :as backtick]
    [hifi.error.iface :as pe]))
 
 (def ^:dynamic *env*
