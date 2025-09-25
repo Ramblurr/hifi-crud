@@ -1,6 +1,8 @@
 ;; This deps.edn is for testing and development of the hifi suite.
 {:paths   []
- :aliases {:dev   {:extra-paths ["dev"]
+ :aliases {:dev   {:extra-paths ["dev"
+                                 "examples/hello-world/src"
+                                 "examples/hello-world/resources"]
                    :extra-deps  {hifi/babashka-tasks    {:local/root "libs/hifi-dev-tasks"}
                                  hifi/config            {:local/root "libs/hifi-config"}
                                  hifi/core              {:local/root "libs/hifi-core"}
@@ -14,8 +16,7 @@
                                  hifi/logging           {:local/root "libs/hifi-logging"}
                                  hifi/system            {:local/root "libs/hifi-system"}
                                  hifi/util              {:local/root "libs/hifi-util"}
-                                 ;; Dev only deps
-                                 org.clojure/clojure    {:mvn/version "1.12.1"}
+                                 org.clojure/clojure    {:mvn/version "1.12.2"}
                                  org.clojure/tools.deps {:mvn/version "0.24.1523"}}
                    :jvm-opts    ["-Dguardrails.enabled=true"]}
            :test  {:extra-paths ["libs/hifi-dev-tasks/test"
@@ -30,7 +31,8 @@
                                  "libs/hifi-html/test"
                                  "libs/hifi-logging/test"
                                  "libs/hifi-system/test"
-                                 "libs/hifi-util/test"]
+                                 "libs/hifi-util/test"
+                                 "examples/hello-world/test"]
                    :extra-deps  {org.slf4j/slf4j-nop                  {:mvn/version "2.0.17"}
                                  com.github.seancorfield/expectations {:mvn/version "2.2.214"}
                                  lambdaisland/kaocha                  {:mvn/version "1.91.1392"}}
@@ -38,11 +40,4 @@
                    :main-opts   ["-m" "kaocha.runner"]}
            :debug {:extra-deps {com.clojure-goes-fast/clj-async-profiler {:mvn/version "1.6.2"}
                                 com.clojure-goes-fast/clj-memory-meter   {:mvn/version "0.4.0"}
-                                criterium/criterium                      {:mvn/version "0.4.6"}}}
-
-           :mcp {:deps      {org.slf4j/slf4j-nop     {:mvn/version "2.0.16"}
-                             com.bhauman/clojure-mcp {:git/url "https://github.com/bhauman/clojure-mcp.git"
-                                                      :git/tag "v0.1.7-alpha-pre"
-                                                      :git/sha "d28a671"}}
-                 :exec-fn   clojure-mcp.main/start-mcp-server
-                 :exec-args {:port 7888}}}}
+                                criterium/criterium                      {:mvn/version "0.4.6"}}}}}

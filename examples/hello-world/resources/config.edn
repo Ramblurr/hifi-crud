@@ -1,0 +1,10 @@
+{:hifi/application               'hello.application
+ :hifi.http/server               {:host "127.0.0.1" :port 3000}
+ :hifi.http/root-handler         {:reload-per-request? #profile {:dev  true :default false}}
+ :hifi.middleware/session-cookie {:cookie-attrs {:same-site   :lax-wut-force-error
+                                                 :http-only   true
+                                                 :path        "/"
+                                                 :secure      #profile {:dev false :default true}
+                                                 :host-prefix #profile {:dev false :default true}}}
+ :hifi.middleware/csrf-protection {:csrf-secret #hifi/secret #profile     {:dev     "stebJ-BjAvs8THKz_UgwSL8f0rDzrEem_LWJb4qZ9q4"
+                                                                           :default #env "CSRF_SECRET"}}}
