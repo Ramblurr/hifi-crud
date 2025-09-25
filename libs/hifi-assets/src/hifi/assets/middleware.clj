@@ -29,24 +29,16 @@
     (some-> (re-find #"-([0-9a-zA-Z]{7,128})" filename)
             second)))
 
-(defn- build-headers [entry logical-path]
-  (let [size         (:size entry)
-        etag         (when-let [digest (extract-digest (:digest-path entry))]
+(defn- build-headers [{:keys [size digest-path last-modified]} logical-path]
+  (let [etag         (when-let [digest (extract-digest digest-path)]
                        (str "\"" digest "\""))
-        content-type (process/infer-mime process/default-ext->mime logical-path)
-        headers      {"Content-Type"    content-type
-                      "Cache-Control"  "public, max-age=31536000, immutable"
-                      "Vary"           "Accept-Encoding"}
-        headers      (if size
-                       (assoc headers "Content-Length" (str size))
-                       headers)
-        headers      (if etag
-                       (assoc headers "ETag" etag)
-                       headers)
-        headers      (if-let [last-modified (:last-modified entry)]
-                       (assoc headers "Last-Modified" last-modified)
-                       headers)]
-    headers))
+        content-type (process/infer-mime process/default-ext->mime (str/lower-case logical-path))]
+    (cond-> {"Content-Type"  content-type
+             "Cache-Control" "public, max-age=31536000, immutable"
+             "Vary"          "Accept-Encoding"}
+      size          (assoc "Content-Length" (str size))
+      etag          (assoc "ETag" etag)
+      last-modified (assoc "Last-Modified" last-modified))))
 
 (defn- asset-response [asset-ctx prefix request]
   (let [{:keys [manifest]} asset-ctx
@@ -69,13 +61,13 @@
                :body    nil}
 
               (= method :head)
-              {:status 200
+              {:status  200
                :headers headers
                :body    nil}
 
               :else
               (if-let [stream (assets/asset-read asset-ctx logical-path)]
-                {:status 200
+                {:status  200
                  :headers headers
                  :body    stream}
                 not-found-response)))

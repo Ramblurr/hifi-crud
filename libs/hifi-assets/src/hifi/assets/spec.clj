@@ -5,9 +5,9 @@
 
 (def AssetProcessor
   [:map
-   [:mime-types {:doc "TODO"} [:set :string]]
-   [:dependencies {:doc "TODO"} fn?]
-   [:process {:doc "TODO"} fn?]])
+   [:mime-types {:doc "Set of MIME types handled by this processor."} [:set :string]]
+   [:dependencies {:doc "Function that returns discovered logical dependencies for the asset."} fn?]
+   [:process {:doc "Function that transforms asset content and returns the processed result."} fn?]])
 
 (def AssetConfigSchema
   [:map {:name :hifi/assets}
@@ -24,3 +24,15 @@
                          :default "/assets"} :string]
    [:hifi.assets/processors {:doc "Asset processors for transforming content"
                              :default []} [:vector AssetProcessor]]])
+
+(def BeholderOptions
+  [:map {:name :beholder}
+   [:file-hasher {:doc "Used by beholder to prevent duplicate events. :slow is only recomended on filesystems that do not have milliscond precision or better"
+                  :default :last-modified} [:enum :slow :last-modified]]])
+
+(def AssetsWatcherComponentOptions
+  [:map {:name :assets-watcher}
+   [:paths {:doc "Directories to monitor for asset changes." :default ["assets"]} [:vector :string]]
+   [:extensions {:doc "File extensions to include; an empty set watches all files." :default #{}} [:set :string]]
+   [:beholder {:doc "Options forwarded to the underlying beholder watcher." :default {}} BeholderOptions]
+   [:callback {:doc "Function invoked with each filtered change event."} fn?]])

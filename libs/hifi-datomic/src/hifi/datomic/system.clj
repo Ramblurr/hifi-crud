@@ -1,14 +1,14 @@
 ;; Copyright © 2025 Casey Link <casey@outskirtslabs.com>
 ;; SPDX-License-Identifier: EUPL-1.2
 (ns hifi.datomic.system
-  (:require [com.fulcrologic.guardrails.malli.core :refer [=> >defn-]]
-            [hifi.error.iface :as pe]
-            [hifi.datomic.report-queue :as report-queue]
-            [clojure.tools.logging :as log]
-            [datomic.api :as d]
-            [hifi.datomic.spec :as spec]
-            [hifi.datomic.outbox :as outbox]
-            [hifi.datomic.migrations :as migrations]))
+  (:require
+   [clojure.tools.logging :as log]
+   [com.fulcrologic.guardrails.malli.core :refer [=> >defn-]]
+   [datomic.api :as d]
+   [hifi.datomic.migrations :as migrations]
+   [hifi.datomic.outbox :as outbox]
+   [hifi.datomic.report-queue :as report-queue]
+   [hifi.datomic.spec :as spec]))
 
 (>defn- ensure-and-connect [{:keys [db-uri]}]
         [spec/DatomicConnectionComponentOptions => spec/DatomicConnectionSchema]
