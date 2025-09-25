@@ -53,7 +53,7 @@
                                   :type    :clj-kondo.hifi.core.defcallback/invalid-gspec})))))))
     new-nodes))
 
-(defn >defcallback
+(defn defcallback
   [{:keys [node]}]
   (let [args       (rest (:children node))
         [fn-name second-arg] args
