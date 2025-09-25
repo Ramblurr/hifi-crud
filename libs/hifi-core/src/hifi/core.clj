@@ -1,4 +1,7 @@
 (ns hifi.core
+  "Core utilities for hifi that layer stricter donut.system schemas,
+  validation helpers, and convenience macros for defining plugins,
+  components, routes, etc."
   (:require
    [clojure.java.io :as io]
    [clojure.tools.reader :as tools.reader]
@@ -11,7 +14,7 @@
 
 (def DonutPlugin
   "Our enhanced donut.system plugin schema, more strict than ds/Plugin"
-  [:and {:name :donut.system/plugin}
+  [:and {:name ::donut-plugin}
    [:map
     [::dsp/name {:error/message "plugin names must be namespace qualified"} qualified-keyword?]
     [::ds/doc {:error/message "a docstring is required for plugins"} string?]
@@ -21,6 +24,16 @@
    [:fn {:error/message "At least one of ::dsp/system-defaults, system-merge, or system-update is required"}
     (fn [{::dsp/keys [system-defaults system-merge system-update]}]
       (or system-defaults system-merge system-update))]])
+
+(def DonutComponent
+  "Our enhanced donut.system component schema, more strict than ds/Component"
+  [:and {:name ::donut-component}
+   ds/Component
+   [:map
+    [::ds/name {:error/message "component names must be namespace qualified"} ds/ComponentName]
+    [::ds/doc {:error/message "a docstring is required for components"} string?]
+    [:hifi/config-spec {:optional true} :any]
+    [:hifi/config-key {:error/message "should be a keyword or a vector of keywords" :optional true} [:or :keyword [:vector :keyword]]]]])
 
 (def plugin-name
   "Key for the plugin's unique identifier in plugin definitions.
@@ -338,6 +351,9 @@
   literal route vector. The resulting var holds a map with a namespaced
   `:route-name` and the original routes under `:routes`.
 
+  This macro is optional. Route are plain data, nested vectors and can be
+  created manually. This macro provides convenience and compile-time validation.
+
   In development profiles the route maps are enriched with `:hifi/annotation`
   entries pointing back to their namespace and source line, helping tooling and
   debug output trace routes to their definitions. Production builds keep the
@@ -372,3 +388,32 @@
                         {:route-name ~route-name
                          :routes ~routes-expr}))]
       def-form)))
+
+(defn validate-component [component-map]
+  (pe/validate! DonutComponent component-map
+                {:error-msg    "donut.system Component definition is invalid"
+                 :more-ex-data {::pe/id  ::invalid-component-definition
+                                ::pe/url (pe/url ::component-definition)}}))
+
+(defmacro defcomponent
+  "Defines a donut.system component with compile-time validation.
+
+   Takes a name symbol, a doc-string, and a component-body map containing the
+   component configuration. Automatically sets `:donut.system/name` to the
+   namespaced keyword derived from `name` and `:donut.system/doc` to the provided
+   docstring.
+
+   The `body` should satisfy `DonutComponent`. The merged component map is
+   validated at macro expansion time via `validate-component`, throwing an
+   exception when required keys are missing or invalid.
+
+   This macro is optional. Component definitions are plain data maps and can be
+   created manually. This macro provides convenience and compile-time validation."
+  [name doc-string body]
+  (let [comp-name (keyword (str *ns*) (str name))]
+    `(def ~name
+       (let [comp-map# (merge {::ds/name ~comp-name
+                               ::ds/doc  ~doc-string}
+                              ~body)]
+         (validate-component comp-map#)
+         comp-map#))))

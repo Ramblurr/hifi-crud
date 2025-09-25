@@ -117,7 +117,6 @@
     "Start the application"
     []
     (let [i (initialize)
-          _ (tap> [:init i])
           s (donut.system/start i)]
       (reset! running-system_ s)
       s))

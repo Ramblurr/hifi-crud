@@ -3,7 +3,6 @@
 (ns hifi.datastar.multicast
   (:require
    [hifi.datastar.spec :as spec]
-   [hifi.datastar.multicast :as mult]
    [promesa.exec.csp :as sp]))
 
 (defonce ^:private !refresh-ch (atom nil))

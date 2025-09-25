@@ -1,4 +1,4 @@
-(ns hifi.html.impl
+(ns ^:no-doc hifi.html.impl
   (:require
    [clojure.string]
    [clojure.walk :as walk]
@@ -9,53 +9,53 @@
 (defn integrity? [attrs]
   (some? (:integrity attrs)))
 
-(defn with-integrity [{:keys [href src crossorigin] :as attrs} asset-ctx]
-  (assoc attrs :integrity (p/integrity asset-ctx (or src href))
+(defn with-integrity [{:keys [href src crossorigin] :as attrs} asset-resolver]
+  (assoc attrs :integrity (p/integrity asset-resolver (or src href))
          :crossorigin (or crossorigin "anonymous")))
 
-(defn rewrite-stylesheet [asset-ctx [_ {:keys [href] :as attrs} & content]]
-  (let [digest-path (p/resolve-path asset-ctx href)]
+(defn rewrite-stylesheet [asset-resolver [_ {:keys [href] :as attrs} & content]]
+  (let [digest-path (p/resolve-path asset-resolver href)]
     [:link (cond-> (assoc attrs
                           :href digest-path
                           :rel "stylesheet")
-             (integrity? attrs) (with-integrity asset-ctx))
+             (integrity? attrs) (with-integrity asset-resolver))
      content]))
 
-(defn rewrite-preload [asset-ctx [_ {:keys [href] :as attrs} & content]]
-  (let [digest-path (p/resolve-path asset-ctx href)]
+(defn rewrite-preload [asset-resolver [_ {:keys [href] :as attrs} & content]]
+  (let [digest-path (p/resolve-path asset-resolver href)]
     [:link (cond-> (assoc attrs
                           :href digest-path
                           :rel "preload")
-             (integrity? attrs) (with-integrity asset-ctx))
+             (integrity? attrs) (with-integrity asset-resolver))
      content]))
 
-(defn rewrite-javascript [asset-ctx [_ {:keys [src] :as attrs} & content]]
-  (let [digest-path (p/resolve-path asset-ctx src)]
+(defn rewrite-javascript [asset-resolver [_ {:keys [src] :as attrs} & content]]
+  (let [digest-path (p/resolve-path asset-resolver src)]
     [:script (cond-> (assoc attrs :src digest-path)
-               (integrity? attrs) (with-integrity asset-ctx))
+               (integrity? attrs) (with-integrity asset-resolver))
      content]))
 
-(defn rewrite-image [asset-ctx [tag attrs & content]]
+(defn rewrite-image [asset-resolver [tag attrs & content]]
   (let [logical-path (:src attrs)
-        digest-path (p/resolve-path asset-ctx logical-path)]
+        digest-path  (p/resolve-path asset-resolver logical-path)]
     [tag (assoc attrs :src digest-path) content]))
 
-(defn rewrite-audio [asset-ctx [tag attrs & content]]
+(defn rewrite-audio [asset-resolver [tag attrs & content]]
   (let [logical-path (:src attrs)
-        digest-path (p/resolve-path asset-ctx logical-path)]
+        digest-path  (p/resolve-path asset-resolver logical-path)]
     [tag (assoc attrs :src digest-path) content]))
 
-(defn rewrite-asset-element [asset-ctx el]
+(defn rewrite-asset-element [asset-resolver el]
   (let [metadata (meta el)]
     (if (::p/processed? metadata)
       el
-      (let [asset-type (-> metadata :hifi.html/asset-marker :type)
+      (let [asset-type   (-> metadata :hifi.html/asset-marker :type)
             processed-el (case asset-type
-                           :hifi.html/stylesheet (rewrite-stylesheet asset-ctx el)
-                           :hifi.html/preload    (rewrite-preload asset-ctx el)
-                           :hifi.html/javascript (rewrite-javascript asset-ctx el)
-                           :hifi.html/image      (rewrite-image asset-ctx el)
-                           :hifi.html/audio      (rewrite-audio asset-ctx el)
+                           :hifi.html/stylesheet (rewrite-stylesheet asset-resolver el)
+                           :hifi.html/preload    (rewrite-preload asset-resolver el)
+                           :hifi.html/javascript (rewrite-javascript asset-resolver el)
+                           :hifi.html/image      (rewrite-image asset-resolver el)
+                           :hifi.html/audio      (rewrite-audio asset-resolver el)
                            el)]
         (with-meta processed-el
           (assoc metadata ::p/processed? true))))))
@@ -69,25 +69,25 @@
 (defn collect-link
   [[tag {:keys [href src rel as type crossorigin integrity]} _]]
   (let [logical-path (or href src)
-        integrity? (some? integrity)]
+        integrity?   (some? integrity)]
     (when logical-path
       (cond
         (= tag :link)
         (when (#{"preload" "modulepreload"} rel)
           (cond-> {:path href :rel rel}
             (and (= rel "preload") as) (assoc :as as)
-            type (assoc :type type)
-            crossorigin (assoc :crossorigin crossorigin)
-            integrity? (assoc :integrity? true)))
+            type                       (assoc :type type)
+            crossorigin                (assoc :crossorigin crossorigin)
+            integrity?                 (assoc :integrity? true)))
 
         (= tag :script)
         (let [module? (= "module" type)
-              rel* (if module? "modulepreload" "preload")]
+              rel*    (if module? "modulepreload" "preload")]
           (cond-> {:path href :rel rel*}
-            (not module?) (assoc :as "script")
+            (not module?)                    (assoc :as "script")
             (and (not module?) (some? type)) (assoc :type type)
-            crossorigin (assoc :crossorigin crossorigin)
-            integrity? (assoc :integrity? true)))))))
+            crossorigin                      (assoc :crossorigin crossorigin)
+            integrity?                       (assoc :integrity? true)))))))
 
 (def collect-head-preloads-xf
   "Returns a transducer that extracts preloads from hiccup elements.
@@ -103,11 +103,11 @@
 
 (defn process-asset-tags
   "Walks hiccup tree and resolves asset paths in the elements with asset metadata"
-  [{:hifi/keys [assets] :as _ctx} hiccup]
-  (if assets
+  [ctx hiccup]
+  (if-let [asset-resolver (:hifi.assets/resolver ctx)]
     (walk/prewalk (fn [node]
                     (if (has-asset-marker? node)
-                      (rewrite-asset-element assets node)
+                      (rewrite-asset-element asset-resolver node)
                       node))
                   hiccup)
     hiccup))
@@ -126,9 +126,9 @@
   (if asset-resolver
     (transduce (comp collect-head-preloads-xf
                      (map (fn [preload]
-                            (let [logical-path (:path preload)
+                            (let [logical-path  (:path preload)
                                   resolved-path (p/resolve-path asset-resolver logical-path)
-                                  integrity (p/integrity asset-resolver logical-path)]
+                                  integrity     (p/integrity asset-resolver logical-path)]
                               (when resolved-path
                                 (cond-> (assoc preload :path resolved-path)
                                   integrity (assoc :integrity integrity))))))
@@ -139,16 +139,16 @@
     []))
 
 (defn render
-  ([{:keys [asset-resolver] :as ctx} hiccup {:as _opts
-                                             :keys [collect-preloads?
-                                                    delay-render?]
-                                             :or {collect-preloads? true
-                                                  delay-render? false}}]
+  ([ctx hiccup {:as   _opts
+                :keys [collect-preloads?
+                       delay-render?]
+                :or   {collect-preloads? true
+                       delay-render?     false}}]
    {:preloads (when collect-preloads?
-                (resolve-preloads asset-resolver hiccup))
-    :html (when-not delay-render? (->str ctx hiccup))
-    :render_ (when delay-render?
-               (delay (->str ctx hiccup)))}))
+                (resolve-preloads (:hifi.assets/resolver ctx) hiccup))
+    :html     (when-not delay-render? (->str ctx hiccup))
+    :render_  (when delay-render?
+                (delay (->str ctx hiccup)))}))
 
 (defn- append-link-to-builder!
   [^StringBuilder sb {:keys [href path rel as type crossorigin integrity]}]
@@ -174,11 +174,11 @@
 
 (defn preloads->header
   [preloads {:keys [max-size]
-             :or {max-size 1000}}]
+             :or   {max-size 1000}}]
   (when (seq preloads)
     (let [sb (StringBuilder.)]
       (loop [remaining preloads
-             first? true]
+             first?    true]
         (if-let [preload (first remaining)]
           (let [start-length (.length sb)]
             (when-not first?

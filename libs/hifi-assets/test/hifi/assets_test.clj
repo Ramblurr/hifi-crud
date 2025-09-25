@@ -16,7 +16,7 @@
 
   (testing "creates context with custom config"
     (is (= ["custom/assets"]
-           (get-in (assets/create-asset-context {:config {::assets/paths ["custom/assets"]}})
+           (get-in (assets/create-asset-context {::assets/paths ["custom/assets"]})
                    [:config ::assets/paths])))))
 
 (deftest asset-path-test

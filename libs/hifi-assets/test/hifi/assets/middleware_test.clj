@@ -16,39 +16,41 @@
                         (instance? InputStream body)
                         (with-open [stream body]
                           (slurp stream))
-                        :else body)))))
+                        :else       body)))))
 
 (deftest assets-middleware-behavior-test
   (let [temp-dir (fs/create-temp-dir)]
     (try
-      (let [output-dir        (fs/path temp-dir "public" "assets")
-            output-dir-str    (str output-dir)
-            _                 (fs/create-dirs (fs/path output-dir "css"))
-            content           "body {}"
-            digest-path       "css/app-abcdef12.css"
-            logical-path      "css/app.css"
-            asset-path        (fs/path output-dir digest-path)
-            _                 (spit (str asset-path) content)
-            manifest          {logical-path {:digest-path   digest-path
-                                             :size          (count content)
-                                             :last-modified "2025-01-01T00:00:00Z"}}
-            asset-ctx         {:config   {:hifi.assets/output-dir output-dir-str
-                                          :hifi.assets/prefix     "/assets"}
-                               :manifest manifest}
-            middleware        (middleware/assets-middleware {:asset-ctx asset-ctx})
-            handler-count     (atom 0)
-            handler           (fn [_]
-                                (swap! handler-count inc)
-                                {:status 599
-                                 :headers {}
-                                 :body    "handler"})]
+      (let [output-dir     (fs/path temp-dir "public" "assets")
+            output-dir-str (str output-dir)
+            _              (fs/create-dirs (fs/path output-dir "css"))
+            content        "body {}"
+            digest-path    "css/app-abcdef12.css"
+            logical-path   "css/app.css"
+            asset-path     (fs/path output-dir digest-path)
+            _              (spit (str asset-path) content)
+            manifest-path  (str (fs/path temp-dir "manifest.edn"))
+            manifest       {logical-path {:digest-path   digest-path
+                                          :size          (count content)
+                                          :last-modified "2025-01-01T00:00:00Z"}}
+            _              (spit manifest-path (pr-str manifest))
+            config         {:hifi.assets/output-dir    output-dir-str
+                            :hifi.assets/prefix        "/assets"
+                            :hifi.assets/manifest-path manifest-path}
+            middleware     (middleware/static-assets-middleware config)
+            handler-count  (atom 0)
+            handler        (fn [_]
+                             (swap! handler-count inc)
+                             {:status  599
+                              :headers {}
+                              :body    "handler"})]
         (testing "serves digested asset on GET"
           (reset! handler-count 0)
           (let [response (((:wrap middleware) handler)
                           {:request-method :get
                            :uri            "/assets/css/app-abcdef12.css"
                            :headers        {}})
-                expected {:status 200
+                expected {:status  200
                           :headers {"Content-Type"   "text/css"
                                     "Cache-Control"  "public, max-age=31536000, immutable"
                                     "Vary"           "Accept-Encoding"
@@ -65,7 +67,7 @@
                           {:request-method :head
                            :uri            "/assets/css/app-abcdef12.css"
                            :headers        {}})
-                expected {:status 200
+                expected {:status  200
                           :headers {"Content-Type"   "text/css"
                                     "Cache-Control"  "public, max-age=31536000, immutable"
                                     "Vary"           "Accept-Encoding"
@@ -82,7 +84,7 @@
                           {:request-method :get
                            :uri            "/assets/css/app-abcdef12.css"
                            :headers        {"if-none-match" "\"abcdef12\""}})
-                expected {:status 304
+                expected {:status  304
                           :headers {"Content-Type"  "text/css"
                                     "Cache-Control" "public, max-age=31536000, immutable"
                                     "Vary"          "Accept-Encoding"
@@ -92,26 +94,13 @@
             (is (= expected (normalize-response response)))
             (is (= 0 @handler-count))))
 
-        (testing "returns 404 when asset missing"
-          (reset! handler-count 0)
-          (let [response (((:wrap middleware) handler)
-                          {:request-method :get
-                           :uri            "/assets/css/missing-abcdef12.css"
-                           :headers        {}})
-                expected {:status 404
-                          :headers {"Content-Type"   "text/plain"
-                                    "Content-Length" "9"}
-                          :body    "Not found"}]
-            (is (= expected (normalize-response response)))
-            (is (= 0 @handler-count))))
-
         (testing "passes through when method is not GET or HEAD"
           (reset! handler-count 0)
           (let [response (((:wrap middleware) handler)
                           {:request-method :post
                            :uri            "/assets/css/app-abcdef12.css"
                            :headers        {}})
-                expected {:status 599
+                expected {:status  599
                           :headers {}
                           :body    "handler"}]
             (is (= expected (normalize-response response)))
@@ -123,7 +112,7 @@
                           {:request-method :get
                            :uri            "/other/app-abcdef12.css"
                            :headers        {}})
-                expected {:status 599
+                expected {:status  599
                           :headers {}
                           :body    "handler"}]
             (is (= expected (normalize-response response)))

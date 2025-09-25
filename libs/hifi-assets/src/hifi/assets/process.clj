@@ -1,6 +1,6 @@
 ;; Copyright © 2025 Casey Link <casey@outskirtslabs.com>
 ;; SPDX-License-Identifier: EUPL-1.2
-(ns hifi.assets.process
+(ns ^:no-doc hifi.assets.process
   "Asset processing"
   (:require
    [babashka.fs :as fs]

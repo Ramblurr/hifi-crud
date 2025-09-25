@@ -35,8 +35,8 @@
   (do
     (stop)
     (require '[clj-reload.core :as clj-reload])
-    (clj-reload/reload :all))
-  (start)
+    (clj-reload/reload :all)
+    (start))
   (hifi.config/set-env! :dev)
   ;;
   )

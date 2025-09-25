@@ -2,13 +2,14 @@
   (:refer-clojure :exclude [compile])
   (:require
    [medley.core :as medley]
+   [hifi.config :as config]
    [hifi.html.impl :as impl]
    [hifi.util.codec :as codec]
    [dev.onionpancakes.chassis.core :as chassis]
    [dev.onionpancakes.chassis.compiler :as cc]))
 
-;; TODO move to dev-time only
-(cc/set-warn-on-ambig-attrs!)
+(when (config/dev?)
+  (cc/set-warn-on-ambig-attrs!))
 
 (defn ->str
   "Converts a Hiccup-style HTML node tree into an HTML string.
@@ -45,7 +46,7 @@
   ([root]
    (impl/->str nil root)))
 
-(defn render
+(defn render_
   "Renders Hiccup HTML with asset path resolving and preloads support.
 
   This function provides a sophisticated hiccup -> html rendering:
@@ -94,6 +95,56 @@
    (impl/render ctx hiccup nil))
   ([ctx hiccup opts]
    (impl/render ctx hiccup opts)))
+
+(defmacro render
+  "Renders Hiccup HTML with asset path resolving and preloads support.
+
+  This function provides a sophisticated hiccup -> html rendering:
+  1. Collects asset preloads from the HTML tree for Link preload headers and HTTP 103 Early Hints
+  2. Resolves asset paths through the asset pipeline
+  3. Optionally delays rendering for performance optimization
+
+  Arguments:
+    ctx    - Context map containing:
+             :asset-resolver - Asset resolver for path resolution
+
+             all other keys are ignored
+
+    hiccup - hiccup data structure to render
+
+    opts   - (optional) Rendering options map:
+             {:collect-preloads? true   - Collect and resolve preload hints (default: true)
+              :delay-render?     false} - Delay HTML rendering until deref (default: false)
+
+  Returns:
+    Map containing:
+      {:preloads [...] - Vector of resolved preload hints for HTTP 103 Early Hints
+       :html     \"...\" - Rendered HTML string (nil if delay-render? is true)
+       :render_  delay} - Delayed HTML rendering (only if delay-render? is true)
+
+  Examples:
+    ;; Basic rendering with preload collection
+    (render {:asset-resolver resolver}
+            [:html
+             [:head
+              [:link {:href \"app.css\" :rel \"preload\" :as \"style\"}]]
+             [:body \"Content\"]])
+    ;; => {:preloads [{:path \"/assets/app-abc123.css\" :rel \"preload\" :as \"style\"}]
+    ;;     :html \"<html>...</html>\"}
+
+    ;; Delayed rendering for streaming responses
+    (render ctx hiccup {:delay-render? true})
+    ;; => {:preloads [...] :render_ #<Delay ...>}
+    ;; Later: (force (:render_ result)) to get HTML
+
+  Notes:
+    - Preloads are extracted from all <link> and <script> tags in <head>
+    - Supports integrity attributes for subresource integrity
+    - Delay rendering is useful for streaming responses or lazy evaluation"
+  ([ctx hiccup]
+   `(impl/render ~ctx (cc/compile ~hiccup) nil))
+  ([ctx hiccup opts]
+   `(impl/render ~ctx (cc/compile ~hiccup) ~opts)))
 
 (defn preloads->header
   "Converts preload data into an HTTP Link header value.
@@ -156,7 +207,7 @@
   `more` - Additional values to be concatenated"
   chassis/raw-string)
 
-(def doctype-html5
+(def doctype
   "RawString for <!DOCTYPE html>"
   chassis/doctype-html5)
 

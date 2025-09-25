@@ -13,4 +13,5 @@
                   hifi.core/extend-ns         clojure.core/require
                   hifi.core/defplugin         clojure.core/def
                   hifi.core/defplugin*        clojure.core/def
-                  hifi.core/defroutes        clojure.core/def}}
+                  hifi.core/defcomponent      clojure.core/def
+                  hifi.core/defroutes         clojure.core/def}}

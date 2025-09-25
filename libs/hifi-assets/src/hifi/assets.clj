@@ -50,18 +50,25 @@
   [asset-ctx logical-path]
   (impl/asset-locate asset-ctx logical-path))
 
-(defn assets-resolver
-  "Creates a HifiAssetResolver that implements the AssetResolver protocol using hifi-assets.
+(defn static-assets-resolver
+  "Creates a static HifiAssetResolver that resolves assets from a static manifest"
+  [assets-config]
+  (impl/static-assets-resolver (create-asset-context assets-config)))
 
-  Arguments:
-  - asset-ctx: The asset context containing manifest and configuration"
-  [asset-ctx]
-  (impl/assets-resolver asset-ctx))
+(defn dynamic-assets-resolver
+  "Creates a HifiAssetResolver that resolves assets and always reloads the manifest "
+  [assets-config]
+  (impl/dynamic-assets-resolver assets-config))
 
-(def AssetsWatcherComponent
-  "A donut.system component that watches for assets changing and reloads the manifest
-  Config:
-    - :hifi/options - See [[spec/AssetsWatcherComponentOptions]]"
+(h/defcomponent AssetsConfigComponent
+  "Holds the configuration for the assets pipeline under the :hifi/assets key"
+  {:donut.system/start (fn [{:donut.system/keys [config]}]
+                         (assets.config/load-config config))
+   :hifi/config-spec spec/AssetConfigSchema
+   :hifi/config-key :hifi/assets})
+
+(h/defcomponent AssetsWatcherComponent
+  "Watches for changes in the watch paths and triggers a assets pipeline build. "
   {:donut.system/start  (fn  [{:donut.system/keys [config]}]
                           (when (if (nil? (::watcher/enable? config)) (config/dev?) (::watcher/enable? config))
                             (watcher/start config)))
@@ -72,18 +79,22 @@
    :hifi/config-spec    spec/AssetsWatcherComponentOptions
    :hifi/config-key     :hifi/assets})
 
-(def AssetsConfigComponent
-  {:donut.system/start (fn [{:donut.system/keys [config]}]
-                         (assets.config/load-config config))
-   :hifi/config-spec spec/AssetConfigSchema
-   :hifi/config-key :hifi/assets})
+(h/defcomponent AssetsResolverComponent
+  "Provides a [[hifi.html.protocols/AssetResolver]] that resolves asset content and data"
+  {:donut.system/start  (fn [{:donut.system/keys [config]}]
+                          (if (config/dev?)
+                            (dynamic-assets-resolver (:hifi.assets/config config))
+                            (static-assets-resolver (:hifi.assets/config config))))
+   :donut.system/config {:hifi.assets/config [:donut.system/local-ref [:hifi.assets/config]]}})
 
 (h/defplugin Pipeline
-  "This plugin provides middleware for serving assets from the compiled asset manifest"
+  "The hifi assets pipeline: dev-time watching and building of assets, resolving them with hiccup helpers, and serving cache-friendly assets via middleware."
   {:hifi/assets
-   {:hifi.assets/watcher AssetsWatcherComponent
-    :hifi.assets/config  AssetsConfigComponent}
+   {:hifi.assets/watcher  AssetsWatcherComponent
+    :hifi.assets/resolver AssetsResolverComponent
+    :hifi.assets/config   AssetsConfigComponent}
    :hifi/middleware
    {:hifi/assets                 middleware/AssetsMiddlewareComponent
     :hifi/assets-static-resolve  middleware/StaticAssetsMiddlewareComponent
-    :hifi/assets-dynamic-resolve middleware/DynamicAssetsMiddlewareComponent}})
+    :hifi/assets-dynamic-resolve middleware/DynamicAssetsMiddlewareComponent
+    :hifi/assets-resolver        middleware/AssetsResolverMiddlewareComponent}})

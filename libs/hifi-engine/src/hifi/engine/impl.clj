@@ -1,7 +1,6 @@
 ;; Copyright © 2025 Casey Link <casey@outskirtslabs.com>
 ;; SPDX-License-Identifier: EUPL-1.2
-
-(ns hifi.engine.impl
+(ns ^:no-doc hifi.engine.impl
   (:require
    [hifi.engine.context :as context]
    [hifi.engine.interceptors-promesa :as ip]

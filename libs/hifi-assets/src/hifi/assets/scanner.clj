@@ -1,6 +1,6 @@
 ;; Copyright © 2025 Casey Link <casey@outskirtslabs.com>
 ;; SPDX-License-Identifier: EUPL-1.2
-(ns hifi.assets.scanner
+(ns ^:no-doc hifi.assets.scanner
   "Asset directory scanning functionality."
   (:require
    [babashka.fs :as fs]

@@ -4,7 +4,7 @@
 ;;
 ;; A vendored version of https://github.com/nextjournal/beholder
 ;; that supports more options
-(ns hifi.assets.beholder
+(ns ^:no-doc hifi.assets.beholder
   (:import
    [io.methvin.watcher
     DirectoryChangeEvent

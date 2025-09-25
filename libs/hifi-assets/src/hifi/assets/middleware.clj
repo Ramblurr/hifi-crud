@@ -6,6 +6,7 @@
    [hifi.assets.impl :as assets]
    [hifi.assets.process :as process]
    [hifi.config :as config]
+   [hifi.core :as h]
    [hifi.system.middleware :as h.mw])
   (:import
    (java.net URLDecoder)))
@@ -30,9 +31,9 @@
   (let [etag         (when-let [digest (extract-digest digest-path)]
                        (str "\"" digest "\""))
         content-type (process/infer-mime process/default-ext->mime (str/lower-case logical-path))]
-    (cond-> {"Content-Type"  content-type
+    (cond-> {"Content-Type" content-type
              "Cache-Control" "public, max-age=31536000, immutable"
-             "Vary"          "Accept-Encoding"}
+             "Vary" "Accept-Encoding"}
       size          (assoc "Content-Length" (str size))
       etag          (assoc "ETag" etag)
       last-modified (assoc "Last-Modified" last-modified))))
@@ -68,42 +69,44 @@
                  :headers headers
                  :body    stream}))))))))
 
-(defn- shared-assets-middleware
-  "Serves the assets as-is from the manifest"
-  [asset-ctx prefix handler]
-  (fn
-    ([request]
-     (tap> [::shared asset-ctx prefix request])
-     (or (asset-response asset-ctx prefix request)
-         (handler request)))
-    ([request respond raise]
-     (tap> [::shared asset-ctx prefix request])
-     (if-let [resp (asset-response asset-ctx prefix request)]
-       (respond resp)
-       (handler request respond raise)))))
-
 (defn static-assets-middleware
   "Serves the assets from the static manifest"
   [opts]
   (let [asset-ctx (assets/create-asset-context opts)
         prefix    (get-in asset-ctx [:config :hifi.assets/prefix])]
     {:name ::assets
-     :wrap (partial shared-assets-middleware asset-ctx prefix)}))
+     :wrap (fn [handler]
+             (fn
+               ([request]
+                (or (asset-response asset-ctx prefix request)
+                    (handler request)))
+               ([request respond raise]
+                (if-let [resp (asset-response asset-ctx prefix request)]
+                  (respond resp)
+                  (handler request respond raise)))))}))
 
 (defn dynamic-assets-middleware
   "Serves the assets from the manifest, reloading the manifest file on every request"
   [config]
   {:name ::assets
-   :wrap (fn wrap-dynamic-assets-middleware [handler]
-           (let [asset-ctx (assets/create-asset-context config)
-                 prefix    (get-in asset-ctx [:config :hifi.assets/prefix])]
-             (tap> [:wrap-dyn :config config :asset-ctx asset-ctx prefix])
-             (shared-assets-middleware asset-ctx prefix handler)))})
+   :wrap (fn [handler]
+           (fn
+             ([request]
+              (let [asset-ctx (assets/create-asset-context config)
+                    prefix    (get-in asset-ctx [:config :hifi.assets/prefix])]
+                (or (asset-response asset-ctx prefix request)
+                    (handler request))))
+             ([request respond raise]
+              (let [asset-ctx (assets/create-asset-context config)
+                    prefix    (get-in asset-ctx [:config :hifi.assets/prefix])
+                    resp      (asset-response asset-ctx prefix request)]
+                (if resp
+                  (respond resp)
+                  (handler request respond raise))))))})
 
 (defn assets-middleware
   "Middleware that serves assets as configured by the :hifi/assets config key. "
   ([opts]
-   (tap> [:assetsmwctor :opts opts])
    (let [config (:hifi.assets/config opts)]
      (if (config/dev?)
        (dynamic-assets-middleware config)
@@ -126,3 +129,14 @@
    {:name                :hifi/assets
     :factory             #(assets-middleware %)
     :donut.system/config {:hifi.assets/config [:donut.system/ref [:hifi/assets :hifi.assets/config]]}}))
+
+(h/defcomponent AssetsResolverMiddlewareComponent
+  "Plops the resolver middleware into the request map"
+  (h.mw/middleware-component
+   {:name                :hifi/assets-resolver
+    :factory             (fn [config]
+                           {:name :hifi/assets-resolver
+                            :wrap (fn [handler]
+                                    (fn [req]
+                                      (handler (assoc req :hifi.assets/resolver (:hifi.assets/resolver config)))))})
+    :donut.system/config {:hifi.assets/resolver [:donut.system/ref [:hifi/assets :hifi.assets/resolver]]}}))

@@ -1,4 +1,4 @@
-(ns hifi.assets.watcher
+(ns ^:no-doc hifi.assets.watcher
   (:require
    [clojure.string :as str]
    [hifi.assets.beholder :as beholder]
