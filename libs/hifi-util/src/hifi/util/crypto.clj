@@ -23,9 +23,9 @@
    [crypto.equality :as equality]
    [hifi.util.codec :as codec])
   (:import
+   [java.security MessageDigest SecureRandom]
    [javax.crypto Mac]
-   [javax.crypto.spec SecretKeySpec]
-   [java.security SecureRandom MessageDigest]))
+   [javax.crypto.spec SecretKeySpec]))
 
 (def ^SecureRandom secure-random
   (SecureRandom/new))
