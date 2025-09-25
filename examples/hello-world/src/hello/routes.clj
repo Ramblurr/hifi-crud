@@ -12,7 +12,8 @@
                               [:head
                                [::html/stylesheet-link {:href "css/hello.css"}]]
                               [:body
-                               [:h1 "Hello w World"]]]))})
+                               [:h1 "Hello w World"]]]
+                             nil))})
 
 (h/defroutes app
   ["" {:middleware hifi.mw/hypermedia-chain}

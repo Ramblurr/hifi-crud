@@ -50,12 +50,12 @@
 (deftest has-asset-marker?-test
   (testing "detects asset marker metadata"
     (is (= true
-           (impl/has-asset-marker? (with-meta [:link {:href "/app.css"}]
-                                     {:hifi.html/asset-marker true})))))
+           (impl/asset-node? (with-meta [:link {:href "/app.css"}]
+                               {:hifi.html/asset-marker true})))))
 
   (testing "returns false for non-marked elements"
     (is (= false
-           (impl/has-asset-marker? [:link {:href "/app.css"}])))))
+           (impl/asset-node? [:link {:href "/app.css"}])))))
 
 (deftest preloads->header-test
   (testing "formats preloads with attributes"

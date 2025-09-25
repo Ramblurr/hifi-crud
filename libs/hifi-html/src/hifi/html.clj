@@ -96,7 +96,7 @@
   ([ctx hiccup opts]
    (impl/render ctx hiccup opts)))
 
-(defmacro render
+(defn render
   "Renders Hiccup HTML with asset path resolving and preloads support.
 
   This function provides a sophisticated hiccup -> html rendering:
@@ -142,9 +142,9 @@
     - Supports integrity attributes for subresource integrity
     - Delay rendering is useful for streaming responses or lazy evaluation"
   ([ctx hiccup]
-   `(impl/render ~ctx (cc/compile ~hiccup) nil))
+   (impl/render ctx hiccup nil))
   ([ctx hiccup opts]
-   `(impl/render ~ctx (cc/compile ~hiccup) ~opts)))
+   (impl/render ctx hiccup opts)))
 
 (defn preloads->header
   "Converts preload data into an HTTP Link header value.
@@ -210,38 +210,6 @@
 (def doctype
   "RawString for <!DOCTYPE html>"
   chassis/doctype-html5)
-
-(defmethod chassis/resolve-alias ::stylesheet-link
-  [_ attrs content]
-  (with-meta
-    [:link attrs content]
-    {::asset-marker {:type ::stylesheet}}))
-
-(defmethod chassis/resolve-alias ::preload-link
-  [_ attrs content]
-  (with-meta
-    [:link attrs content]
-    {::asset-marker {:type ::preload}}))
-
-(defmethod chassis/resolve-alias ::javascript-include
-  [_ attrs content]
-  (with-meta
-    [:script attrs content]
-    {::asset-marker {:type ::javascript}}))
-
-(defmethod chassis/resolve-alias ::image
-  [_ attrs content]
-  (with-meta
-    [:img attrs content]
-    {::asset-marker {:type ::image :opts attrs}}))
-
-(defmethod chassis/resolve-alias ::audio
-  [_ attrs content]
-  (with-meta
-    [:audio attrs content]
-    {::asset-marker {:type ::audio :opts attrs}}))
-
-;; TODO future tags: video, picture
 
 (defn csrf-token-input
   "Returns hiccup for <input type=\"hidden\" /> field with the anti-forgery token name and value"

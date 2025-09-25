@@ -51,36 +51,34 @@
   (let [scanned-assets (scanner/scan-assets config)]
     (when verbose?
       (print-scan-result scanned-assets))
-    (when (zero? (count scanned-assets))
-      (System/exit 0))
+    (when-not (zero? (count scanned-assets))
+      (fs/create-dirs output-dir)
+      (when verbose?
+        (println "\nProcessing assets..."))
 
-    (fs/create-dirs output-dir)
-    (when verbose?
-      (println "\nProcessing assets..."))
+      (let [digest-infos               (mapv #(digest/digest-file-content (:abs-path %) (:logical-path %)) scanned-assets)
+            manifest-data              (manifest/generate-manifest digest-infos)
+            processing-ctx             {:config     config
+                                        :manifest   manifest-data
+                                        :find-asset (fn [path] (scanner/find-asset scanned-assets path))}
+            {warnings         :warnings
+             processed-assets :assets} (process/process-assets processing-ctx scanned-assets)]
 
-    (let [digest-infos               (mapv #(digest/digest-file-content (:abs-path %) (:logical-path %)) scanned-assets)
-          manifest-data              (manifest/generate-manifest digest-infos)
-          processing-ctx             {:config     config
-                                      :manifest   manifest-data
-                                      :find-asset (fn [path] (scanner/find-asset scanned-assets path))}
-          {warnings         :warnings
-           processed-assets :assets} (process/process-assets processing-ctx scanned-assets)]
+        (doseq [[asset digest-info] (map vector processed-assets digest-infos)]
+          (copy-digested-file! asset digest-info output-dir)
+          (when verbose?
+            (println "  " (str (:logical-path asset)) "→" (:digest-name digest-info))))
 
-      (doseq [[asset digest-info] (map vector processed-assets digest-infos)]
-        (copy-digested-file! asset digest-info output-dir)
         (when verbose?
-          (println "  " (str (:logical-path asset)) "→" (:digest-name digest-info))))
+          (println "\nGenerating manifest..."))
+        (manifest/write-manifest manifest-data manifest-path)
+        (when verbose?
+          (print-manifest-result manifest-path manifest-data digest-infos))
 
-      (when verbose?
-        (println "\nGenerating manifest..."))
-      (manifest/write-manifest manifest-data manifest-path)
-      (when verbose?
-        (print-manifest-result manifest-path manifest-data digest-infos))
-
-      (when (seq warnings)
-        (println "\nWarnings:")
-        (doseq [warning warnings]
-          (println "  " (:type warning) "in" (:asset warning) ":" (:missing-path warning)))))))
+        (when (seq warnings)
+          (println "\nWarnings:")
+          (doseq [warning warnings]
+            (println "  " (:type warning) "in" (:asset warning) ":" (:missing-path warning))))))))
 
 (defn clean
   "Removes the compiled assets directory"

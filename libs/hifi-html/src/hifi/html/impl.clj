@@ -6,6 +6,43 @@
    [hifi.html.protocols :as p]
    [hifi.html.util :as u]))
 
+(def asset-tags #{:hifi.html/stylesheet-link
+                  :hifi.html/preload-link
+                  :hifi.html/javascript-include
+                  :hifi.html/image
+                  :hifi.html/audio})
+
+;; TODO future tags: video, picture, don't forget to update hifi.html.impl/asset-tags
+(defmethod chassis/resolve-alias ::stylesheet-link
+  [_ attrs content]
+  (with-meta
+    [:link attrs content]
+    {::asset-marker {:type ::stylesheet-link}}))
+
+(defmethod chassis/resolve-alias ::preload-link
+  [_ attrs content]
+  (with-meta
+    [:link attrs content]
+    {::asset-marker {:type ::preload-link}}))
+
+(defmethod chassis/resolve-alias ::javascript-include
+  [_ attrs content]
+  (with-meta
+    [:script attrs content]
+    {::asset-marker {:type ::javascript-include}}))
+
+(defmethod chassis/resolve-alias ::image
+  [_ attrs content]
+  (with-meta
+    [:img attrs content]
+    {::asset-marker {:type ::image :opts attrs}}))
+
+(defmethod chassis/resolve-alias ::audio
+  [_ attrs content]
+  (with-meta
+    [:audio attrs content]
+    {::asset-marker {:type ::audio :opts attrs}}))
+
 (defn integrity? [attrs]
   (some? (:integrity attrs)))
 
@@ -49,22 +86,24 @@
   (let [metadata (meta el)]
     (if (::p/processed? metadata)
       el
-      (let [asset-type   (-> metadata :hifi.html/asset-marker :type)
+      (let [asset-type   (or (-> metadata :hifi.html/asset-marker :type)
+                             (first el))
             processed-el (case asset-type
-                           :hifi.html/stylesheet (rewrite-stylesheet asset-resolver el)
-                           :hifi.html/preload    (rewrite-preload asset-resolver el)
-                           :hifi.html/javascript (rewrite-javascript asset-resolver el)
-                           :hifi.html/image      (rewrite-image asset-resolver el)
-                           :hifi.html/audio      (rewrite-audio asset-resolver el)
+                           :hifi.html/stylesheet-link    (rewrite-stylesheet asset-resolver el)
+                           :hifi.html/preload-link       (rewrite-preload asset-resolver el)
+                           :hifi.html/javascript-include (rewrite-javascript asset-resolver el)
+                           :hifi.html/image              (rewrite-image asset-resolver el)
+                           :hifi.html/audio              (rewrite-audio asset-resolver el)
                            el)]
         (with-meta processed-el
           (assoc metadata ::p/processed? true))))))
 
-(defn has-asset-marker? [node]
+(defn asset-node? [node]
   (and
    (vector? node)
    (keyword? (first node))
-   (-> node meta :hifi.html/asset-marker some?)))
+   (or (-> node meta :hifi.html/asset-marker some?)
+       (contains? asset-tags (first node)))))
 
 (defn collect-link
   [[tag {:keys [href src rel as type crossorigin integrity]} _]]
@@ -106,7 +145,7 @@
   [ctx hiccup]
   (if-let [asset-resolver (:hifi.assets/resolver ctx)]
     (walk/prewalk (fn [node]
-                    (if (has-asset-marker? node)
+                    (if (asset-node? node)
                       (rewrite-asset-element asset-resolver node)
                       node))
                   hiccup)
