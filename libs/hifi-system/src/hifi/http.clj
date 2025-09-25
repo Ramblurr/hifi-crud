@@ -23,7 +23,9 @@
                                                                              :port                       port}
                                                                             http-kit)))
    ::ds/stop   (fn http-server-component-stop [{::ds/keys [instance]}]
-                 ((requiring-resolve 'org.httpkit.server/server-stop!) instance))
+                 (try
+                   ((requiring-resolve 'org.httpkit.server/server-stop!) instance)
+                   (catch Exception _)))
 
    :hifi/config-spec    spec/HTTPServerOptions
    :hifi/config-key     :hifi.http/server

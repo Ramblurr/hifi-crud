@@ -142,13 +142,13 @@
   ([opts]
    (let [{:keys [debug-errors? error-handlers]} (pe/coerce! options/ExceptionMiddlewareOptions (or opts {}))
          prepared-handlers                      (prepare-handlers (or error-handlers default-exception-handlers))]
-     {:name           ::exception-middleware
-      :options-schema options/ExceptionMiddlewareOptions
-      :wrap           (wrap debug-errors? prepared-handlers)})))
+     {:name        ::exception-middleware
+      :config-spec options/ExceptionMiddlewareOptions
+      :wrap        (wrap debug-errors? prepared-handlers)})))
 
 (def ExceptionMiddlewareComponentData
   {:name           ::exception
-   :options-schema options/ExceptionMiddlewareOptions
+   :config-spec options/ExceptionMiddlewareOptions
    :factory        #(exception-middleware %)})
 
 (defn- report-backstop-and-return [report request e]
@@ -192,12 +192,12 @@
                      (prn :exception-backstop e)
                      (tap> [:exception-backstop :error e :request req]))}}]
    {:name           ::exception-backstop-middleware
-    :options-schema options/ExceptionBackstopMiddlewareOptions
+    :config-spec options/ExceptionBackstopMiddlewareOptions
     :wrap           (wrap-backstop report)}))
 
 (def ExceptionBackstopMiddlewareComponentData
   {:name           ::exception-backstop
-   :options-schema options/ExceptionBackstopMiddlewareOptions
+   :config-spec options/ExceptionBackstopMiddlewareOptions
    :factory        #(exception-backstop-middleware %)})
 
 (comment

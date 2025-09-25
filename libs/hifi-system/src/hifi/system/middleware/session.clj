@@ -64,7 +64,7 @@
   ([options]
    (let [options (->session-middleware-opts options)]
      {:name           ::session
-      :options-schema options/SessionMiddlewareOptions
+      :config-spec options/SessionMiddlewareOptions
       :wrap           (fn session-middleware-wrap [handler]
                         (fn session-middleware
                           ([request]
@@ -89,7 +89,7 @@
 (def SessionMiddlewareComponentData
   {:name           :session-cookie
    :factory        #(session-middleware %)
-   :options-schema options/SessionMiddlewareOptions})
+   :config-spec options/SessionMiddlewareOptions})
 
 (comment
 

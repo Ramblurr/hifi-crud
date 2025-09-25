@@ -60,7 +60,7 @@
          validate     (partial valid-csrf-token? csrf-keyspec)
          generate     (partial generate-csrf-token csrf-keyspec)]
      {:name           ::csrf
-      :options-schema options/CSRFProtectionMiddlewareOptions
+      :config-spec options/CSRFProtectionMiddlewareOptions
       :wrap           (fn csrf-middleware-wrap [handler]
                         (fn csrf-middleware
                           ([request]
@@ -84,7 +84,7 @@
 (def CSRFProtectionMiddlewareComponentData
   {:name           :hifi.middleware/csrf-protection
    :factory        #(csrf-middleware %)
-   :options-schema options/CSRFProtectionMiddlewareOptions})
+   :config-spec options/CSRFProtectionMiddlewareOptions})
 
 (comment
 

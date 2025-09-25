@@ -1,7 +1,11 @@
 (ns hifi.core
   (:require
+   [clojure.java.io :as io]
+   [clojure.tools.reader :as tools.reader]
+   [clojure.tools.reader.reader-types :as reader-types]
    [donut.system :as ds]
    [donut.system.plugin :as dsp]
+   [hifi.config :as config]
    [hifi.backtick :as backtick]
    [hifi.error.iface :as pe]))
 
@@ -242,12 +246,129 @@
      (extend-ns hifi.application :foo :bar)"
   [spec]
   (let [[prov-ns opts] (parse-extend-spec spec)
+        _ (require prov-ns)
         ext-sym        (symbol (str prov-ns) "__extend__")
         decls          (provider-decls prov-ns)]
-    (require prov-ns)
     (require 'hifi.core)
     `(do
        (~ext-sym ~opts)
        ;; after provider code has defined any defaults, enforce required callbacks
        (hifi.core/ensure-declared-in-caller '~prov-ns '~decls)
        :extended)))
+
+(defn- source->resource [source-file]
+  (when source-file
+    (let [file (io/file source-file)]
+      (cond
+        (.exists file) file
+        :else (io/resource source-file)))))
+
+(defn- read-defroutes-form [rdr sym target-line]
+  (let [pushback (reader-types/indexing-push-back-reader rdr)
+        opts {:eof ::eof :read-cond :preserve :features #{:clj}}]
+    (loop []
+      (let [form (tools.reader/read opts pushback)]
+        (cond
+          (= ::eof form) nil
+          (not (sequential? form)) (recur)
+          :else
+          (let [[op binding-name & body] form
+                form-meta (meta form)
+                op-name (some-> op name)]
+            (if (and (= "defroutes" op-name)
+                     (= sym binding-name)
+                     (or (nil? target-line)
+                         (= target-line (:line form-meta))))
+              (let [body (if (string? (first body)) (rest body) body)]
+                (first body))
+              (recur))))))))
+
+(defn- enrich-route-form [sym default-form source-meta]
+  (try
+    (let [{:keys [file line]} source-meta
+          resource (source->resource file)]
+      (if resource
+        (with-open [r (io/reader resource)]
+          (or (read-defroutes-form r sym line)
+              default-form))
+        default-form))
+    (catch Exception _
+      default-form)))
+
+(defn- route-form-line [form]
+  (or (:line (meta form))
+      (some-> form first meta :line)))
+
+(defn- annotate-route-form [sym current-ns fallback-line form]
+  (when-not (vector? form)
+    (throw (ex-info "Route entries must be vectors"
+                    {:hifi/error ::invalid-route-entry
+                     :symbol sym
+                     :entry form})))
+  (let [line          (or (route-form-line form) fallback-line)
+        annotation    `(when (config/dev?)
+                         {:ns '~current-ns
+                          :line ~line})
+        [path & rest*] form
+        has-map?      (and (seq rest*) (map? (first rest*)))
+        route-map     (when has-map? (first rest*))
+        child-forms   (if has-map?
+                        (rest rest*)
+                        rest*)
+        annotated     (map (partial annotate-route-form sym current-ns line) child-forms)]
+    (if has-map?
+      `(let [path# ~path
+             data# ~route-map
+             annotation# ~annotation
+             data'# (if (and annotation# (not (contains? data# :hifi/annotation)))
+                      (assoc data# :hifi/annotation annotation#)
+                      data#)]
+         (into [path# data'#]
+               [~@annotated]))
+      `(let [path# ~path
+             annotation# ~annotation]
+         (into (cond-> [path#]
+                 annotation# (conj {:hifi/annotation annotation#}))
+               [~@annotated])))))
+
+(defmacro defroutes
+  "Define named route data that mirrors reitit's vector syntax.
+
+  Usage is identical to `def`, with an optional docstring followed by a
+  literal route vector. The resulting var holds a map with a namespaced
+  `:route-name` and the original routes under `:routes`.
+
+  In development profiles the route maps are enriched with `:hifi/annotation`
+  entries pointing back to their namespace and source line, helping tooling and
+  debug output trace routes to their definitions. Production builds keep the
+  route data untouched."
+  [sym & body]
+  (let [[doc body] (if (string? (first body))
+                     [(first body) (rest body)]
+                     [nil body])
+        route-form (first body)
+        source-meta (merge {:file *file*} (meta &form))
+        effective-route-form (if (config/dev?) (enrich-route-form sym route-form source-meta) route-form)]
+    (when-not route-form
+      (throw (ex-info "defroutes requires a route vector"
+                      {:hifi/error ::missing-route-vector
+                       :symbol sym})))
+    (when-not (vector? route-form)
+      (throw (ex-info "defroutes expects a literal vector for route data"
+                      {:hifi/error ::invalid-route-form
+                       :symbol sym
+                       :provided route-form})))
+    (let [current-ns (ns-name *ns*)
+          route-name (keyword (str current-ns) (name sym))
+          fallback-line (or (route-form-line effective-route-form)
+                            (:line source-meta)
+                            0)
+          routes-expr (annotate-route-form sym current-ns fallback-line effective-route-form)
+          def-form (if doc
+                     `(def ~sym ~doc
+                        {:route-name ~route-name
+                         :routes ~routes-expr})
+                     `(def ~sym
+                        {:route-name ~route-name
+                         :routes ~routes-expr}))]
+      def-form)))

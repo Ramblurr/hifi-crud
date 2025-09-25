@@ -4,7 +4,7 @@
    [donut.system.plugin :as dsp]
    [hifi.anomalies.iface :as anom]
    [hifi.application.finisher :as finisher]
-   [hifi.core :as h :refer [=> defcallback defplugin* deftemplate]]
+   [hifi.core :as h :refer [defcallback defplugin* deftemplate]]
    [hifi.error.iface :as he]
    [malli.core :as m]
    [medley.core :as medley]))
@@ -81,7 +81,7 @@
   "Configures and validates components from the config.edn"
   {h/system-update configure-components})
 
-(defcallback components "The components to start" ([] [:map => :vector]))
+(defcallback components "The components to start" ([] [=> :vector]))
 (defcallback initialize "Build the system map" ([] [=> :map]))
 (defcallback config "Load configuration" ([] [=> :map]))
 (defcallback start "Start the application" ([] [=> :map]))
@@ -104,7 +104,7 @@
 
   (defonce running-system_ (atom nil))
 
-  (defn config
+  (hifi.core/defn-default ::marker config
     "Load configuration"
     []
     (hifi.config/read-config))

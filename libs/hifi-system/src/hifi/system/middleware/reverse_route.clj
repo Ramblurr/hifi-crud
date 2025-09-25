@@ -24,4 +24,4 @@
 (def ReititReverseRouteMiddlewareComponentData
   {:name           :url-for
    :factory        (constantly {:wrap wrap-reverse-route})
-   :options-schema nil})
+   :config-spec nil})

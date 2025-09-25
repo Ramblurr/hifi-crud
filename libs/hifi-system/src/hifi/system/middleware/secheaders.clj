@@ -61,7 +61,7 @@
   "Default security headers to set in the response."
   [opts]
   {:name           ::security-headers
-   :options-schema options/SecHeadersMiddlewareOptions
+   :config-spec options/SecHeadersMiddlewareOptions
    :wrap           (fn wrap-security-headers [handler]
                      (fn [request]
                        (let [nonce-val   (nonce)
@@ -74,7 +74,7 @@
 
 (def SecurityHeadersMiddlewareComponentData
   {:name           ::security-headers
-   :options-schema options/SecHeadersMiddlewareOptions
+   :config-spec options/SecHeadersMiddlewareOptions
    :factory        #(security-headers-middleware %)})
 
 (comment

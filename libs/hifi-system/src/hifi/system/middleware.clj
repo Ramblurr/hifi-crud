@@ -11,18 +11,18 @@
 (def ParametersMiddlewareComponentData
   {:name           :parse-raw-params
    :factory        (constantly reitit.params/parameters-middleware)
-   :options-schema nil})
+   :config-spec nil})
 
 (def ParseMultipartMiddlewareComponentData
   {:name           :parse-multipart
    :factory        #(reitit.multipart/create-multipart-middleware %)
-   :options-schema nil})
+   :config-spec nil})
 
-(defn middleware-component [{:keys [name factory options-schema :donut.system/config] :as _component-data}]
+(defn middleware-component [{:keys [name factory config-spec :donut.system/config] :as _component-data}]
   {:donut.system/start  (fn [{:keys [:donut.system/config]}]
                           (factory config))
    :donut.system/config (merge {} config)
-   :hifi/config-spec options-schema
+   :hifi/config-spec config-spec
    :hifi/config-key  name})
 
 (def MiddlewareRegistryComponentGroup
@@ -36,15 +36,10 @@
    ;; :datastar-tab-state          (middleware-component d*mw/DatastarTabStateMiddlewareComponentData)
    :session-cookie              (middleware-component session/SessionMiddlewareComponentData)
    :csrf-protection             (middleware-component csrf/CSRFProtectionMiddlewareComponentData)
-   :security-headers            (middleware-component secheaders/SecurityHeadersMiddlewareComponentData)
-   ;; :wrap-http-kit-set-real-remote-address (middleware-component remote-addr/HttpKitSetRealRemoteAddressComponentData)
-   ;; :wrap-parse-x-forwarded-for            (middleware-component remote-addr/ParseXForwardedForComponentData)
-   })
+   :security-headers            (middleware-component secheaders/SecurityHeadersMiddlewareComponentData)})
 
 (def hypermedia-chain
-  [;; :wrap-http-kit-set-real-remote-address
-   ;; :wrap-parse-x-forwarded-for
-   :parse-raw-params
+  [:parse-raw-params
    :reverse-route
    :exception
    :parse-multipart
