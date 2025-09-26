@@ -34,7 +34,7 @@
        (sort-by :path)))
 
 (defn route-list [req]
-  (html/->str
+  (html/hiccup->str
    (let [registry (:reitit.middleware/registry (r/options (:reitit.core/router req)))
          data (route-data (r/routes (:reitit.core/router req)))]
      [:div

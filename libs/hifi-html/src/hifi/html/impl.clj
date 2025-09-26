@@ -6,6 +6,11 @@
    [hifi.html.protocols :as p]
    [hifi.html.util :as u]))
 
+(defn chassis-data?
+  [x]
+  (or (:dev.onionpancakes.chassis.core/content (meta x))
+      (= (type x) dev.onionpancakes.chassis.core.RawString)))
+
 (def asset-tags #{:hifi.html/stylesheet-link
                   :hifi.html/preload-link
                   :hifi.html/javascript-include

@@ -18,7 +18,6 @@
 (h/defroutes app
   ["" {:middleware hifi.mw/hypermedia-chain}
    ["/" {:get  {:handler #'hello-world}}]
-
    ["/error" {:get  {:handler (fn [_] (throw (ex-info "Uhoh" {})))}}]])
 
 (comment

@@ -11,7 +11,7 @@
 (when (h/dev?)
   (cc/set-warn-on-ambig-attrs!))
 
-(defn ->str
+(defn hiccup->str
   "Converts a Hiccup-style HTML node tree into an HTML string.
 
   This function processes asset-marked elements (stylesheet links, scripts, images)
@@ -145,6 +145,11 @@
    (impl/render ctx hiccup nil))
   ([ctx hiccup opts]
    (impl/render ctx hiccup opts)))
+
+(defn chassis-data?
+  "Returns true if `x` is data generated from chassis"
+  [x]
+  (impl/chassis-data? x))
 
 (defn preloads->header
   "Converts preload data into an HTTP Link header value.
@@ -315,7 +320,7 @@
 
 (defn shim-page-resp [{:keys [compress-fn encoding body]
                        :or   {compress-fn identity}}]
-  (let [body (->str body)]
+  (let [body (hiccup->str body)]
     (-> {:status  200
          :headers (-> {"Content-Type"  "text/html"
                        "Cache-Control" "no-cache, must-revalidate"}

@@ -38,7 +38,7 @@
 
 (defn home-view [{:keys [::datastar/tab-state] :as _req}]
   ;; TODO the problem here is that tab-state is out of date, it is fixed in time at the beginning of the long lived request
-  (html/->str
+  (html/hiccup->str
    (list
     (html/stylesheet {:!asset !extra-css :id "css-extra"})
     [:main#morph {:data-signals__ifmissing (datastar/edn->json {:choice ""}) :style "font-family: sans;"}
