@@ -1,7 +1,6 @@
 (ns hifi.cli.cmds.dev
   (:require
-   [hifi.cli.cmds.shared :as shared]
-   [babashka.cli :as cli]))
+   [hifi.cli.cmds.shared :as shared]))
 
 (declare spec)
 
@@ -9,16 +8,13 @@
 
 (defn handler
   [{:keys [opts _args] :as i}]
-  (if (:help opts)
-    ((shared/help-printer spec) i)
-    (let [config (shared/load-config opts)]
-      (println config))))
+  (let [config (shared/load-config opts)]
+    (println config)))
 
-(def spec
-  {:spec (shared/with-shared-specs [:help :config-file]
-           {:project-name {:desc    "THe project name"
-                           :ref     "<name>"}})
-   :examples examples
-   :description "Start a dev repl"
-   :cmds ["dev"]
-   :fn handler})
+(def spec (shared/with-help handler
+            {:spec (shared/with-shared-specs [:help :config-file]
+                     {:project-name {:desc    "THe project name"
+                                     :ref     "<name>"}})
+             :examples examples
+             :description "Start a dev repl"
+             :cmds ["dev"]}))

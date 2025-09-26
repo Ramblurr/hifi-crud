@@ -100,3 +100,11 @@
       (println (cli/format-opts spec))
       (println)
       (print-examples (:examples spec)))))
+
+(defn with-help [handler spec]
+  (assoc spec :fn
+         (fn [{:keys [opts] :as i}]
+           (if (:help opts)
+             ((help-printer spec) i)
+             (let [config (load-config opts)]
+               (println config))))))
