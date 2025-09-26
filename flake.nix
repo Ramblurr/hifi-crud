@@ -17,7 +17,7 @@
       treefmt-nix,
     }:
     let
-      javaVersion = 21;
+      javaVersion = 24;
     in
     {
       overlays.default =
