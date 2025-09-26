@@ -12,9 +12,7 @@
     (println config)))
 
 (def spec (shared/with-help handler
-            {:spec (shared/with-shared-specs [:help :config-file]
-                     {:project-name {:desc    "THe project name"
-                                     :ref     "<name>"}})
+            {:spec (shared/with-shared-specs [:help :config-file])
              :examples examples
              :description "Start a dev repl"
              :cmds ["dev"]}))

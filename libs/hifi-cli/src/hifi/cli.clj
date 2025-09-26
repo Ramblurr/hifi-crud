@@ -1,7 +1,7 @@
 (ns hifi.cli
   (:require
    [hifi.cli.cmds.dev :as cmd.dev]
-   [hifi.cli.cmds.init :as cmd.init]
+   [hifi.cli.cmd.new :as cmd.new]
    [babashka.cli :as cli]))
 
 (declare table)
@@ -26,7 +26,7 @@
 (def table
   [{:cmds ["help"] :fn help-handler :description "Get this help"}
    {:cmds [] :fn help-handler :hide? true}
-   cmd.init/spec
+   cmd.new/spec
    cmd.dev/spec])
 
 (defn -main [& args]
