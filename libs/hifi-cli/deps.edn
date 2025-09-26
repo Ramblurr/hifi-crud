@@ -1,0 +1,15 @@
+{:paths ["src" "resources"]
+ :deps  {babashka/fs                      {:mvn/version "0.5.27"}
+         cider/cider-nrepl                {:mvn/version "0.57.0"}
+         com.widdindustries/time-literals {:mvn/version "0.1.10"}
+         hifi/config                      {:local/root "../hifi-config"}
+         hifi/error                       {:local/root "../hifi-error"}
+         io.github.paintparty/bling       {:mvn/version "0.8.8"}
+         lambdaisland/deep-diff2          {:mvn/version "2.12.219"}
+         lambdaisland/kaocha              {:mvn/version "1.91.1392"}
+         mvxcvi/puget                     {:mvn/version "1.3.4"}
+         nrepl/nrepl                      {:mvn/version "1.4.0"}
+         org.babashka/cli                 {:mvn/version "0.8.66"}
+         org.clojure/clojure              {:mvn/version "1.12.2"}
+         org.clojure/tools.cli            {:mvn/version "1.1.230"}
+         party.donut/system               {:mvn/version "1.0.257"}}}
