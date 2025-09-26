@@ -11,24 +11,24 @@
       ["/health" ["/sub" {:get {:handler (constantly :ok)}}]]]))
 
 (defn- evaluate-routes [dev?]
-  (let [current-ns (the-ns 'hifi.core-test)
-        expanded (binding [*ns* current-ns]
-                   (macroexpand routes-form))
-        [_def _name & body] expanded
-        value-expr (first (if (string? (first body))
-                            (rest body)
-                            body))]
-    (with-redefs [h/dev? (constantly dev?)]
+  (with-redefs [h/*env* (if dev? :dev nil)]
+    (let [current-ns (the-ns 'hifi.core-test)
+          expanded (binding [*ns* current-ns]
+                     (macroexpand routes-form))
+          [_def _name & body] expanded
+          value-expr (first (if (string? (first body))
+                              (rest body)
+                              body))]
       (eval value-expr))))
 
 (deftest defroutes-annotates-when-dev
-  (let [route-def (evaluate-routes true)
-        routes (:routes route-def)
-        root-data (second routes)
-        ping-route (nth routes 2)
-        ping-data (second ping-route)
+  (let [route-def    (evaluate-routes true)
+        routes       (:routes route-def)
+        root-data    (second routes)
+        ping-route   (nth routes 2)
+        ping-data    (second ping-route)
         health-route (nth routes 3)
-        health-data (second health-route)
+        health-data  (second health-route)
         health-child (nth health-route 2)]
     (is (= ::sample-routes (:route-name route-def)))
     (testing "top-level route retains original data and annotation"
