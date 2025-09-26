@@ -240,6 +240,8 @@
   `(do (defmacro ~'__extend__ [& {:as ~'opts}]
          (backtick/template (do ~@body)))))
 
+;; TODO: write an 'eject' macro
+
 (defn ensure-declared-in-caller
   [prov-ns decls]
   (doseq [{:keys [sym kind]} decls]
