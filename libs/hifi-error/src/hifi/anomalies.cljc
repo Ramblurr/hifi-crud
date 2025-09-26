@@ -13,11 +13,11 @@
 ;; See the License for the specific language governing permissions and
 ;; limitations under the License.
 ;;
-;; Inspired by cognitect's https://github.com/cognitect-labs/anomalies
+;; Vendored from cognitect's https://github.com/cognitect-labs/anomalies
 ;;
 ;; Changes:
 ;;   - ported to malli
-(ns hifi.anomalies.iface)
+(ns hifi.anomalies)
 
 (def Category  [:enum
                 ::unavailable

@@ -1,7 +1,7 @@
-(ns hifi.anomalies.iface-test
+(ns hifi.anomalies-test
   (:require [clojure.test :as test :refer [deftest is]]
             [malli.core :as m]
-            [hifi.anomalies.iface :as anom]))
+            [hifi.anomalies :as anom]))
 
 (deftest validates
   (is (m/validate anom/Anomaly {::anom/category ::anom/incorrect ::anom/message "foo"}))

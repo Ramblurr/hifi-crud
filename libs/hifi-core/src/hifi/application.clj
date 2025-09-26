@@ -2,7 +2,7 @@
   (:require
    [donut.system :as ds]
    [donut.system.plugin :as dsp]
-   [hifi.anomalies.iface :as anom]
+   [hifi.anomalies :as anom]
    [hifi.application.finisher :as finisher]
    [hifi.core :as h :refer [defcallback defplugin* deftemplate]]
    [hifi.error.iface :as he]

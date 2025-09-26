@@ -1,7 +1,7 @@
 (ns hifi.error.iface-test
   {:clj-kondo/config '{:linters {:unresolved-symbol {:level :off}}}}
   (:require
-   [hifi.anomalies.iface :as anom]
+   [hifi.anomalies :as anom]
    [clojure.test :as test :refer [deftest is testing]]
    [malli.transform :as mt]
    [hifi.error.iface :as error]))

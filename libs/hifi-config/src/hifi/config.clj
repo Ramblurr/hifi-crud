@@ -29,7 +29,7 @@
   (let [v (cloak/unmask x)]
     (if (nil? v)
       (throw (ex-info "Unmasked secret is nil" {:hifi/error                    :hifi.config/unmask-nil
-                                                :hifi.anomalies.iface/category :hifi.anomalies.iface/incorrect}))
+                                                :hifi.anomalies/category :hifi.anomalies/incorrect}))
       v)))
 
 (defn secret?

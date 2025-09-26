@@ -2,7 +2,7 @@
 ;; SPDX-License-Identifier: EUPL-1.2
 (ns hifi.error.iface
   (:require
-   [hifi.anomalies.iface :as anom]
+   [hifi.anomalies :as anom]
    [clojure.string :as str]
    [malli.transform :as mt]
    [malli.core :as m]
