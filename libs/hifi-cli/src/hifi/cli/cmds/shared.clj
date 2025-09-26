@@ -106,5 +106,12 @@
          (fn [{:keys [opts] :as i}]
            (if (:help opts)
              ((help-printer spec) i)
-             (let [config (load-config opts)]
-               (println config))))))
+             (handler i)))))
+
+(defn write-file
+  ([f contents]
+   (write-file f contents nil))
+  ([f contents {:keys [overwrite?]}]
+   (if (or (not (fs/exists? f)) overwrite?)
+     (do (spit f contents) (info "Created " (str f)) nil)
+     {:error (str f " already exists")})))
