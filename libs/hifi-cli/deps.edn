@@ -2,6 +2,8 @@
  :deps  {babashka/fs                      {:mvn/version "0.5.27"}
          cider/cider-nrepl                {:mvn/version "0.57.0"}
          com.widdindustries/time-literals {:mvn/version "0.1.10"}
+
+         hifi/core                      {:local/root "../hifi-core"}
          hifi/config                      {:local/root "../hifi-config"}
          hifi/error                       {:local/root "../hifi-error"}
          io.github.paintparty/bling       {:mvn/version "0.8.8"}
