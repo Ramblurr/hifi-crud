@@ -15,7 +15,7 @@
   (clojure.repl.deps/sync-deps)
 
   (do
-    (hifi.config/set-env! :dev)
+    (hifi.core/set-env! :dev)
     (require '[clj-reload.core :as clj-reload])
     (clj-reload/init {:dirs
                       ["examples/hello-world/src"
