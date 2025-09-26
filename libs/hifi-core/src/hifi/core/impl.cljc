@@ -1,8 +1,10 @@
 (ns ^:no-doc hifi.core.impl
   (:require
-   [clojure.java.io :as io]
-   [clojure.tools.reader :as tools.reader]
-   [clojure.tools.reader.reader-types :as reader-types]))
+   [clojure.java.io :as io]))
+#?(:bb nil
+   :clj (require
+         '[clojure.tools.reader.reader-types :as reader-types]
+         '[clojure.tools.reader :as tools.reader]))
 
 (defn provider-decls
   "Return a seq of {:sym 'name :kind :fn|:macro :meta <meta>}"
@@ -45,36 +47,42 @@
       (cond
         (.exists file) file
         :else (io/resource source-file)))))
+
 (defn read-defroutes-form [rdr sym target-line]
-  (let [pushback (reader-types/indexing-push-back-reader rdr)
-        opts {:eof ::eof :read-cond :preserve :features #{:clj}}]
-    (loop []
-      (let [form (tools.reader/read opts pushback)]
-        (cond
-          (= ::eof form) nil
-          (not (sequential? form)) (recur)
-          :else
-          (let [[op binding-name & body] form
-                form-meta (meta form)
-                op-name (some-> op name)]
-            (if (and (= "defroutes" op-name)
-                     (= sym binding-name)
-                     (or (nil? target-line)
-                         (= target-line (:line form-meta))))
-              (let [body (if (string? (first body)) (rest body) body)]
-                (first body))
-              (recur))))))))
+  #?(:bb nil
+     :clj
+     (let [pushback (reader-types/indexing-push-back-reader rdr)
+           opts {:eof ::eof :read-cond :preserve :features #{:clj}}]
+       (loop []
+         (let [form (tools.reader/read opts pushback)]
+           (cond
+             (= ::eof form) nil
+             (not (sequential? form)) (recur)
+             :else
+             (let [[op binding-name & body] form
+                   form-meta (meta form)
+                   op-name (some-> op name)]
+               (if (and (= "defroutes" op-name)
+                        (= sym binding-name)
+                        (or (nil? target-line)
+                            (= target-line (:line form-meta))))
+                 (let [body (if (string? (first body)) (rest body) body)]
+                   (first body))
+                 (recur)))))))))
+
 (defn enrich-route-form [sym default-form source-meta]
-  (try
-    (let [{:keys [file line]} source-meta
-          resource (source->resource file)]
-      (if resource
-        (with-open [r (io/reader resource)]
-          (or (read-defroutes-form r sym line)
-              default-form))
-        default-form))
-    (catch Exception _
-      default-form)))
+  #?(:bb default-form
+     :clj
+     (try
+       (let [{:keys [file line]} source-meta
+             resource (source->resource file)]
+         (if resource
+           (with-open [r (io/reader resource)]
+             (or (read-defroutes-form r sym line)
+                 default-form))
+           default-form))
+       (catch Exception _
+         default-form))))
 
 (defn route-form-line [form]
   (or (:line (meta form))
