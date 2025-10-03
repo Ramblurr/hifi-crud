@@ -16,18 +16,17 @@
       flake-utils,
       treefmt-nix,
     }:
-    let
-      javaVersion = 24;
-    in
     {
       overlays.default =
         _final: prev:
         let
-          jdk = prev."jdk${toString javaVersion}";
+          #jdk = prev."jdk${toString javaVersion}";
+          jdk = prev.graalvmPackages.graalvm-ce;
         in
         {
-          clojure = prev.clojure.override { inherit jdk; };
+          clojure = prev.clojure.override { jdk21 = jdk; };
           datomic-pro = prev.datomic-pro.override { extraJavaPkgs = [ prev.sqlite-jdbc ]; };
+          inherit jdk;
         };
     }
     // flake-utils.lib.eachDefaultSystem (
@@ -48,6 +47,7 @@
         devShells.default = pkgs.mkShell {
           DATOMIC_PRO_PEER_JAR = "${pkgs.datomic-pro-peer_1_0_7394}/share/java/datomic-pro-peer-1.0.7394.jar";
           packages = with pkgs; [
+            jdk
             gum
             bun
             clojure
