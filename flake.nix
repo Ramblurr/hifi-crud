@@ -21,7 +21,7 @@
         _final: prev:
         let
           #jdk = prev."jdk${toString javaVersion}";
-          jdk = prev.graalvmPackages.graalvm-ce;
+          jdk = prev.graalvmPackages.graalvm-oracle;
         in
         {
           clojure = prev.clojure.override { jdk21 = jdk; };
@@ -34,6 +34,7 @@
       let
         pkgs = import nixpkgs {
           inherit system;
+          config.allowUnfree = true;
           overlays = [
             datomic-pro.overlays.${system}
             self.overlays.default
