@@ -2,9 +2,11 @@
   (:require
    [com.fulcrologic.guardrails.malli.core :refer [=> >defn]]
    [donut.system :as ds]
+   [hifi.config :as config]
    [hifi.core :as h]
    [hifi.system.middleware :as middleware]
    [hifi.system.spec :as spec]
+   [hifi.util.crypto :as crypto]
    [reitit.ring :as reitit.ring]
    [reitit.ring.middleware.dev :as reitit.ring.middleware.dev]))
 
@@ -39,7 +41,6 @@
                    router
                    (reitit.ring/routes (reitit.ring/create-default-handler default-handler-opts))
                    handler-opts)))
-
    :hifi/config-spec spec/RingHandlerOptions
    :hifi/config-key :hifi.http/root-handler
    ::ds/config {:router [::ds/local-ref [:hifi.http/router]]}})
@@ -73,6 +74,14 @@
                  (:router-options config)))
    ::ds/config {:routes [:donut.system/local-ref [:hifi.http/routes]]
                 :router-options [:donut.system/local-ref [:hifi.http/router-options]]}})
+
+(h/defcomponent PrimaryKeyComponent
+  "TODO"
+  {::ds/start (fn [{::ds/keys [config]}]
+                (crypto/key->hmac-sha256-keyspec (config/unmask! config)))
+   :hifi/config-spec spec/Secret
+   :hifi/config-key :hifi/primary-key
+   ::ds/config {}})
 
 (defn route-component-start [{:keys [::ds/config]}]
   (let [{:keys [routes path-prefix _route-name route-data]} config]
@@ -111,6 +120,7 @@
                :hifi.http/root-handler RootRingHandlerComponent
                :hifi.http/router-options RouterOptionsComponent
                :hifi.http/router RouterComponent
-               :hifi.http/routes [::ds/ref [:hifi/routes]]}
+               :hifi.http/routes [::ds/ref [:hifi/routes]]
+               :hifi.http/primary-key PrimaryKeyComponent}
    :hifi/routes {}
    :hifi/middleware middleware/MiddlewareRegistryComponentGroup})

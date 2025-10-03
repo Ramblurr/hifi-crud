@@ -55,7 +55,9 @@
 
 (defn csrf-middleware
   ([options]
+   (tap> [:CSRF options])
    (let [options      (->csrf-middleware-opts options)
+         csrf-keyspec (crypto/derive (:options :hifi.http/primary-key))
          csrf-keyspec (crypto/secret-key->hmac-sha256-keyspec (-> options :csrf-secret config/unmask!))
          validate     (partial valid-csrf-token? csrf-keyspec)
          generate     (partial generate-csrf-token csrf-keyspec)]
@@ -84,7 +86,8 @@
 (def CSRFProtectionMiddlewareComponentData
   {:name           :hifi.middleware/csrf-protection
    :factory        #(csrf-middleware %)
-   :config-spec options/CSRFProtectionMiddlewareOptions})
+   :config-spec options/CSRFProtectionMiddlewareOptions
+   :donut.system/config {:hifi.http/primary-key [:donut.system/ref [:hifi/http :hifi.http/primary-key]]}})
 
 (comment
 

@@ -107,7 +107,6 @@
 (def CSRFProtectionMiddlewareOptions
   (m/schema
    [:map {:name ::csrf-protection-middleware-options}
-    [:csrf-secret {:doc "A randomly generated random secret used to sign the CSRF token."} Secret]
     [:cookie-name {:default "csrf" :doc "Name of the cookie holding the csrf double-submit token."} NonBlankString]
     [:cookie-attrs {:default {:same-site :lax :secure true :path "/" :host-prefix true}
                     :doc     "Map of attributes for the csrf cookie."} CookieAttrsOption]]))
