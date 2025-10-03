@@ -1,0 +1,6 @@
+{:hifi/application                {{name}}
+ :secrets                         #hifi/sops #profile {:dev "secrets.dev.sops.yaml" :default "secrets.prod.sops.yaml"}
+ :hifi/root-key                   #hifi/secret #or [#ref [:secrets :hifi/root-key] #env "HIFI_ROOT_KEY"]
+ :hifi.http/server                {:host "127.0.0.1" :port 3000}
+ :hifi.http/root-handler          {:reload-per-request? #profile {:dev true :default false}}
+ :hifi/assets                     #:hifi.assets{:paths ["assets"]}}
