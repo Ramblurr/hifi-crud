@@ -1,8 +1,10 @@
 (ns hifi.cli
+  (:gen-class)
   (:require
-   [hifi.cli.cmds.dev :as cmd.dev]
+   [babashka.cli :as cli]
+   [hifi.cli.cmd.dev :as cmd.dev]
    [hifi.cli.cmd.new :as cmd.new]
-   [babashka.cli :as cli]))
+   [hifi.cli.sops :as age]))
 
 (declare table)
 
@@ -12,6 +14,7 @@
   (println "Usage: hifi <command> [OPTIONS]")
   (println)
   (println "This is hifi.")
+  (age/generate-age-key)
   (println)
   (println "Commands:")
   (println (cli/format-table
@@ -30,7 +33,8 @@
    cmd.dev/spec])
 
 (defn -main [& args]
-  (cli/dispatch table args))
+  (cli/dispatch table args)
+  (shutdown-agents))
 
 (when (= *file* (System/getProperty "babashka.file"))
   (apply -main *command-line-args*))

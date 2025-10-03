@@ -1,34 +1,47 @@
 (ns hifi.cli.cmd.new
   (:require
-   [org.corfield.new :as dnew]
-   [rewrite-clj.zip :as z]
+   [babashka.fs :as fs]
    [clojure.pprint :as pp]
-   [hifi.cli.cmds.shared :as shared]))
+   [hifi.cli.cmd.shared :as shared]
+   [hifi.cli.sops :as sops]
+   [hifi.util.codec :as codec]
+   [hifi.util.crypto :as crypto]
+   [org.corfield.new :as dnew]))
 
 (defn data-fn
   "Example data-fn handler.
 
   Result is merged onto existing options data."
-  [data]
-  ;; returning nil means no changes to options data
-  (println "data-fn returning nil")
-  nil)
+  [_data]
+  (println "data-fn got ")
+  (pp/pprint _data)
+  (let [age-keypair (sops/generate-age-key)]
+    {:age-keypair age-keypair
+     :age-keys-txt-path (sops/keys-txt-path)
+     :age-public-key (sops/public-key age-keypair)}))
 
 (defn template-fn
   "Example template-fn handler.
 
   Result is used as the EDN for the template."
-  [edn data]
-  ;; must return the whole EDN hash map
+  [edn _data]
   (println "template-fn returning edn")
   edn)
+
+(defn initial-secrets []
+  {:hifi/root-key (codec/->hex (crypto/bytes 32))})
 
 (defn post-process-fn
   "Example post-process-fn handler.
 
   Can programmatically modify files in the generated project."
   [edn data]
-  (println "post-process-fn not modifying" (:target-dir data)))
+  (sops/write-secret-key data)
+  (sops/write-initial-secrets (str (fs/path (:target-dir data) "config" "secrets.dev.sops.edn")) (:age-keypair data) (initial-secrets))
+  (println "Post-processing edn")
+  (pp/pprint edn)
+  (println "with data")
+  (pp/pprint data))
 
 (defn new-project [{:keys [target-dir project-name overwrite]}]
   (dnew/create {:target-dir target-dir
@@ -53,7 +66,7 @@
     (shared/exit-msg "<project-name> must be provided. see hifi new --help")))
 
 (defn handler
-  [{:keys [opts args] :as i}]
+  [{:keys [opts args]}]
   (validate-opts opts args)
   (new-project opts))
 

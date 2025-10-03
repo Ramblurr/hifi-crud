@@ -1,6 +1,6 @@
-(ns hifi.cli.cmds.dev
+(ns hifi.cli.cmd.dev
   (:require
-   [hifi.cli.cmds.shared :as shared]))
+   [hifi.cli.cmd.shared :as shared]))
 
 (declare spec)
 
