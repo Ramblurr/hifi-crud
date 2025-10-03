@@ -21,3 +21,13 @@
   "Converts byte array to hex string using bit manipulation."
   ^String [^bytes b]
   (apply str (map #(format "%02x" (Byte/toUnsignedInt %)) b)))
+
+(defn hex->
+  "Convertes a hex string to a byte array."
+  ^bytes [^String hex]
+  (when (odd? (count hex))
+    (throw (Exception. "Invalid hex string")))
+  (byte-array
+   (map #(unchecked-byte (Integer/parseInt % 16))
+        (map #(apply str %)
+             (partition 2 hex)))))

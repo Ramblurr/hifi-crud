@@ -18,24 +18,31 @@
    - -hex suffix for hex string output"
   (:refer-clojure :exclude [bytes])
   (:require
+   [clojure.string :as str]
    [babashka.fs :as fs]
    [clojure.java.io :as io]
    [crypto.equality :as equality]
-   [hifi.util.codec :as codec])
+   [hifi.util.codec :as codec]
+   [hifi.util.random :as random])
   (:import
-   [java.security MessageDigest SecureRandom]
+   [java.security MessageDigest]
    [javax.crypto Mac]
    [javax.crypto.spec SecretKeySpec]))
 
-(def ^SecureRandom secure-random
-  (SecureRandom/new))
+(def ^:dynamic *secure-random*
+  "This is a zero arity function that returns a [[java.security.SecureRandom]] suitable for cryptographic purposes."
+  random/secure-random)
+
+(defn secure-random
+  "See [[*secure-random]]"
+  ^java.security.SecureRandom [] (*secure-random*))
 
 (defn bytes
   "Returns secure random bytes of specified size."
   ^bytes [size]
-  (let [seed (byte-array size)]
-    (.nextBytes secure-random seed)
-    seed))
+  (let [buf (byte-array size)]
+    (.nextBytes (secure-random) buf)
+    buf))
 
 (defn rand-string
   "Returns base64-encoded random string of n bytes."
@@ -210,3 +217,114 @@
   "Computes SHA-384 SRI hash of classpath resource."
   [path]
   (sri-hash-resource "sha384" path))
+
+(defn ^:private hmac-sha256-bytes
+  "Low-level HMAC-SHA256 (bytes in → bytes out).
+   Key and data are byte arrays."
+  ^bytes [^SecretKeySpec key ^bytes data]
+  (let [mac (doto (Mac/getInstance "HmacSHA256")
+              (.init (SecretKeySpec. key "HmacSHA256")))]
+    (.doFinal mac data)))
+
+(defn ^:private hkdf-sha256-extract
+  "HKDF-Extract(step) per RFC 5869 with SHA-256.
+   If salt is nil or empty, uses a HashLen(=32) zero key."
+  ^bytes [^bytes salt ^bytes ikm]
+  (let [zero-salt (byte-array 32)]
+    (hmac-sha256-bytes (if (or (nil? salt) (zero? (alength ^bytes salt)))
+                         zero-salt
+                         salt)
+                       ikm)))
+
+(defn ^:private hkdf-sha256-expand
+  "HKDF-Expand(step) per RFC 5869 with SHA-256.
+   prk: output from hkdf-sha256-extract (32 bytes)
+   info: context/application-specific data (may be nil/empty)
+   length: length of output keying material in bytes."
+  ^bytes [^bytes prk ^bytes info length]
+  (let [info     (or info (byte-array 0))
+        blocks   (long (Math/ceil (/ (double length) 32.0)))
+        out      (byte-array length)]
+    (loop [t (byte-array 0)
+           i 1
+           offset 0]
+      (if (<= i blocks)
+        (let [buf (byte-array (+ (alength t) (alength info) 1))
+              _   (System/arraycopy t 0 buf 0 (alength t))
+              _   (System/arraycopy info 0 buf (alength t) (alength info))
+              _   (aset-byte buf (dec (alength buf)) (byte i))
+              t'  (hmac-sha256-bytes prk buf)
+              n   (min 32 (- length offset))]
+          (System/arraycopy t' 0 out offset n)
+          (recur t' (inc i) (+ offset n)))
+        out))))
+
+(defn derive-subkey-hkdf-sha256
+  "Derives a context-bound subkey from input keying material using HKDF-SHA256.
+
+   Parameters:
+   - ikm: input keying material (byte array), e.g. your primary (master) key bytes
+   - opts (map):
+     :salt  (byte array, optional) non-secret randomization; if nil, HKDF uses zero-salt
+     :info  (byte array, optional) context string (binds the subkey to a purpose, must be unique per context)
+     :length (int, optional) desired output length in bytes (default 32)
+
+   Warning: ikm must be random bytes, and not a password. Do not put  passwords
+   or passphrases anywhere near here.
+
+   Returns: derived key as byte-array of length `length`."
+  ^bytes [^bytes ikm & [{:keys [^bytes salt ^bytes info length]
+                         :or   {length 32}}]]
+  (let [prk (hkdf-sha256-extract salt ikm)]
+    (hkdf-sha256-expand prk info length)))
+
+(defn secret-bytes->hmac-sha256-keyspec
+  "Converts raw secret key bytes into an HMAC-SHA256 SecretKeySpec."
+  [^bytes secret-bytes]
+  (SecretKeySpec. secret-bytes "HmacSHA256"))
+
+(defn key->hmac-sha256-keyspec
+  "Converts a hex encoded secret key into an HMAC-SHA256 SecretKeySpec."
+  [^String hex]
+  (SecretKeySpec. (codec/hex-> hex) "HmacSHA256"))
+
+(defn derive-hmac-keyspec
+  "Derives an HMAC-SHA256 keyspec from a primary key using HKDF.
+
+   Takes a primary `SecretKeySpec` and derives a context-bound subkey using
+   the provided `info` string as the HKDF context parameter.
+
+   Parameters:
+   - primary-key: A `SecretKeySpec` containing the primary (master) key bytes
+   - info: A non-empty string used as the HKDF context parameter. This binds 
+           the derived key to a specific purpose and must be unique per context.
+           Must not be blank.
+   - opts (map, optional):
+     :salt   - Non-secret randomization bytes (optional)
+     :length - Desired output length in bytes (default: 32)
+
+   Returns: A new `SecretKeySpec` suitable for HMAC-SHA256 operations.
+
+   Throws: `ex-info` if `info` is blank or nil.
+
+   Example:
+   ```clojure
+   (derive-hmac-keyspec primary-key \"my-app.csrf/v1\" {:length 32})
+   ```"
+  [^SecretKeySpec primary-key info & [{:keys [^bytes salt ^bytes length]
+                                       :or   {length 32}}]]
+  (when (str/blank? info)
+    (throw (ex-info "info parameter cannot be blank - it must be a non-empty string that uniquely identifies the key's purpose"
+                    {:info info})))
+  (-> primary-key
+      (derive-subkey-hkdf-sha256 {:salt salt :info (.getBytes info) :length length})
+      (secret-bytes->hmac-sha256-keyspec)))
+
+(defn derive-csrf-hmac-keyspec
+  "Derives an HMAC-SHA256 key for CSRF double-submit from the primary key.
+
+   See [[derive-hmac-keyspec]] for the options.
+
+   Returns: javax.crypto.spec.SecretKeySpec suitable for HMAC-SHA256."
+  [^SecretKeySpec primary-key & opts]
+  (derive-hmac-keyspec primary-key "hifi.csrf.hmac/v1" opts))
