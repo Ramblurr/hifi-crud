@@ -1,4 +1,4 @@
-(ns hifi.cli.cmds.shared
+(ns hifi.cli.cmd.shared
   (:require
    [clojure.string :as str]
    [babashka.fs :as fs]
