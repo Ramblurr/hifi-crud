@@ -2,10 +2,16 @@
 ;; SPDX-License-Identifier: EUPL-1.2
 (ns hifi.system.spec
   (:require
+   [hifi.config :as config]
    [hifi.datastar.spec :as d*spec]
    [hifi.error.iface :as pe]
    [hifi.logging.spec :as logging.spec]
    [reitit.middleware :as reitit.middleware]))
+
+(def Secret
+  [:and
+   [:fn {:error/message "should be a secret value"} config/secret?]
+   [:fn {:error/message "should be a secret value that isn't nil"} config/secret-present?]])
 
 (def IntoMiddleware
   [:fn #(satisfies? reitit.middleware/IntoMiddleware %)])
