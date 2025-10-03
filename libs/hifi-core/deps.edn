@@ -2,4 +2,6 @@
  :deps  {hifi/error               {:local/root "../hifi-error"}
          hifi/util                {:local/root "../hifi-util"}
          dev.weavejester/medley   {:mvn/version "1.9.0"}
+         party.donut/system       {:mvn/version "1.0.257"
+                                   :exclusions  [tailrecursion/cljs-priority-map]}
          org.clojure/tools.reader {:mvn/version "1.5.2"}}}
