@@ -11,7 +11,7 @@
                                  :alias :h}
                    :config-file {:desc    "The hifi config file to load"
                                  :alias   :c
-                                 :default "hifi.edn"}})
+                                 :default "config/hifi.edn"}})
 
 (defn with-shared-specs
   ([ks] (with-shared-specs ks {}))
@@ -57,18 +57,15 @@
   (when (seq examples)
     (println "EXAMPLES:")))
 
-(defn load-config [opts]
-  (let [filename (:config-file opts)]
+(defn load-config [{:keys [config-file profile] :as _opts}]
+  (let [filename config-file]
     (if (fs/exists? filename)
       (try
-        (config/read-config :filename filename)
+        (config/read-config :filename filename :profile profile)
         (catch Exception e
-          (if-let [_data (ex-data e)]
-            (do
-              (println (ex-message e))
-              ;; (println data)
-              (exit-msg (format "the config for your app failed to parse, please fix the issue in '%s'. " filename)))
-            (exit-msg (format "the config for your app failed to parse, please fix the issue in '%s'. " filename)))))
+          (println (ex-message e))
+            ;; (println (ex-data e))
+          (exit-msg (format "the config for your app failed to parse, please fix the issue in '%s'. " filename))))
       (exit-msg (format "the config for your app is missing, the file '%s' does not exist. " filename)))))
 
 (defn print-args [args]

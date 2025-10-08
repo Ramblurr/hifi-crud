@@ -6,7 +6,7 @@
                    :extra-deps  {hifi/babashka-tasks    {:local/root "libs/hifi-dev-tasks"}
                                  hifi/config            {:local/root "libs/hifi-config"}
                                  hifi/core              {:local/root "libs/hifi-core"}
-                                 hifi/cli              {:local/root "libs/hifi-cli"}
+                                 hifi/cli               {:local/root "libs/hifi-cli"}
                                  hifi/assets            {:local/root "libs/hifi-assets"}
                                  hifi/datastar          {:local/root "libs/hifi-datastar"}
                                  hifi/datomic           {:local/root "libs/hifi-datomic"}

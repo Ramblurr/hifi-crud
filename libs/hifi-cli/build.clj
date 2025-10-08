@@ -92,7 +92,6 @@
                         bin-path
                         "-H:+ReportExceptionStackTraces"
                         "--features=clj_easy.graal_build_time.InitClojureClasses"
-                      ;; "--trace-object-instantiation=java.security.SecureRandom"
                         "--verbose"
                         "--future-defaults=all"
                         "--no-fallback"]
