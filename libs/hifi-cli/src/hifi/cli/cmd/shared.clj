@@ -58,15 +58,14 @@
     (println "EXAMPLES:")))
 
 (defn load-config [{:keys [config-file profile] :as _opts}]
-  (let [filename config-file]
-    (if (fs/exists? filename)
-      (try
-        (config/read-config :filename filename :profile profile)
-        (catch Exception e
-          (println (ex-message e))
-            ;; (println (ex-data e))
-          (exit-msg (format "the config for your app failed to parse, please fix the issue in '%s'. " filename))))
-      (exit-msg (format "the config for your app is missing, the file '%s' does not exist. " filename)))))
+  (if (fs/exists? config-file)
+    (try
+      (config/read-config config-file {:profile profile})
+      (catch Exception e
+        (println (ex-message e))
+        ;; (println (ex-data e))
+        (exit-msg (format "the config for your app failed to parse, please fix the issue in '%s'. " config-file))))
+    (exit-msg (format "the config for your app is missing, the file '%s' does not exist. " config-file))))
 
 (defn print-args [args]
   (when (seq args)

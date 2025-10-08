@@ -7,8 +7,8 @@
 (def examples [])
 
 (defn handler
-  [{:keys [opts _args] :as i}]
-  (let [config (shared/load-config opts)]
+  [{:keys [opts _args]}]
+  (let [config (shared/load-config (assoc opts :profile :dev))]
     (println config)))
 
 (def spec (shared/with-help handler
