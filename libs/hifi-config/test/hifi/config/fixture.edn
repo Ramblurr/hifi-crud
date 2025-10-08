@@ -1,3 +1,4 @@
 {:hello   "world"
  :foo     #or [#prop "FOO" "bar"]
- :api-key #hifi/secret "1234"}
+ :api-key #hifi/secret "1234"
+ :secrets #hifi/sops "secrets.edn.sops"}

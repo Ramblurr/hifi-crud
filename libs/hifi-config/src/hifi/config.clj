@@ -46,6 +46,7 @@
     - `:profile` - Profile to use for `#profile` extension (defaults to `hifi.core/current-profile`)
     - `:user` - Manually set the user for the `#user` extension
     - `:resolver` - A function or map used to resolve includes
+    - `:hifi/sops` - Options passed to ol.sops
 
   Supports Aero reader literals (`#profile`, `#user`, `#include`) and custom extensions
   like `#hifi/secret` and `#hifi/sops`.

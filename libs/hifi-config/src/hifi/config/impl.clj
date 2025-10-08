@@ -71,10 +71,10 @@
 (defmethod aero/reader 'hifi/sops
   ;; Implementation for #hifi/sops tag literal in an Aero config edn
   ;; It assumes the value is a path to a file then tries to decrypt it with (sops/decrypt-file-to-str "dev/test.sops.yml")
-  [{:keys [source] :as opts} _tag value]
+  [{:keys [source :hifi/sops] :as opts} _tag value]
   (if-let [resolved-file (relative-resolver source value)]
     (-> resolved-file
-        (sops/decrypt-file-to-str {:input-type "binary"})
+        (sops/decrypt-file-to-str (merge {:input-type "binary"} sops))
         (StringReader.)
         (aero/read-config opts)
         (mask-deep))
