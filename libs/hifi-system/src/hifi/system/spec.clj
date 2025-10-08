@@ -11,7 +11,7 @@
 (def Secret
   [:and
    [:fn {:error/message "should be a secret value"} config/secret?]
-   [:fn {:error/message "should be a secret value that isn't nil"} config/secret-present?]])
+   [:fn {:error/message "should be a secret value that isn't nil"} config/present-secret?]])
 
 (def IntoMiddleware
   [:fn #(satisfies? reitit.middleware/IntoMiddleware %)])

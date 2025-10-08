@@ -26,7 +26,7 @@
   [x]
   (impl/secret? x))
 
-(defn secret-present?
+(defn present-secret?
   "Returns true if x is a value wrapped by the Secret type and the wrapped value is not nil, false otherwise"
   [x]
   (impl/secret-present? x))
