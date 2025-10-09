@@ -10,16 +10,13 @@
     (def tap-routing nil)
     (defonce my-submit (portal-repl/make-submit :transforms #'transforms :tap-routing #'tap-routing))
     (p/open {:theme :portal.colors/gruvbox})
-    (add-tap my-submit))
-
-  (clojure.repl.deps/sync-deps)
-
-  (do
+    (add-tap my-submit)
     (hifi.core/set-env! :dev)
     (require '[clj-reload.core :as clj-reload])
     (clj-reload/init {:dirs
                       ["examples/hello-world/src"
                        "libs/hifi-config/src"
+                       "libs/hifi-cli/src"
                        "libs/hifi-core/src"
                        "libs/hifi-assets/src"
                        "libs/hifi-datastar/src"
@@ -32,7 +29,9 @@
                        "libs/hifi-system/src"
                        "libs/hifi-util/src"]
                       :no-reload #{'user 'dev}}))
-  (clj-reload/reload :all)
+
+  (clojure.repl.deps/sync-deps)
+  (clj-reload/reload)
   (System/getProperty "guardrails.enabled")
   (System/setProperty "guardrails.enabled" "")
 
