@@ -3,7 +3,6 @@
 (ns hifi.system.middleware.csrf
   "A simple HMAC double-submit cookie implementation"
   (:require
-   [hifi.config :as config]
    [clojure.string :as str]
    [hifi.util.crypto :as crypto]
    [hifi.system.middleware.spec :as options]))
@@ -57,8 +56,8 @@
   ([options]
    (tap> [:CSRF options])
    (let [options      (->csrf-middleware-opts options)
-         csrf-keyspec (crypto/derive (:options :hifi.http/primary-key))
-         csrf-keyspec (crypto/secret-key->hmac-sha256-keyspec (-> options :csrf-secret config/unmask!))
+         csrf-keyspec (crypto/derive-csrf-hmac-keyspec (:options :hifi.http/root-key))
+         #_#_csrf-keyspec (crypto/secret-key->hmac-sha256-keyspec (-> options :csrf-secret config/unmask!))
          validate     (partial valid-csrf-token? csrf-keyspec)
          generate     (partial generate-csrf-token csrf-keyspec)]
      {:name           ::csrf
@@ -87,7 +86,7 @@
   {:name           :hifi.middleware/csrf-protection
    :factory        #(csrf-middleware %)
    :config-spec options/CSRFProtectionMiddlewareOptions
-   :donut.system/config {:hifi.http/primary-key [:donut.system/ref [:hifi/http :hifi.http/primary-key]]}})
+   :donut.system/config {:hifi.http/root-key [:donut.system/ref [:hifi/http :hifi.http/root-key]]}})
 
 (comment
 
