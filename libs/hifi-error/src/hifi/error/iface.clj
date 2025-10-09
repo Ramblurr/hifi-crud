@@ -119,9 +119,8 @@
   (= id (-> ex (ex-data) ::id)))
 
 (defn bling-schema-error [error]
-  (when (id? error ::schema-validation-error)
-    (let [{:as _data :keys [explanation]} (ex-data error)
-          value                          (-> explanation :value)
-          schema                         (-> explanation :schema)]
-      ((requiring-resolve 'bling.explain/explain-malli)
-       schema value))))
+  (let [{:as _data :keys [explanation]} (ex-data error)
+        value                          (-> explanation :value)
+        schema                         (-> explanation :schema)]
+    ((requiring-resolve 'bling.explain/explain-malli)
+     schema value)))

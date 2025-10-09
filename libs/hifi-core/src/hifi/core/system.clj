@@ -41,18 +41,18 @@
   (cond
     (he/error? config) config
     (nil? config)      component
-    (map? config)
-    (update component ::ds/config medley/deep-merge config)
-    :else
-    (assoc component ::ds/config config)))
+    (map? config)      (update component ::ds/config medley/deep-merge config)
+    :else              (assoc component ::ds/config config)))
 
 (defn- configure-component [system comp-id]
   (let [component   (get-component system comp-id)
         config-key  (:hifi/config-key component)
         config-spec (:hifi/config-spec component)
-        config-path (if (keyword? config-key) [config-key] config-key)]
+        config-path (if (keyword? config-key) [config-key] config-key)
+        comp-config (get-config system config-path)]
     (if (and config-spec config-key)
-      (set-config component (coerce-config! comp-id config-spec (get-config system config-path) {:config-key config-key :config-spec-name (some-> config-spec (m/properties) :name)}))
+      (->> (coerce-config! comp-id config-spec comp-config {:config-key config-key :config-spec-name (some-> config-spec (m/properties) :name)})
+           (set-config component))
       component)))
 
 (defn- aggregate-errors-and-maybe-throw [orig-system final-system]
@@ -98,3 +98,15 @@
     (dsp/apply-plugins
      {::ds/defs    {:config config}
       ::ds/plugins plugins})))
+
+(defn resolve-plugins [plugins]
+  (mapv (fn [?plugin]
+          (try
+            (cond
+              (symbol? ?plugin)            @(requiring-resolve ?plugin)
+              (qualified-keyword? ?plugin) @(requiring-resolve (symbol (namespace ?plugin) (name ?plugin)))
+              :else                        ?plugin)
+            (catch java.io.FileNotFoundException e
+              (throw (ex-info (str "Failed to load plugin" ?plugin) {:plugin ?plugin} e)))))
+
+        plugins))

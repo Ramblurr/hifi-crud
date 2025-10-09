@@ -75,13 +75,12 @@
    ::ds/config {:routes [:donut.system/local-ref [:hifi.http/routes]]
                 :router-options [:donut.system/local-ref [:hifi.http/router-options]]}})
 
-(h/defcomponent PrimaryKeyComponent
+(h/defcomponent RootKeyComponent
   "TODO"
   {::ds/start (fn [{::ds/keys [config]}]
-                (crypto/key->hmac-sha256-keyspec (config/unmask! config)))
-   :hifi/config-spec spec/Secret
-   :hifi/config-key :hifi/primary-key
-   ::ds/config {}})
+                (crypto/key->hmac-sha256-keyspec (config/unmask! (:key config))))
+   :hifi/config-spec [:map {:name ::root-key-component} [:key spec/Secret]]
+   :hifi/config-key :hifi/root-key})
 
 (defn route-component-start [{:keys [::ds/config]}]
   (let [{:keys [routes path-prefix _route-name route-data]} config]
@@ -97,8 +96,7 @@
        [routes {:keys [route-name path-prefix route-data]
                 :or {path-prefix ""
                      route-data {}}}]
-
-       [:vector RouteComponentDef => :map]
+       [[:vector :any] RouteComponentDef => :map]
        {::ds/start route-component-start
         :hifi/config-spec nil
         :hifi/config-key nil
@@ -107,20 +105,18 @@
                      :path-prefix path-prefix
                      :route-data route-data}})
 
-(>defn route-group
-       [& components]
-       [[:* RouteComponentDef] => :map]
-       (reduce (fn [group {:keys [routes route-name] :as opts}]
-                 (assoc group route-name (route-component routes opts)))
-               {} components))
+(defn route-group
+  [& components]
+  (reduce (fn [group {:keys [routes route-name] :as opts}]
+            (assoc group route-name (route-component routes opts)))
+          {} components))
 
-(h/defplugin Defaults
+(h/defplugin plugin
   "The default, and recommended, component for HTTP applications"
   {:hifi/http {:hifi.http/server HTTPServerComponent
                :hifi.http/root-handler RootRingHandlerComponent
                :hifi.http/router-options RouterOptionsComponent
                :hifi.http/router RouterComponent
                :hifi.http/routes [::ds/ref [:hifi/routes]]
-               :hifi.http/primary-key PrimaryKeyComponent}
-   :hifi/routes {}
+               :hifi.http/root-key RootKeyComponent}
    :hifi/middleware middleware/MiddlewareRegistryComponentGroup})

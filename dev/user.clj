@@ -35,5 +35,16 @@
   (clj-reload/reload :all)
   (System/getProperty "guardrails.enabled")
   (System/setProperty "guardrails.enabled" "")
+
+  (let [c (hifi.config/read-config "/home/ramblurr/src/clojure-playground/hyperlith-is-for-crud/libs/hifi-cli/new-test/config/hifi.edn" {:profile :dev})
+        plugs (into [] (butlast (:hifi/plugins c)))]
+
+    (hifi.core.system/build-system (hifi.core.system/resolve-plugins plugs) c))
+
+  (hifi.core.mai)
+  (->> (or  [])
+       (system/resolve-plugins)
+       (system/build-system config))
+
   ;;
   )

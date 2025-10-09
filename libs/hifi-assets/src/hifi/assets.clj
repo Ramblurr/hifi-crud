@@ -86,7 +86,7 @@
                             (static-assets-resolver (:hifi.assets/config config))))
    :donut.system/config {:hifi.assets/config [:donut.system/local-ref [:hifi.assets/config]]}})
 
-(h/defplugin Pipeline
+(h/defplugin plugin
   "The hifi assets pipeline: dev-time watching and building of assets, resolving them with hiccup helpers, and serving cache-friendly assets via middleware."
   {:hifi/assets
    {:hifi.assets/watcher  AssetsWatcherComponent
