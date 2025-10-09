@@ -1,0 +1,29 @@
+{:skip-comments  true
+ :exclude-files  "libs/hifi-cli/resources/.*"
+ :lint-as        {com.fulcrologic.guardrails.core/>def              clojure.spec.alpha/def
+                  com.fulcrologic.guardrails.core/>defn             clojure.core/defn
+                  com.fulcrologic.guardrails.core/>defn-            clojure.core/defn-
+                  com.fulcrologic.guardrails.malli.core/>def        clojure.spec.alpha/def
+                  com.fulcrologic.guardrails.malli.core/>defn       clojure.core/defn
+                  com.fulcrologic.guardrails.malli.core/>defn-      clojure.core/defn-
+                  starfederation.datastar.clojure.utils/transient-> clojure.core/->
+                  starfederation.datastar.clojure.utils/def-clone   clojure.core/def
+                  promesa.exec.csp/go-loop                          clojure.core/loop}
+ :linters        {;; :unused-value        {:level :off}
+                  ;; :unused-binding      {:level :off}
+                  :unresolved-symbol   {:exclude ['(starfederation.datastar.clojure.expressions/->expr)]}
+                  :unused-import       {:level :warning}
+                  :invalid-arity       {:level :error}
+                  :unused-namespace    {:level   :warning
+                                        :exclude [com.fulcrologic.guardrails.core]}
+                  :unused-referred-var {:level   :warning
+                                        :exclude {com.fulcrologic.guardrails.core       [>def >defn >fdef => | <- ?]
+                                                  com.fulcrologic.guardrails.malli.core [>def >defn >fdef => | <- ?]
+                                                  clojure.test                          [deftest is are run-tests testing]}}
+
+                  :unresolved-var {:exclude [taoensso.tempel/rate-limiter
+                                             taoensso.tempel/keychain-decrypt
+                                             taoensso.tempel/keychain-encrypt
+                                             taoensso.tempel/keychain
+                                             starfederation.datastar.clojure.adapter.http-kit/on-close
+                                             starfederation.datastar.clojure.adapter.http-kit/on-open]}}}
