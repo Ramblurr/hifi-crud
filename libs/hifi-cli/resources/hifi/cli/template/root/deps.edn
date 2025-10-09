@@ -1,15 +1,19 @@
-{:paths ["src" "resources"]
- :deps  {org.clojure/clojure {:mvn/version "1.12.2"}
-         hifi/core           {:local/root "/home/ramblurr/src/clojure-playground/hyperlith-is-for-crud/libs/hifi-core"}}
- :aliases {:dev   {:extra-paths ["dev"]
-                   :extra-deps  {hifi/dev {:local/root "/home/ramblurr/src/clojure-playground/hyperlith-is-for-crud/libs/hifi-dev"}}
-                   :jvm-opts
-                   ["-Dhifi.profile=dev"
-                    "-Dguardrails.enabled=true"
-                    "-Djdk.attach.allowAttachSelf" ;; https://nrepl.org/nrepl/installation.html#jvmti
-                    "-Duser.timezone=UTC"
-                    "-XX:+UseZGC"
-                    "--add-opens=java.base/java.nio=ALL-UNNAMED"
-                    "--add-opens=java.base/sun.nio.ch=ALL-UNNAMED"]}
+{:paths   ["src" "resources"]
+ :deps    {org.clojure/clojure {:mvn/version "1.12.2"}
+           hifi/system         {:local/root "/home/ramblurr/src/clojure-playground/hyperlith-is-for-crud/libs/hifi-system"}
+           hifi/html           {:local/root "/home/ramblurr/src/clojure-playground/hyperlith-is-for-crud/libs/hifi-html"}
+           hifi/assets         {:local/root "/home/ramblurr/src/clojure-playground/hyperlith-is-for-crud/libs/hifi-assets"}
+           hifi/config         {:local/root "/home/ramblurr/src/clojure-playground/hyperlith-is-for-crud/libs/hifi-config"}
+           hifi/core           {:local/root "/home/ramblurr/src/clojure-playground/hyperlith-is-for-crud/libs/hifi-core"}}
+ :aliases {:dev  {:extra-paths ["dev"]
+                  :extra-deps  {hifi/dev {:local/root "/home/ramblurr/src/clojure-playground/hyperlith-is-for-crud/libs/hifi-dev"}}
+                  :jvm-opts
+                  ["-Dhifi.profile=dev"
+                   "-Dguardrails.enabled=true"
+                   "-Djdk.attach.allowAttachSelf" ;; https://nrepl.org/nrepl/installation.html#jvmti
+                   "-Duser.timezone=UTC"
+                   "-XX:+UseZGC"
+                   "--add-opens=java.base/java.nio=ALL-UNNAMED"
+                   "--add-opens=java.base/sun.nio.ch=ALL-UNNAMED"]}
            :hifi {:extra-deps {hifi/cli {:local/root ".."}}
-                  :main-opts ["-m" "hifi.cli"]}}}
+                  :main-opts  ["-m" "hifi.cli"]}}}
