@@ -13,13 +13,15 @@
 (h/defcomponent HTTPServerComponent
   "HTTP server component that starts and manages a Ring-compatible HTTP server using http-kit."
   {::ds/start (fn http-server-component-start [{{:keys [handler port host http-kit] :as _opts} ::ds/config}]
-                ((requiring-resolve 'org.httpkit.server/run-server) handler
-                                                                    (merge {:legacy-return-value? false
-                                                                            :legacy-content-length? false
-                                                                            :legacy-unsafe-remote-addr? false
-                                                                            :ip host
-                                                                            :port port}
-                                                                           http-kit)))
+                (let [res ((requiring-resolve 'org.httpkit.server/run-server) handler
+                                                                              (merge {:legacy-return-value? false
+                                                                                      :legacy-content-length? false
+                                                                                      :legacy-unsafe-remote-addr? false
+                                                                                      :ip host
+                                                                                      :port port}
+                                                                                     http-kit))]
+                  (println (str "Started hifi. Visit http://" host ":" port))
+                  res))
    ::ds/stop (fn http-server-component-stop [{::ds/keys [instance]}]
                (try
                  ((requiring-resolve 'org.httpkit.server/server-stop!) instance)
