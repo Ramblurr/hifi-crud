@@ -1,14 +1,13 @@
 (ns hifi.cli.sops
   (:require
-   [clojure.pprint :as pp]
-   [ol.sops :as sops]
    [babashka.fs :as fs]
-   [clj-yaml.core :as yaml]
+   [clojure.pprint :as pp]
+   [clojure.string :as str]
    [hifi.util.os :as os]
-   [clojure.string :as str])
+   [ol.sops :as sops])
   (:import
-   [java.security KeyPair]
-   [com.exceptionfactory.jagged.x25519 X25519KeyPairGenerator]))
+   [com.exceptionfactory.jagged.x25519 X25519KeyPairGenerator]
+   [java.security KeyPair]))
 
 (set! *warn-on-reflection* true)
 

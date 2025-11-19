@@ -1,5 +1,5 @@
 {:skip-comments  true
- :exclude-files  "libs/hifi-cli/resources/.*"
+ :exclude-files  "(libs/[^/]+/resources/.*|libs/[^/]+/(build|dist|target)/.*)"
  :lint-as        {com.fulcrologic.guardrails.core/>def              clojure.spec.alpha/def
                   com.fulcrologic.guardrails.core/>defn             clojure.core/defn
                   com.fulcrologic.guardrails.core/>defn-            clojure.core/defn-

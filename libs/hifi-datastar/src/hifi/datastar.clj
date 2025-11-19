@@ -2,16 +2,14 @@
   {:clj-kondo/ignore [:clojure-lsp/unused-public-var]}
   (:require
    [charred.api :as charred]
-   [clojure.tools.logging :as log]
    [hifi.datastar.multicast :as mult]
    [hifi.datastar.spec :as spec]
    [hifi.datastar.tab-state :as tab-state]
    [hifi.util.assets :as assets]
    [hifi.util.codec :as codec]
    [promesa.exec.csp :as sp]
-   [starfederation.datastar.clojure.brotli :as brotli]
-   [starfederation.datastar.clojure.adapter.common :as d*com]
-   [starfederation.datastar.clojure.api :as d*])
+   [starfederation.datastar.clojure.api :as d*]
+   [starfederation.datastar.clojure.brotli :as brotli])
   (:import
    [java.io StringWriter]))
 
@@ -19,7 +17,7 @@
 
 (defn write-json-str
   "Write json to a string.  See options for [[write-json]]."
-  [data & {:as args}]
+  [data & {:as _args}]
   (let [w (StringWriter.)]
     (default-write-json w data)
     (.toString w)))

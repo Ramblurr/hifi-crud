@@ -20,9 +20,10 @@
 ;; OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 ;; SOFTWARE.
 (ns hifi.datomic.fixtures.movies
-  (:require [clojure.test :refer :all]
-            [datomic.api :as d])
-  (:import [java.util UUID]))
+  {:clj-kondo/ignore [:refer-all]}
+  (:require
+   [clojure.test :refer :all]
+   [datomic.api :as d]))
 
 (def specs
   [#:db{:ident :movie/id, :cardinality :db.cardinality/one, :valueType :db.type/uuid, :unique :db.unique/identity}

@@ -55,16 +55,15 @@
   ([{:hifi.datastar/keys [tab-state-store tab-id]} <ch init-fn]
    (assert <ch "Channel must be provided")
    (when (some? tab-id)
-     (do
-       (swap! tab-state-store update
-              tab-id (fn [state]
-                       (-> (or state {})
-                           (init-fn)
-                           (assoc ::created (Instant/now)))))
-       (add-watch tab-state-store tab-id (fn [watch-key _ _ _]
-                                           (when-not (sp/put! <ch [:state-changed])
-                                             (remove-watch tab-state-store watch-key))))
-       (tab-state! tab-state-store tab-id)))))
+     (swap! tab-state-store update
+            tab-id (fn [state]
+                     (-> (or state {})
+                         (init-fn)
+                         (assoc ::created (Instant/now)))))
+     (add-watch tab-state-store tab-id (fn [watch-key _ _ _]
+                                         (when-not (sp/put! <ch [:state-changed])
+                                           (remove-watch tab-state-store watch-key))))
+     (tab-state! tab-state-store tab-id))))
 
 (defn remove-tab-state!
   "Cleans up a tab state session"
@@ -91,9 +90,7 @@
   (let [now (Instant/now)]
     (reduce-kv (fn [acc tab-id s]
                  (if (clean-predicate opts now tab-id s)
-                   (do
-                     ;; (tap> [:cleaning-stale tab-id])
-                     (dissoc acc tab-id))
+                   (dissoc acc tab-id)
                    acc))
                tab-state
                tab-state)))

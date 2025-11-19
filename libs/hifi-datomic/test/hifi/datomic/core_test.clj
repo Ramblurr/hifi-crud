@@ -20,6 +20,7 @@
 ;; OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 ;; SOFTWARE.
 (ns hifi.datomic.core-test
+  {:clj-kondo/ignore [:refer-all]}
   (:require [clojure.test :refer :all]
             [hifi.datomic.fixtures.movies :as fixtures.movies]
             [datomic.api :as d]))

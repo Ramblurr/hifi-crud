@@ -1,4 +1,5 @@
 (ns build
+  {:clj-kondo/ignore [:redefined-var]}
   (:refer-clojure :exclude [test])
   (:require
    [babashka.process :as p]

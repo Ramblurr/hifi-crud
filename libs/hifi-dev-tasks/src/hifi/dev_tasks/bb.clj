@@ -88,9 +88,8 @@
         after  (updated-bb-edn before)
         diff   (diff-changes before after)]
     (when (prompt-change diff (force? args))
-      (do
-        (spit "bb.edn" (str after))
-        (println (bling/bling [:bold.positive "bb.edn updated successfully."]))))))
+      (spit "bb.edn" (str after))
+      (println (bling/bling [:bold.positive "bb.edn updated successfully."])))))
 
 #_(defn generate-bb-edn
     "Generate the bb.edn file with the default configuration."

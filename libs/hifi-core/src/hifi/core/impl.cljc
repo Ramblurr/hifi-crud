@@ -48,6 +48,7 @@
         (.exists file) file
         :else (io/resource source-file)))))
 
+#_{:clj-kondo/ignore [:unused-binding]}
 (defn read-defroutes-form [rdr sym target-line]
   #?(:bb nil
      :clj
@@ -70,6 +71,7 @@
                    (first body))
                  (recur)))))))))
 
+#_{:clj-kondo/ignore [:unused-binding]}
 (defn enrich-route-form [sym default-form source-meta]
   #?(:bb default-form
      :clj

@@ -25,7 +25,7 @@
     `(resource->bytes (io/resource ~path))))
 
 (defn static-asset
-  [reload? {:keys [resource-path route-path content-type compress-fn encoding integrity]}]
+  [reload? {:keys [resource-path route-path content-type compress-fn encoding _integrity]}]
   (let [route-path (or route-path
                        (when resource-path
                          (str "/"
