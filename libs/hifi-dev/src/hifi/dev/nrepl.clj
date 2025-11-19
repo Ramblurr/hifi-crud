@@ -70,6 +70,12 @@
     true
     (catch Throwable _)))
 
+(defn pretty-exceptions []
+  (try
+    ((requiring-resolve 'clj-commons.pretty.repl/install-pretty-exceptions))
+    true
+    (catch Throwable _)))
+
 (defn initializers []
   (reduce (fn [acc [kw msg init-fn]]
             (if (init-fn)
@@ -81,6 +87,7 @@
            :messages []}
           [[:jedi-time "datafy jedi-time" jedi-time]
            [:datomic "datafy datomic" datomic-datafy]
+           [:pretty-exceptions "pretty-exceptions" pretty-exceptions]
            [:portal-logging "clojure.tools.logging tap>'d" portal-clojure-logging]
            [:guardrails "guardrails" load-guardrails-silently]]))
 
@@ -129,5 +136,4 @@
     (when (seq messages)
       (println (str "hifi dev tooling enabled: " (str/join ", " messages))))
     (start-nrepl-server opts)
-    (start-hifi-application opts)
-    (System/exit 0)))
+    (start-hifi-application opts)))

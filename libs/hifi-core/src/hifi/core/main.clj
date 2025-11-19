@@ -1,8 +1,6 @@
 (ns hifi.core.main
   (:require
-   [clj-commons.pretty.repl :as pretty]
    [donut.system :as ds]
-   [hifi.core :as h]
    [hifi.core.system :as system]
    [hifi.util.shutdown :as shutdown]))
 
@@ -57,8 +55,6 @@
 (defn start
   "Start the application"
   [opts]
-  (when (or (= :dev (:profile opts)) (h/dev?))
-    (pretty/install-pretty-exceptions))
   (let [config-loader (require-config-loader (:config-loader opts))]
     (try
       (let [i (-> (config-loader opts)

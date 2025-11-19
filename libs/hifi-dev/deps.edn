@@ -2,6 +2,7 @@
  :deps  {nrepl/nrepl                   {:mvn/version "1.5.1"}
          cider/cider-nrepl             {:mvn/version "0.58.0"}
          refactor-nrepl/refactor-nrepl {:mvn/version "3.11.0"}
+         org.clj-commons/pretty        {:mvn/version "3.6.7"}
          djblue/portal                 {:mvn/version "0.62.0"}
          lambdaisland/ansi             {:mvn/version "0.2.37"}
          io.github.tonsky/clj-reload   {:mvn/version "1.0.0"}

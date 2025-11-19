@@ -35,6 +35,7 @@
       ;; TODO log error
       ;; (log/error "failed to start the nREPL server on port:" port)
       (throw e))))
+
 (defn stop-nrepl [instance]
   (nrepl/stop-server (::server instance)))
 
