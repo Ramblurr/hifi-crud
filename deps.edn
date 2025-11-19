@@ -5,6 +5,7 @@
                                  "examples/hello-world/resources"]
                    :extra-deps  {hifi/babashka-tasks    {:local/root "libs/hifi-dev-tasks"}
                                  hifi/config            {:local/root "libs/hifi-config"}
+                                 hifi/repl              {:local/root "libs/hifi-repl"}
                                  hifi/core              {:local/root "libs/hifi-core"}
                                  hifi/cli               {:local/root "libs/hifi-cli"}
                                  hifi/assets            {:local/root "libs/hifi-assets"}
@@ -22,6 +23,7 @@
                    :jvm-opts    ["-Dguardrails.enabled=true"]}
            :test  {:extra-paths ["libs/hifi-dev-tasks/test"
                                  "libs/hifi-config/test"
+                                 "libs/hifi-repl/test"
                                  "libs/hifi-core/test"
                                  "libs/hifi-cli/test"
                                  "libs/hifi-assets/test"

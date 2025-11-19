@@ -26,6 +26,9 @@
    {:id :config
     :kaocha/source-paths ["libs/hifi-config/src"]
     :kaocha/test-paths ["libs/hifi-config/test"]}
+   {:id :repl
+    :kaocha/source-paths ["libs/hifi-repl/src"]
+    :kaocha/test-paths ["libs/hifi-repl/test"]}
    {:id :core
     :kaocha/source-paths ["libs/hifi-core/src"]
     :kaocha/test-paths ["libs/hifi-core/test"]}

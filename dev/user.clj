@@ -16,6 +16,7 @@
     (clj-reload/init {:dirs
                       ["examples/hello-world/src"
                        "libs/hifi-config/src"
+                       "libs/hifi-repl/src"
                        "libs/hifi-cli/src"
                        "libs/hifi-core/src"
                        "libs/hifi-assets/src"
