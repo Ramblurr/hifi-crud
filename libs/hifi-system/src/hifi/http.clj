@@ -20,7 +20,7 @@
                                                                                       :ip host
                                                                                       :port port}
                                                                                      http-kit))]
-                  (println (str "Started hifi. Visit http://" host ":" port))
+                  (println (str "hifi started. visit http://" host ":" port))
                   res))
    ::ds/stop (fn http-server-component-stop [{::ds/keys [instance]}]
                (try

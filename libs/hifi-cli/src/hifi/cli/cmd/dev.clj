@@ -15,7 +15,7 @@
            (shared/->args
             "clojure"
             "-X:dev"
-            "hifi.core.main/start"
+            "hifi.dev.nrepl/main"
             ":profile" profile
             (when config-loader [":config-loader" config-loader])))))
 

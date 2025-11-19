@@ -7,7 +7,7 @@
    [donut.system :as ds]
    [hifi.core :as h]))
 
-(def ^:private hifi-only-opts [:create-nrepl-port-file? :middleware :cider?])
+(def ^:private hifi-only-opts [:create-nrepl-port-file? :middleware :cider? :suppress-start-msg?])
 
 (defn- load-cider-mw []
   (try
@@ -28,7 +28,8 @@
                      (nrepl/start-server))]
       (when (:create-nrepl-port-file? config)
         (nrepl.cmdline/save-port-file server {}))
-      (println (str "nREPL server started on " (:bind config) ":" (:port server)))
+      (when-not (:suppress-start-msg?  config)
+        (println (str "hifi nREPL server started on " (:bind config) ":" (:port server))))
       (assoc config ::server server))
     (catch Exception e
       ;; TODO log error
