@@ -3,9 +3,11 @@
 (ns hifi.logging
   "Standarized logging and telemetry for HIFI applications."
   (:require
-   [hifi.util.shutdown :as shutdown]
    [charred.api :as charred]
+   [donut.system :as ds]
+   [hifi.core :as h]
    [hifi.logging.spec :as spec]
+   [hifi.util.shutdown :as shutdown]
    [taoensso.telemere :as t]
    [taoensso.telemere.tools-logging :as taoensso.telemere.tools-logging]))
 
@@ -72,16 +74,16 @@
   (t/add-handler! ::tap-handler telemere-tap-handler
                   {:min-level :debug}))
 
-(def TelemereTapHandlerComponent
-  {:donut.system/start  (fn [{config :donut.system/config}]
-                          (shutdown/add-shutdown-hook! ::telemere-shutdown t/stop-handlers!)
-                          (when (-> config :hifi/options :enabled?)
-                            (add-telemere-tap-handler!)))
-   :donut.system/stop   (fn  [_]
-                          (t/remove-handler! ::tap-handler))
-   :donut.system/config {}
-   :hifi/options-schema spec/TelemereTapHandlerComponentOptions
-   :hifi/options-ref    [:hifi/components :options :logging-tap]})
+(h/defcomponent TelemereTapHandlerComponent
+  "TODO docstring"
+  {::ds/start  (fn [{config :donut.system/config}]
+                 (shutdown/add-shutdown-hook! ::telemere-shutdown t/stop-handlers!)
+                 (when (-> config :hifi/options :enabled?)
+                   (add-telemere-tap-handler!)))
+   ::ds/stop   (fn  [_]
+                 (t/remove-handler! ::tap-handler))
+   :hifi/config-key :hifi.logging/telemere-tap
+   :hifi/config-spec spec/TelemereTapHandlerComponentOptions})
 
 ;; --------------------------------------------------------------------------------------------
 ;;; Console Logging
@@ -90,29 +92,33 @@
 
 (def default-write-json (charred/write-json-fn {}))
 
-(def ConsoleLoggingComponent
-  {:donut.system/start (fn start-console-logging [{config :donut.system/config}]
-                         (t/remove-handler! :default/console)
-                         (shutdown/add-shutdown-hook! ::telemere-shutdown t/stop-handlers!)
-                         (when (-> config :hifi/options :enabled?)
-                           (condp = (-> config :hifi/options :format)
-                             :json
-                             (t/add-handler! ::logging-console
-                                             (t/handler:console
-                                              {:output-fn default-write-json}))
-                             :edn
-                             (t/add-handler! ::logging-console
-                                             (t/handler:console
-                                              {:output-fn (t/pr-signal-fn {:pr-fn :edn})}))
-                             :pretty
-                             (t/add-handler! ::logging-console
-                                             (t/handler:console
-                                              {:output-fn (t/format-signal-fn {})}))
-                             nil)))
+(h/defcomponent ConsoleLoggingComponent
+  "TODO docstring"
+  {::ds/start (fn start-console-logging [{config :donut.sysktem/config}]
+                (t/remove-handler! :default/console)
+                (shutdown/add-shutdown-hook! ::telemere-shutdown t/stop-handlers!)
+                (when (-> config :hifi/options :enabled?)
+                  (condp = (-> config :hifi/options :format)
+                    :json
+                    (t/add-handler! ::logging-console
+                                    (t/handler:console
+                                     {:output-fn default-write-json}))
+                    :edn
+                    (t/add-handler! ::logging-console
+                                    (t/handler:console
+                                     {:output-fn (t/pr-signal-fn {:pr-fn :edn})}))
+                    :pretty
+                    (t/add-handler! ::logging-console
+                                    (t/handler:console
+                                     {:output-fn (t/format-signal-fn {})}))
+                    nil)))
+   ::ds/stop (fn [_]
+               (t/remove-handler! ::logging-console))
 
-   :donut.system/stop   (fn stop-console-logging [_]
-                          (t/remove-handler! ::logging-console))
-   :donut.system/config {}
-   :hifi/options-schema spec/ConsoleLoggingComponentOptions
-   :hifi/options-ref    [:hifi/components :options :logging-console]})
+   :hifi/config-spec spec/ConsoleLoggingComponentOptions
+   :hifi/config-key :hifi.logging/console})
 
+(h/defplugin plugin
+  "TODO docstring"
+  {:hifi/logging {:hifi.logging/console ConsoleLoggingComponent
+                  :hifi.logging/telemere-tap TelemereTapHandlerComponent}})

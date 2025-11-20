@@ -2,8 +2,8 @@
 
 (def ConsoleLoggingComponentOptions
   [:map {:name ::logging-console}
-   [:enabled? {:default true} :boolean]
-   [:format {:default :pretty} [:enum :json :edn :pretty]]])
+   [:enabled? {:doc "Enable logging to stdout" :default true} :boolean]
+   [:format {:doc "What format should the logging to stdout take?" :default :pretty} [:enum :json :edn :pretty]]])
 
 (def TelemereTapHandlerComponentOptions
   [:map {:name ::logging-tap}
