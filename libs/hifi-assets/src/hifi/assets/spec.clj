@@ -38,3 +38,8 @@
    [:hifi.assets.watcher/extensions {:doc "File extensions to include; an empty set watches all files." :default #{}} [:set :string]]
    [:hifi.assets.watcher/beholder {:doc "Options forwarded to the underlying beholder watcher." :default {}} BeholderOptions]
    [:hifi.assets.watcher/callback {:doc "Function invoked with each filtered change event." :optional true} fn?]])
+
+(comment
+
+  (require '[malli.core :as m])
+  (-> BeholderOptions m/schema m/properties :name))

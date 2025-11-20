@@ -1,0 +1,17 @@
+{:hifi/application       'hello.application
+ :secrets                #include "secrets.edn"
+ :hifi/primary-key       #hifi/secret #ref [:secrets :primary-key]
+ :hifi.web/server       {:host "127.0.0.1" :port 3000}
+ :hifi.web/root-handler {:reload-per-request? #profile {:dev true :default false}}
+
+ ;; TODO fix namespaced qualified keys for existing middleware
+ :hifi.middleware/session-cookie  {:cookie-attrs {:same-site   :lax-wut-force-error
+                                                  :http-only   true
+                                                  :path        "/"
+                                                  :secure      #profile {:dev false :default true}
+                                                  :host-prefix #profile {:dev false :default true}}}
+ :hifi.middleware/csrf-protection {:csrf-secret #hifi/secret #profile     {:dev     "stebJ-BjAvs8THKz_UgwSL8f0rDzrEem_LWJb4qZ9q4"
+                                                                           :default #env "CSRF_SECRET"}}
+
+ :hifi/assets #:hifi.assets{:excluded-paths ["assets/js"]
+                            :project-root   "examples/hello-world"}}

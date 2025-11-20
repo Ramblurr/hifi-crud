@@ -4,6 +4,15 @@
    [hifi.html :as html]
    [hifi.system.middleware :as hifi.mw]))
 
+(def hypermedia-chain
+  [:parse-raw-params
+   :reverse-route
+   :exception
+   :parse-multipart
+   :session-cookie
+   :csrf-protection
+   :security-headers])
+
 (defn hello-world [req]
   {:status 200
    :headers {"content-type" "text/html"}
@@ -16,7 +25,7 @@
                              nil))})
 
 (h/defroutes app
-  ["" {:middleware hifi.mw/hypermedia-chain}
+  ["" {:middleware hypermedia-chain}
    ["/" {:get  {:handler #'hello-world}}]
    ["/error" {:get  {:handler (fn [_] (throw (ex-info "Uhoh" {})))}}]])
 
