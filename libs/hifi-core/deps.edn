@@ -5,4 +5,5 @@
          dev.weavejester/medley   {:mvn/version "1.9.0"}
          org.clojure/tools.reader {:mvn/version "1.5.2"}
          party.donut/system       {:mvn/version "1.0.257"
-                                   :exclusions  [tailrecursion/cljs-priority-map]}}}
+                                   :exclusions  [tailrecursion/cljs-priority-map]}
+         rs.shaffe/sys-ext        {:mvn/version "0.3.0"}}}

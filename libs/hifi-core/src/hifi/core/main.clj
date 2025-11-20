@@ -1,9 +1,10 @@
 (ns hifi.core.main
   (:require
-   [taoensso.trove :as trove]
    [donut.system :as ds]
    [hifi.core.system :as system]
-   [hifi.util.shutdown :as shutdown]))
+   [hifi.util.shutdown :as shutdown]
+   [sys-ext.core :as se]
+   [taoensso.trove :as trove]))
 
 (defonce running-system_ (atom nil))
 
@@ -34,7 +35,8 @@
     (dissoc
      (->> (or (:hifi/plugins config) [])
           (system/resolve-plugins)
-          (system/build-system config))
+          (system/build-system config)
+          (se/remove-dead-refs))
      :donut.system/plugins)
     (catch Exception e
       (throw (ex-info "Building the system failed" {} e)))))
