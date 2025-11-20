@@ -23,7 +23,7 @@
                                    :ip                         host
                                    :port                       port}
                                   http-kit))]
-                  (trove/log! {:msg (str "hifi started. visit http://" host ":" port)})
+                  (trove/log! {:msg (str "hifi web started at http://" host ":" port)})
                   res))
    ::ds/stop  (fn http-server-component-stop [{::ds/keys [instance]}]
                 (try
