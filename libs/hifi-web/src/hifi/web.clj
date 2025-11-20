@@ -8,29 +8,31 @@
    [hifi.web.middleware :as middleware]
    [hifi.web.spec :as spec]
    [reitit.ring :as reitit.ring]
-   [reitit.ring.middleware.dev :as reitit.ring.middleware.dev]))
+   [reitit.ring.middleware.dev :as reitit.ring.middleware.dev]
+   [taoensso.trove :as trove]))
 
 (h/defcomponent HTTPKitServerComponent
   "HTTP server component that starts and manages a Ring-compatible HTTP server using http-kit.
    http-kit is lazily required."
   {::ds/start (fn http-server-component-start [{{:keys [handler port host http-kit] :as _opts} ::ds/config}]
-                (let [res ((requiring-resolve 'org.httpkit.server/run-server) handler
-                                                                              (merge {:legacy-return-value? false
-                                                                                      :legacy-content-length? false
-                                                                                      :legacy-unsafe-remote-addr? false
-                                                                                      :ip host
-                                                                                      :port port}
-                                                                                     http-kit))]
-                  (println (str "hifi started. visit http://" host ":" port))
+                (let [res ((requiring-resolve 'org.httpkit.server/run-server)
+                           handler
+                           (merge {:legacy-return-value?       false
+                                   :legacy-content-length?     false
+                                   :legacy-unsafe-remote-addr? false
+                                   :ip                         host
+                                   :port                       port}
+                                  http-kit))]
+                  (trove/log! {:msg (str "hifi started. visit http://" host ":" port)})
                   res))
-   ::ds/stop (fn http-server-component-stop [{::ds/keys [instance]}]
-               (try
-                 ((requiring-resolve 'org.httpkit.server/server-stop!) instance)
-                 (catch Exception _)))
+   ::ds/stop  (fn http-server-component-stop [{::ds/keys [instance]}]
+                (try
+                  ((requiring-resolve 'org.httpkit.server/server-stop!) instance)
+                  (catch Exception _)))
 
    :hifi/config-spec spec/HTTPServerOptions
-   :hifi/config-key :hifi.web/server
-   ::ds/config {:handler [::ds/local-ref [:hifi.web/root-handler]]}})
+   :hifi/config-key  :hifi.web/server
+   ::ds/config       {:handler [::ds/local-ref [:hifi.web/root-handler]]}})
 
 (h/defcomponent RootRingHandlerComponent
   "Root Ring handler component that creates the main HTTP request handler.

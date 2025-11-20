@@ -1,12 +1,13 @@
 {:paths ["src"]
- :deps  {com.fulcrologic/guardrails       {:mvn/version "1.2.9"}
-         dev.weavejester/medley           {:mvn/version "1.9.0"}
-         http-kit/http-kit                {:mvn/version "2.9.0-beta2"}
-         metosin/reitit-core              {:mvn/version "0.9.1"}
-         metosin/reitit-middleware        {:mvn/version "0.9.1" :exclusions [metosin/muuntaja]}
-         metosin/reitit-ring              {:mvn/version "0.9.1" :exclusions [metosin/muuntaja]}
-         party.donut/system               {:mvn/version "1.0.257" :exclusions [tailrecursion/cljs-priority-map]}
-         ring/ring-defaults               {:mvn/version "0.7.0"}
-         hifi/config                      {:local/root "../hifi-config"}
-         hifi/error                       {:local/root "../hifi-error"}
-         hifi/util                        {:local/root "../hifi-util"}}}
+ :deps  {com.fulcrologic/guardrails {:mvn/version "1.2.9"}
+         com.taoensso/trove         {:mvn/version "1.1.0"}
+         dev.weavejester/medley     {:mvn/version "1.9.0"}
+         http-kit/http-kit          {:mvn/version "2.9.0-beta2"}
+         metosin/reitit-core        {:mvn/version "0.9.1"}
+         metosin/reitit-middleware  {:mvn/version "0.9.1" :exclusions [metosin/muuntaja]}
+         metosin/reitit-ring        {:mvn/version "0.9.1" :exclusions [metosin/muuntaja]}
+         party.donut/system         {:mvn/version "1.0.257" :exclusions [tailrecursion/cljs-priority-map]}
+         ring/ring-defaults         {:mvn/version "0.7.0"}
+         hifi/config                {:local/root "../hifi-config"}
+         hifi/error                 {:local/root "../hifi-error"}
+         hifi/util                  {:local/root "../hifi-util"}}}
