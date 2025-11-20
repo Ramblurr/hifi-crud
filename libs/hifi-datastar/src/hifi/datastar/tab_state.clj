@@ -3,12 +3,12 @@
 (ns hifi.datastar.tab-state
   (:require
    [chime.core :as chime]
-   [clojure.tools.logging :as log]
    [com.fulcrologic.guardrails.malli.core :refer [=> >defn]]
    [hifi.datastar.spec :as spec]
    [hifi.util.shutdown :as shutdown]
    [promesa.exec.csp :as sp]
-   [taoensso.nippy :as nippy])
+   [taoensso.nippy :as nippy]
+   [taoensso.trove :as trove])
   (:import
    [java.time Duration Instant]))
 
@@ -116,13 +116,13 @@
   (try
     (reset! !store (nippy/thaw-from-file file))
     (catch java.io.FileNotFoundException e
-      (log/warn e "tab-state file does not exist, this is expected on the first start" file))))
+      (trove/log! {:level :warn :msg "tab-state file does not exist, this is expected on the first start" :data {:file file} :error e}))))
 
 (defn persist! [!store file]
   (try
     (nippy/freeze-to-file file @!store)
     (catch Exception e
-      (log/error e "Could not save tab-state" file))))
+      (trove/log! {:level :error :msg "Could not save tab-state" :data {:file file} :error e}))))
 
 (def TabStateComponent
   {:donut.system/start (fn  [{{:keys [:hifi/options]} :donut.system/config}]
