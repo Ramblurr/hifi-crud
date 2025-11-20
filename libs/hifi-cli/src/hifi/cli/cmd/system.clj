@@ -1,7 +1,8 @@
 (ns hifi.cli.cmd.system
   (:require
    [babashka.process :as p]
-   [hifi.cli.cmd.shared :as shared]))
+   [hifi.cli.cmd.shared :as shared]
+   [hifi.cli.extension :as ext]))
 
 (def examples [])
 
@@ -17,7 +18,7 @@
                                ":profile" profile
                                ":format" format
                                (when config-loader [":config-loader" config-loader])))]
-    (System/exit exit)))
+    (ext/exit exit)))
 
 (def spec {:fn          (fn [_])
            :examples    examples

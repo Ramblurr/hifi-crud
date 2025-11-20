@@ -33,7 +33,7 @@
 (defn -main [& args]
   (binding [ext/*exit?* true]
     (apply main args)
-    (System/exit 0)))
+    (ext/exit 0)))
 
 (comment
 

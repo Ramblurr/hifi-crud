@@ -1,23 +1,30 @@
 (ns hifi.dev.system
   (:require
-   [zprint.core :as z]
-   [hifi.util.terminal :as t]
-   [hifi.core.main :as main]
-   [hifi.dev.nrepl :refer [load-guardrails-silently]]
    [clojure.walk :as walk]
-   [malli.core :as m]))
+   [hifi.util.terminal :as term]
+   [hifi.dev.util :refer [load-guardrails-silently]]))
+
+(defn lazy-fn [symbol]
+  (fn [& args] (apply (requiring-resolve symbol) args)))
+
+(def czprint (lazy-fn 'zprint.core/czprint))
+(def zprint (lazy-fn 'zprint.core/zprint))
+(def load-system (lazy-fn 'hifi.core.main/load-system))
+
+(def m-schema (lazy-fn 'malli.core/schema))
+(def m-properties (lazy-fn 'malli.core/properties))
 
 (defn pprint [coll & _rest]
-  (let [opts {:style (t/zprint-style)}]
-    (if (t/color?)
-      (z/czprint coll opts)
-      (z/zprint coll opts))))
+  (let [opts {:style (term/zprint-style)}]
+    (if (term/color?)
+      (czprint coll opts)
+      (zprint coll opts))))
 
 (defn prune-system [sys]
   (walk/postwalk
    (fn [x]
      (if (and (map? x) (:hifi/config-spec x))
-       (if-let [name (some-> (:hifi/config-spec x) m/schema m/properties :name)]
+       (if-let [name (some-> (:hifi/config-spec x) m-schema m-properties :name)]
          (assoc x :hifi/config-spec name)
          (dissoc x :hifi/config-spec))
        x))
@@ -33,8 +40,9 @@
 
 (defn inspect-system [{:keys [format] :or {format :portal} :as opts}]
   (load-guardrails-silently)
-  (case format
-    :print  (-> (main/load-system opts)
-                (prune-system)
-                (pprint))
-    :portal (portal-inspect (main/load-system opts))))
+  (let [sys (term/with-spinner {:msg "Loading system" :disappear? true} (load-system opts))]
+    (case format
+      :print  (-> sys
+                  (prune-system)
+                  (pprint))
+      :portal (portal-inspect sys))))
