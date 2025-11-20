@@ -10,8 +10,9 @@
    [reitit.ring :as reitit.ring]
    [reitit.ring.middleware.dev :as reitit.ring.middleware.dev]))
 
-(h/defcomponent HTTPServerComponent
-  "HTTP server component that starts and manages a Ring-compatible HTTP server using http-kit."
+(h/defcomponent HTTPKitServerComponent
+  "HTTP server component that starts and manages a Ring-compatible HTTP server using http-kit.
+   http-kit is lazily required."
   {::ds/start (fn http-server-component-start [{{:keys [handler port host http-kit] :as _opts} ::ds/config}]
                 (let [res ((requiring-resolve 'org.httpkit.server/run-server) handler
                                                                               (merge {:legacy-return-value? false
@@ -115,7 +116,7 @@
 
 (h/defplugin plugin
   "The default, and recommended, component for HTTP applications"
-  {:hifi/web {:hifi.web/server HTTPServerComponent
+  {:hifi/web {:hifi.web/server HTTPKitServerComponent
               :hifi.web/root-handler RootRingHandlerComponent
               :hifi.web/router-options RouterOptionsComponent
               :hifi.web/router RouterComponent
