@@ -8,8 +8,7 @@
    [hifi.core :as h]
    [hifi.logging.spec :as spec]
    [hifi.util.shutdown :as shutdown]
-   [taoensso.telemere :as t]
-   [taoensso.telemere.tools-logging :as taoensso.telemere.tools-logging]))
+   [taoensso.telemere :as t]))
 
 ;; --------------------------------------------------------------------------------------------
 ;;; Some sane defaults
@@ -20,8 +19,10 @@
                         "datomic.db" "datomic.slf4j"} :warn)
 
 ;; --------------------------------------------------------------------------------------------
-;;; Telemere is our clojure tools.logging backend
-(taoensso.telemere.tools-logging/tools-logging->telemere!)
+;;; Use Telemere as our clojure tools.logging backend, but only if the deps are present
+(try
+  ((requiring-resolve 'taoensso.telemere.tools-logging/tools-logging->telemere!))
+  (catch Throwable _))
 
 ;; -------------------------------------------------------------------------------------------- a
 ;;; Telemere is our slf4j backend -> no code here.

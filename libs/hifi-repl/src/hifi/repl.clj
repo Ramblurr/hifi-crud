@@ -1,11 +1,12 @@
 (ns hifi.repl
   "TODO docstring"
   (:require
+   [donut.system :as ds]
+   [hifi.core :as h]
    [hifi.repl.spec :as spec]
    [nrepl.cmdline]
    [nrepl.server :as nrepl]
-   [donut.system :as ds]
-   [hifi.core :as h]))
+   [taoensso.trove :as trove]))
 
 (def ^:private hifi-only-opts [:create-nrepl-port-file? :middleware :cider? :suppress-start-msg?])
 
@@ -29,7 +30,7 @@
       (when (:create-nrepl-port-file? config)
         (nrepl.cmdline/save-port-file server {}))
       (when-not (:suppress-start-msg?  config)
-        (println (str "hifi nREPL server started on " (:bind config) ":" (:port server))))
+        (trove/log! {:msg (str "hifi nREPL server started on " (:bind config) ":" (:port server))}))
       (assoc config ::server server))
     (catch Exception e
       ;; TODO log error

@@ -1,5 +1,6 @@
 (ns hifi.core.main
   (:require
+   [taoensso.trove :as trove]
    [donut.system :as ds]
    [hifi.core.system :as system]
    [hifi.util.shutdown :as shutdown]))
@@ -13,7 +14,7 @@
     (try
       (requiring-resolve config-loader)
       (catch java.io.FileNotFoundException _
-        (println "config-loader not found: " config-loader)
+        (trove/log! {:msg (str "config-loader not found: " config-loader)})
         nil))
     (try
       (when-let [read-config (requiring-resolve 'hifi.config/read-config)]
@@ -67,9 +68,11 @@
         (shutdown/add-shutdown-hook! ::stop stop)
         s)
       (catch Exception e
-        (println "Failed to start")
-        (println e)
-        (prn "value")
-        (prn (get-in (ex-data e) [:explanation :value]))
-        (prn "errors")
-        (prn (get-in (ex-data e) [:explanation :errors]))))))
+        (trove/log! {:error e :level :error :msg "Failed to start"})
+        (prn e)
+        ;; TODO nicely print validation errors in dev mode
+        ;;(prn "value")
+        ;;(prn (get-in (ex-data e) [:explanation :value]))
+        ;;(prn "errors")
+        ;;(prn (get-in (ex-data e) [:explanation :errors]))
+        ))))

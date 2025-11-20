@@ -1,7 +1,8 @@
 {:paths ["src"]
  :deps  {hifi/error               {:local/root "../hifi-error"}
          hifi/util                {:local/root "../hifi-util"}
+         com.taoensso/trove       {:mvn/version "1.1.0"}
          dev.weavejester/medley   {:mvn/version "1.9.0"}
+         org.clojure/tools.reader {:mvn/version "1.5.2"}
          party.donut/system       {:mvn/version "1.0.257"
-                                   :exclusions  [tailrecursion/cljs-priority-map]}
-         org.clojure/tools.reader {:mvn/version "1.5.2"}}}
+                                   :exclusions  [tailrecursion/cljs-priority-map]}}}

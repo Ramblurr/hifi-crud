@@ -1,3 +1,4 @@
 {:paths ["src"]
- :deps  {cider/cider-nrepl {:mvn/version "0.58.0"}
-         nrepl/nrepl {:mvn/version "1.5.1"}}}
+ :deps  {cider/cider-nrepl  {:mvn/version "0.58.0"}
+         com.taoensso/trove {:mvn/version "1.1.0"}
+         nrepl/nrepl        {:mvn/version "1.5.1"}}}

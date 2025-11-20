@@ -2,7 +2,6 @@
  :deps  {dev.weavejester/medley       {:mvn/version "1.9.0"}
          babashka/fs                  {:mvn/version "0.5.27"}
          babashka/process             {:mvn/version "0.6.23"}
-         org.clojure/tools.logging    {:mvn/version "1.3.0"}
          io.methvin/directory-watcher {:mvn/version "0.17.3" :exclusions [org.slf4j/slf4j-api]}
          hifi/error                   {:local/root "../hifi-error"}
          hifi/util                    {:local/root "../hifi-util"}

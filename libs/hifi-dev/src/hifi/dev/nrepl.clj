@@ -1,8 +1,9 @@
 (ns hifi.dev.nrepl
   (:require
-   [hifi.repl :as repl]
    [clojure.repl :refer [demunge]]
-   [clojure.string :as str]))
+   [clojure.string :as str]
+   [hifi.repl :as repl]
+   [taoensso.trove :as trove]))
 
 (when-not (resolve 'requiring-resolve)
   (throw (ex-info "hifi.dev requires at least Clojure 1.10"
@@ -121,11 +122,11 @@
                                   nrepl-bind "127.0.0.1"}}]
   (let [middleware     (available-middleware)
         middleware-kws (into #{} (map first) middleware)
-        _              (println (str "hifi nREPL server middleware: " (when (seq middleware) (str/join ", " (map second middleware)))))
+        _              (trove/log! {:msg (str "hifi nREPL server middleware: " (when (seq middleware) (str/join ", " (map second middleware))))})
         _server        (repl/start-nrepl {:port                    nrepl-port
                                           :bind                    nrepl-bind
                                           :create-nrepl-port-file? true
-                                          :middleware (into [] mw-xf middleware)})]
+                                          :middleware              (into [] mw-xf middleware)})]
     (assoc config :with-middleware middleware-kws)))
 
 (defn start-hifi-application [opts]
@@ -134,6 +135,6 @@
 (defn main [opts]
   (let [{:keys [_initiated messages]} (initializers)]
     (when (seq messages)
-      (println (str "hifi dev tooling enabled: " (str/join ", " messages))))
+      (trove/log! {:msg (str "hifi dev tooling enabled: " (str/join ", " messages))}))
     (start-nrepl-server opts)
     (start-hifi-application opts)))
