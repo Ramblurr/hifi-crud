@@ -3,8 +3,6 @@
    [babashka.process :as p]
    [hifi.cli.cmd.shared :as shared]))
 
-((requiring-resolve 'hashp.install/install!))
-
 (def examples [])
 
 (defn handler

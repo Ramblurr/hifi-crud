@@ -9,5 +9,10 @@
          lint              (if (seq *command-line-args*)
                              (apply shell "clj-kondo" "--lint" *command-line-args*)
                              (shell "clj-kondo" "--lint" "libs" "dev"))
-         update-datastar   {:doc "Update datastar to latest version from GitHub releases"
+         build-cli     {:doc "Build the hifi cli tool"
+                        :task
+                        (do (shell {:dir "libs/hifi-cli"} "clj -T:build ci")
+                            (shell "cp libs/hifi-cli/target/hifi ."))}
+
+         update-datastar   {:doc  "Update datastar to latest version from GitHub releases"
                             :task (datastar/update-datastar)}}}
