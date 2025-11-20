@@ -1,10 +1,10 @@
 {:hifi/application           {{name}}
- :hifi/plugins               [hifi.http/plugin
+ :hifi/plugins               [hifi.web/plugin
                               hifi.repl/plugin
                               hifi.assets/plugin
                               {{top/ns}}.{{main/ns}}/app]
  :secrets                    #hifi/sops #profile {:dev "secrets.dev.sops.edn" :default "secrets.prod.sops.edn"}
  :hifi/root-key              {:key #or [#ref [:secrets :hifi/root-key] #hifi/secret #env "HIFI_ROOT_KEY"]}
- :hifi.http/server           {:host "127.0.0.1" :port 3000}
- :hifi.http/root-handler     {:reload-per-request? #profile {:dev true :default false}}
+ :hifi.web/server           {:host "127.0.0.1" :port 3000}
+ :hifi.web/root-handler     {:reload-per-request? #profile {:dev true :default false}}
  :hifi/assets                {:hifi.assets/paths ["assets"]}}

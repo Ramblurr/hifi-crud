@@ -1,9 +1,9 @@
 ;; Copyright © 2025 Casey Link <casey@outskirtslabs.com>
 ;; SPDX-License-Identifier: EUPL-1.2
-(ns hifi.system.middleware.exception
+(ns hifi.web.middleware.exception
   "Middleware for gracefully handling exceptions both during development and in production."
   (:require [malli.core :as m]
-            [hifi.system.middleware.spec :as options]
+            [hifi.web.middleware.spec :as options]
             [malli.experimental.lite :as l]
             [hifi.error.iface :as pe]
             [reitit.ring :as ring]))

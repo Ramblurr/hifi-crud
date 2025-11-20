@@ -1,6 +1,6 @@
 ;; Copyright © 2025 Casey Link <casey@outskirtslabs.com>
 ;; SPDX-License-Identifier: EUPL-1.2
-(ns hifi.system.spec
+(ns hifi.web.spec
   (:require
    [hifi.config :as config]
    [hifi.datastar.spec :as d*spec]
@@ -97,7 +97,7 @@
    [:not-acceptable {:doc "406, when handler returns nil" :optional true} fn?]])
 
 (def RingHandlerOptions
-  [:map {:error/message "should be a valid hifi system ring handler component options map"}
+  [:map {:error/message "should be a valid hifi.web.ring handler component options map"}
    [:default-handler-opts {:doc      "Options for the default handler"
                            :optional true} DefaultHandlerOptions]
    [:handler-opts
@@ -160,10 +160,10 @@
    :routes               [:routes]})
 
 (def HifiSystemOptionsSchema
-  "These are the options passed to hifi.system/start.
+  "These are the options passed to hifi.web.start.
 
   They are shortcuts for common options that get merged into the component configs."
-  [:map {:name ::hifi-system-options}
+  [:map {:name ::hifi.web.options}
    RoutesKey
    [:profile {:optional true} ProfileEnum]
    [:debug-errors? {:optional true} :boolean]

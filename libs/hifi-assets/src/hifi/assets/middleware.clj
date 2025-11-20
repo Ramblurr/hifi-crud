@@ -6,7 +6,7 @@
    [hifi.assets.impl :as assets]
    [hifi.assets.process :as process]
    [hifi.core :as h]
-   [hifi.system.middleware :as h.mw])
+   [hifi.web.middleware :as h.mw])
   (:import
    (java.net URLDecoder)))
 

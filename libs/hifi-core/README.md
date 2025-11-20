@@ -11,16 +11,16 @@ component groups - donut uses component groups, (components can't be at the top 
 
 child components the key below also corresponds to the name in the config edn. So the system map
 
-{::ds/defs { :env {...} :hifi/http { :hifi.http/server { :start, :stop, :config COMPONENT DEF } }}, would inject (get env :hifi.http/server) into the :config key
+{::ds/defs { :env {...} :hifi/web { :hifi.web/server { :start, :stop, :config COMPONENT DEF } }}, would inject (get env :hifi.web/server) into the :config key
 
 
-component group :hifi/http
+component group :hifi/web
 
-:hifi.http/server - the http server component, opens ports, handles connections etc
+:hifi.web/server - the http server component, opens ports, handles connections etc
 
-:hifi.http/application - the root ring handler that wraps the router and other ring handlers, there can be only one
+:hifi.web/application - the root ring handler that wraps the router and other ring handlers, there can be only one
 
-:hifi.http/router-options -
+:hifi.web/router-options -
 
 
 component group :hifi/middleware - the middleware registry

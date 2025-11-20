@@ -1,6 +1,6 @@
 ;; Copyright © 2025 Casey Link <casey@outskirtslabs.com>
 ;; SPDX-License-Identifier: EUPL-1.2
-(ns hifi.system.middleware.spec
+(ns hifi.web.middleware.spec
   (:require
    [hifi.config :as config]
    [malli.transform :as mt]
@@ -90,7 +90,7 @@
 (def ExceptionMiddlewareOptions
   (m/schema
    [:map {:name ::exception-middleware-options}
-    [:debug-errors? {:doc     "When true uses hifi.system.middleware.errors functionality for debugging application failures."
+    [:debug-errors? {:doc     "When true uses hifi.web.middleware.errors functionality for debugging application failures."
                      :default false} :boolean]
     [:error-handlers {:doc      "TODO"
                       :optional true} [:map-of :any fn?]]

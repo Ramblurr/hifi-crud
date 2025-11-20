@@ -1,10 +1,10 @@
-(ns hifi.system.middleware
+(ns hifi.web.middleware
   (:require
-   [hifi.system.middleware.csrf :as csrf]
-   [hifi.system.middleware.exception :as exception]
-   [hifi.system.middleware.reverse-route :as reverse-route]
-   [hifi.system.middleware.secheaders :as secheaders]
-   [hifi.system.middleware.session :as session]
+   [hifi.web.middleware.csrf :as csrf]
+   [hifi.web.middleware.exception :as exception]
+   [hifi.web.middleware.reverse-route :as reverse-route]
+   [hifi.web.middleware.secheaders :as secheaders]
+   [hifi.web.middleware.session :as session]
    [reitit.ring.middleware.multipart :as reitit.multipart]
    [reitit.ring.middleware.parameters :as reitit.params]))
 

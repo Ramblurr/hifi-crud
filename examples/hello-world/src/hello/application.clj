@@ -2,7 +2,7 @@
   (:require
    [hifi.assets :as assets]
    [hifi.config :as hifi.config]
-   [hifi.http :as http]
+   [hifi.web :as http]
    [hello.routes :as hello.routes]
    [hifi.core :as h :refer [extend-ns defplugin]]))
 
@@ -11,12 +11,12 @@
   {:hifi/routes (http/route-group hello.routes/app)})
 
 (def plugins
-  [hifi.http/Defaults
+  [hifi.web/Defaults
    hifi.assets/Pipeline
    hello-app])
 
 (defn config []
-  (hifi.config/read-config :filename "examples/hello-world/resources/config.edn"))
+  (hifi.config/read-config :filename "examples/hello-world/hifi.edn"))
 
 (extend-ns '[hifi.application :opts {:some-opt "a value"}])
 
@@ -30,8 +30,9 @@
   (initialize)
 
   (reitit.core/routes
-   (-> @running-system_ :donut.system/instances  :hifi/http :hifi.http/root-handler meta :reitit.core/router))
+   (-> @running-system_ :donut.system/instances  :hifi/web :hifi.web/root-handler meta :reitit.core/router))
 
+  (config)
   (do
     (stop)
     (require '[clj-reload.core :as clj-reload])

@@ -3,11 +3,11 @@
 ;; Portions of this file are based on hyperlith code from @Anders
 ;; https://github.com/andersmurphy/hyperlith/
 ;; SPDX-License-Identifier: MIT
-(ns hifi.system.middleware.secheaders
+(ns hifi.web.middleware.secheaders
   "Middleware for setting default security headers"
   (:require
    [hifi.util.crypto :as crypto]
-   [hifi.system.middleware.spec :as options]
+   [hifi.web.middleware.spec :as options]
    [medley.core :as medley]
    [clojure.string :as str]))
 

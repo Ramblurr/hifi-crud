@@ -27,7 +27,7 @@
                        "libs/hifi-error/src"
                        "libs/hifi-html/src"
                        "libs/hifi-logging/src"
-                       "libs/hifi-system/src"
+                       "libs/hifi-web/src"
                        "libs/hifi-util/src"]
                       :no-reload #{'user 'dev}}))
 

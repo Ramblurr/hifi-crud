@@ -1,6 +1,6 @@
 (ns {{top/ns}}.{{main/ns}}
   (:require
-   [hifi.http :as http]
+   [hifi.web :as web]
    [hifi.config :as config]
    [hifi.assets :as assets]
    [hifi.html :as html]
@@ -33,4 +33,4 @@
 
 (h/defplugin app
   "My application"
-  {:hifi/routes (http/route-group routes)})
+  {:hifi/routes (web/route-group routes)})

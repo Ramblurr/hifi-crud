@@ -1,11 +1,11 @@
-(ns hifi.http
+(ns hifi.web
   (:require
    [com.fulcrologic.guardrails.malli.core :refer [=> >defn]]
    [donut.system :as ds]
    [hifi.config :as config]
    [hifi.core :as h]
-   [hifi.system.middleware :as middleware]
-   [hifi.system.spec :as spec]
+   [hifi.web.middleware :as middleware]
+   [hifi.web.spec :as spec]
    [hifi.util.crypto :as crypto]
    [reitit.ring :as reitit.ring]
    [reitit.ring.middleware.dev :as reitit.ring.middleware.dev]))
@@ -28,8 +28,8 @@
                  (catch Exception _)))
 
    :hifi/config-spec spec/HTTPServerOptions
-   :hifi/config-key :hifi.http/server
-   ::ds/config {:handler [::ds/local-ref [:hifi.http/root-handler]]}})
+   :hifi/config-key :hifi.web/server
+   ::ds/config {:handler [::ds/local-ref [:hifi.web/root-handler]]}})
 
 (h/defcomponent RootRingHandlerComponent
   "Root Ring handler component that creates the main HTTP request handler.
@@ -44,8 +44,8 @@
                    (reitit.ring/routes (reitit.ring/create-default-handler default-handler-opts))
                    handler-opts)))
    :hifi/config-spec spec/RingHandlerOptions
-   :hifi/config-key :hifi.http/root-handler
-   ::ds/config {:router [::ds/local-ref [:hifi.http/router]]}})
+   :hifi/config-key :hifi.web/root-handler
+   ::ds/config {:router [::ds/local-ref [:hifi.web/router]]}})
 
 (h/defcomponent RouterOptionsComponent
   "Router options component that configures reitit router behavior.
@@ -61,7 +61,7 @@
                                                   middleware-transformers)
                    :data route-data}))
    :hifi/config-spec spec/RouterOptionsOptions
-   :hifi/config-key :hifi.http/router-options
+   :hifi/config-key :hifi.web/router-options
    ::ds/config {:middleware-registry [::ds/ref [:hifi/middleware]]}})
 
 (h/defcomponent RouterComponent
@@ -74,8 +74,8 @@
                 (reitit.ring/router
                  (into [] (vals (:routes config)))
                  (:router-options config)))
-   ::ds/config {:routes [:donut.system/local-ref [:hifi.http/routes]]
-                :router-options [:donut.system/local-ref [:hifi.http/router-options]]}})
+   ::ds/config {:routes [:donut.system/local-ref [:hifi.web/routes]]
+                :router-options [:donut.system/local-ref [:hifi.web/router-options]]}})
 
 (h/defcomponent RootKeyComponent
   "TODO"
@@ -115,10 +115,10 @@
 
 (h/defplugin plugin
   "The default, and recommended, component for HTTP applications"
-  {:hifi/http {:hifi.http/server HTTPServerComponent
-               :hifi.http/root-handler RootRingHandlerComponent
-               :hifi.http/router-options RouterOptionsComponent
-               :hifi.http/router RouterComponent
-               :hifi.http/routes [::ds/ref [:hifi/routes]]
-               :hifi.http/root-key RootKeyComponent}
+  {:hifi/web {:hifi.web/server HTTPServerComponent
+              :hifi.web/root-handler RootRingHandlerComponent
+              :hifi.web/router-options RouterOptionsComponent
+              :hifi.web/router RouterComponent
+              :hifi.web/routes [::ds/ref [:hifi/routes]]
+              :hifi.web/root-key RootKeyComponent}
    :hifi/middleware middleware/MiddlewareRegistryComponentGroup})

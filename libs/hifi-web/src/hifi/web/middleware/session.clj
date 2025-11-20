@@ -1,9 +1,9 @@
 ;; Copyright © 2025 Casey Link <casey@outskirtslabs.com>
 ;; SPDX-License-Identifier: EUPL-1.2
-(ns hifi.system.middleware.session
+(ns hifi.web.middleware.session
   (:require
    [hifi.util.crypto :as crypto]
-   [hifi.system.middleware.spec :as options]
+   [hifi.web.middleware.spec :as options]
    [ring.middleware.cookies :as cookies]))
 
 (defn ->session-middleware-opts [v]
@@ -39,7 +39,7 @@
 (defn session-middleware
   "Creates a Cross-Site Request Forgery (CSRF) protection middleware using HMAC double-submit cookie pattern.
 
-  Takes a map of options that conform to [[hifi.system.middleware.spec/CSRFProtectionMiddlewareOptions]] schema:
+  Takes a map of options that conform to [[hifi.web.middleware.spec/CSRFProtectionMiddlewareOptions]] schema:
 
   - `:csrf-secret` (required): A secure random secret used for signing CSRF tokens (suggested: 32 random bytes encoded as string)
   - `:cookie-name` (default: \"csrf\"): Base name for the CSRF cookie
@@ -56,7 +56,7 @@
 
   ### Requirements
 
-  - **Session middleware** must be configured to run before this middleware (from [[hifi.system.middleware.session]])
+  - **Session middleware** must be configured to run before this middleware (from [[hifi.web.middleware.session]])
   - The request must have a valid `:sid` (session ID) for token generation
   - **Body-parsing middleware** must extract the token from request body and add it as `:hifi/submitted-csrf-token`
   - The client must extract and submit the CSRF token with all non-GET requests"

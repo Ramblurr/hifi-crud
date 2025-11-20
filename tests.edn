@@ -20,9 +20,9 @@
    {:id :error
     :kaocha/source-paths ["libs/hifi-error/src"]
     :kaocha/test-paths ["libs/hifi-error/test"]}
-   {:id :system
-    :kaocha/source-paths ["libs/hifi-system/src"]
-    :kaocha/test-paths ["libs/hifi-system/test"]}
+   {:id :web
+    :kaocha/source-paths ["libs/hifi-web/src"]
+    :kaocha/test-paths ["libs/hifi-web/test"]}
    {:id :config
     :kaocha/source-paths ["libs/hifi-config/src"]
     :kaocha/test-paths ["libs/hifi-config/test"]}

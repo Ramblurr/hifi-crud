@@ -16,7 +16,7 @@
                                  hifi/error             {:local/root "libs/hifi-error"}
                                  hifi/html              {:local/root "libs/hifi-html"}
                                  hifi/logging           {:local/root "libs/hifi-logging"}
-                                 hifi/system            {:local/root "libs/hifi-system"}
+                                 hifi/web            {:local/root "libs/hifi-web"}
                                  hifi/util              {:local/root "libs/hifi-util"}
                                  org.clojure/clojure    {:mvn/version "1.12.2"}
                                  org.clojure/tools.deps {:mvn/version "0.24.1523"}}
@@ -34,7 +34,7 @@
                                  "libs/hifi-error/test"
                                  "libs/hifi-html/test"
                                  "libs/hifi-logging/test"
-                                 "libs/hifi-system/test"
+                                 "libs/hifi-web/test"
                                  "libs/hifi-util/test"
                                  "examples/hello-world/test"]
                    :extra-deps  {org.slf4j/slf4j-nop                  {:mvn/version "2.0.17"}

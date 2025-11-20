@@ -1,11 +1,11 @@
 ;; Copyright © 2025 Casey Link <casey@outskirtslabs.com>
 ;; SPDX-License-Identifier: EUPL-1.2
-(ns hifi.system.middleware.csrf
+(ns hifi.web.middleware.csrf
   "A simple HMAC double-submit cookie implementation"
   (:require
    [clojure.string :as str]
    [hifi.util.crypto :as crypto]
-   [hifi.system.middleware.spec :as options]))
+   [hifi.web.middleware.spec :as options]))
 
 (defn ->csrf-middleware-opts [v]
   (options/valid! "csrf-middleware"
@@ -56,7 +56,7 @@
   ([options]
    (tap> [:CSRF options])
    (let [options      (->csrf-middleware-opts options)
-         csrf-keyspec (crypto/derive-csrf-hmac-keyspec (:options :hifi.http/root-key))
+         csrf-keyspec (crypto/derive-csrf-hmac-keyspec (:options :hifi.web/root-key))
          #_#_csrf-keyspec (crypto/secret-key->hmac-sha256-keyspec (-> options :csrf-secret config/unmask!))
          validate     (partial valid-csrf-token? csrf-keyspec)
          generate     (partial generate-csrf-token csrf-keyspec)]
@@ -86,7 +86,7 @@
   {:name           :hifi.middleware/csrf-protection
    :factory        #(csrf-middleware %)
    :config-spec options/CSRFProtectionMiddlewareOptions
-   :donut.system/config {:hifi.http/root-key [:donut.system/ref [:hifi/http :hifi.http/root-key]]}})
+   :donut.system/config {:hifi.web/root-key [:donut.system/ref [:hifi/web :hifi.web/root-key]]}})
 
 (comment
 

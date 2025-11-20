@@ -5,7 +5,7 @@
    [donut.system :as ds]
    [hifi.core :as h :refer [defplugin*]]
    [hifi.html :as html]
-   [hifi.http :as hifi.http]
+   [hifi.web :as hifi.web]
    [reitit.core :as r]))
 
 (def _clojure-version
@@ -99,13 +99,13 @@
 (defn maybe-add-welcome [system]
   (if (empty? (-> system ::ds/defs :hifi/routes))
     (assoc-in system [::ds/defs :hifi/routes]
-              (hifi.http/route-group {:routes welcome-routes
-                                      :route-name ::app}))
+              (hifi.web/route-group {:routes welcome-routes
+                                     :route-name ::app}))
 
     system))
 (defn maybe-add-internal [system]
   (if (h/dev?)
-    (assoc-in system [::ds/defs :hifi/routes ::internal-routes] (hifi.http/route-component internal-routes {:route-name ::internal-routes :path-prefix "/hifi"}))
+    (assoc-in system [::ds/defs :hifi/routes ::internal-routes] (hifi.web/route-component internal-routes {:route-name ::internal-routes :path-prefix "/hifi"}))
     system))
 
 (defplugin* hifi-finisher-plugin

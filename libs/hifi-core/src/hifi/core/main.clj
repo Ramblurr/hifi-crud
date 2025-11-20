@@ -50,7 +50,7 @@
       (puget/pprint (hifi.config/unmask cleaned)))
     (prn "HTTP")
     #_(prn
-       ((get-in sys [::ds/defs :hifi/http :hifi.http/root-key :donut.system/start]) {})))
+       ((get-in sys [::ds/defs :hifi/web :hifi.web/root-key :donut.system/start]) {})))
 
 (defn start
   "Start the application"
