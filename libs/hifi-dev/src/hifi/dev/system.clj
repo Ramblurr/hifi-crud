@@ -1,6 +1,5 @@
 (ns hifi.dev.system
   (:require
-   [clojure.walk :as walk]
    [hifi.util.terminal :as term]
    [hifi.dev.util :refer [load-guardrails-silently]]))
 
@@ -10,9 +9,9 @@
 (def czprint (lazy-fn 'zprint.core/czprint))
 (def zprint (lazy-fn 'zprint.core/zprint))
 (def load-system (lazy-fn 'hifi.core.main/load-system))
-
 (def m-schema (lazy-fn 'malli.core/schema))
 (def m-properties (lazy-fn 'malli.core/properties))
+(def postwalk (lazy-fn 'clojure.walk/postwalk))
 
 (defn pprint [coll & _rest]
   (let [opts {:style (term/zprint-style)}]
@@ -21,7 +20,7 @@
       (zprint coll opts))))
 
 (defn prune-system [sys]
-  (walk/postwalk
+  (postwalk
    (fn [x]
      (if (and (map? x) (:hifi/config-spec x))
        (if-let [name (some-> (:hifi/config-spec x) m-schema m-properties :name)]
