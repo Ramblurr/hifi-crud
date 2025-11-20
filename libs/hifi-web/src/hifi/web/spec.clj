@@ -2,58 +2,12 @@
 ;; SPDX-License-Identifier: EUPL-1.2
 (ns hifi.web.spec
   (:require
-   [hifi.config :as config]
-   [hifi.datastar.spec :as d*spec]
-   [hifi.error.iface :as pe]
-   [hifi.logging.spec :as logging.spec]
-   [reitit.middleware :as reitit.middleware]))
+   [hifi.config :as config]))
 
 (def Secret
   [:and
    [:fn {:error/message "should be a secret value"} config/secret?]
    [:fn {:error/message "should be a secret value that isn't nil"} config/present-secret?]])
-
-(def IntoMiddleware
-  [:fn #(satisfies? reitit.middleware/IntoMiddleware %)])
-
-(defn arity
-  "Returns the arities (a vector of ints) of:
-    - anonymous functions like `#()` and `(fn [])`.
-    - defined functions like `map` or `+`.
-    - macros, by passing a var like `#'->`.
-
-  Returns `[:variadic]` if the function/macro is variadic.
-  Otherwise returns nil"
-  [f]
-  (let [func      (if (var? f) @f f)
-        methods   (->> func
-                       class
-                       .getDeclaredMethods
-                       (map (fn [^java.lang.reflect.Method m]
-                              (vector (.getName m)
-                                      (count (.getParameterTypes m))))))
-        var-args? (some #(-> % first #{"getRequiredArity"})
-                        methods)
-        arities   (->> methods
-                       (filter (comp #{"invoke"} first))
-                       (map second)
-                       (sort))]
-    (cond
-      (keyword? f)     nil
-      var-args?        [:variadic]
-      (empty? arities) nil
-      :else            (if (and (var? f) (-> f meta :macro))
-                         (mapv #(- % 2) arities) ;; substract implicit &form and &env arguments
-                         (into [] arities)))))
-
-(defn zero-arity? [f]
-  (= 0 (first (arity f))))
-
-(def ZeroArityFn [:fn {:error/message "should be a 0-arity function"} zero-arity?])
-
-(def Var
-  [:fn {:name ::var :error/message "clojure.lang.Var of a function"}
-   #(var? %)])
 
 (def HTTPKitServerOptions
   ;; ref https://github.com/http-kit/http-kit/blob/master/src/org/httpkit/server.clj
@@ -81,15 +35,6 @@
    [:host {:doc "Which IP to bind"} :string]
    [:http-kit {:optional true} HTTPKitServerOptions]])
 
-(def ResourceHandlerOptions
-  [:map
-   [:parameter         {:doc "Optional name of the wildcard parameter, defaults to unnamed keyword `:`" :optional true} :keyword]
-   [:root              {:doc "The resource root, a path to the root directory in your resources/ (or elsewhere on the classpath)" :default "public" :optional true} [:string {:min 1}]]
-   [:path              {:doc "Path to mount the handler to. Required when mounted outside of a router, does not work inside a router." :default "/" :optional true} [:string {:min 1}]]
-   [:loader            {:doc "The class loader to resolve the resources" :optional true} :any]
-   [:index-files       {:doc "A vector of index-files to look in a resource directory" :default ["index.html"] :optional true} [:vector :string]]
-   [:not-found-handler {:doc "Optional handler function to use if the requested resource is missing (404 Not Found)" :optional true} :any]])
-
 (def DefaultHandlerOptions
   [:map
    [:not-found {:doc "404, when no route matches" :optional true} fn?]
@@ -108,76 +53,9 @@
                                   [:donut.system/ref [:hifi/middleware :exception-backstop]]]}}
     :map]])
 
-(def CreateHandlerOptsSchema
-  [:map
-   [:reload-per-request? :boolean]
-   [:routes ZeroArityFn]
-   [:handler-opts map?]
-   [:router-options map?]
-   [:resource-handler-opts :map]
-   [:middleware-top-level [:vector IntoMiddleware]]])
-
 (def RouterOptionsOptions
   [:map {:error/message "should be a map of options passed to reitit's router function after the route data"}
    [:route-data {:doc "Initial top-level route data" :default {}} :any]
    [:print-context-diffs? {:default false} :boolean]
    [:middleware-transformers {:doc     "A vector of middleware chain transformers"
                               :default []} [:vector fn?]]])
-
-(def ReititRoutesLike [:multi {:dispatch (fn [v]
-                                           (cond (fn? v)     :fn
-                                                 (vector? v) :vector
-                                                 (var? v)    :var))}
-
-                       [:vector [:vector {:min 1} :any]]
-                       [:fn ZeroArityFn]
-                       [:var [:fn {:error/message "should be a var of a function returning or vector of reitit routes"} (fn [v] (fn? (var-get v)))]]])
-
-(def RoutesKey [:routes {:doc           "Route definitions using reitit syntax. Can be the routes themselves or a fn/0 that returns them."
-                         :error/message "should be a vector of reitit routes or zero-arity function that returns the routes"}
-                ReititRoutesLike])
-
-(def ProfileEnum [:enum :dev :test :prod])
-
-(def HifiComponentOptionsSchema
-  [:map {:name ::hifi-component-options}
-   RoutesKey
-   [:profile {:default :dev} ProfileEnum]
-   [:http-server HTTPServerOptions]
-   [:ring-handler {:default {}} RingHandlerOptions]
-   [:router-options {:default {}} RouterOptionsOptions]
-   [:datastar-render-multicaster {:default {}} d*spec/DatastarRenderMulticasterOptions]
-   [:tab-state {:default {}} d*spec/TabStateComponentOptions]
-   [:logging-console {:default {}} logging.spec/ConsoleLoggingComponentOptions]
-   [:logging-tap {:default {}} logging.spec/TelemereTapHandlerComponentOptions]])
-
-(def system-opts->component-opts-path
-  {:host                 [:http-server :host]
-   :port                 [:http-server :port]
-   :debug-errors?        [:middleware :opts :exception :debug-errors?]
-   :reload-per-request?  [:ring-handler :reload-per-request?]
-   :print-context-diffs? [:router-options :print-context-diffs?]
-   :routes               [:routes]})
-
-(def HifiSystemOptionsSchema
-  "These are the options passed to hifi.web.start.
-
-  They are shortcuts for common options that get merged into the component configs."
-  [:map {:name ::hifi.web.options}
-   RoutesKey
-   [:profile {:optional true} ProfileEnum]
-   [:debug-errors? {:optional true} :boolean]
-   [:print-context-diffs? {:optional true} :boolean]
-   [:reload-per-request? {:optional true} :boolean]
-   #_[:middleware {:optional true :default {}} MiddlewareOptions]
-   [:port {:optional true} :int]
-   [:host {:default "127.0.0.1"} :string]
-   [:hifi/components {:optional true
-                      :doc      "Component options map merged into the donut.system hifi components."} HifiComponentOptionsSchema]])
-
-(defn system-opts->component-opts [raw-opts]
-  (let [opts (pe/coerce! HifiSystemOptionsSchema (dissoc raw-opts :hifi/components))]
-    (->> system-opts->component-opts-path
-         (map (fn [[k path]]
-                #_(tap> [:k k :path path :v (get opts k)])
-                (assoc-in {} path (get opts k)))))))

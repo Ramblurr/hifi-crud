@@ -4,9 +4,9 @@
    [donut.system :as ds]
    [hifi.config :as config]
    [hifi.core :as h]
+   [hifi.util.crypto :as crypto]
    [hifi.web.middleware :as middleware]
    [hifi.web.spec :as spec]
-   [hifi.util.crypto :as crypto]
    [reitit.ring :as reitit.ring]
    [reitit.ring.middleware.dev :as reitit.ring.middleware.dev]))
 

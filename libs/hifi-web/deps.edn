@@ -1,27 +1,12 @@
 {:paths ["src"]
- :deps  {dev.onionpancakes/chassis        {:mvn/version "1.0.365"}
-         com.widdindustries/time-literals {:mvn/version "0.1.10"}
-         metosin/reitit-core              {:mvn/version "0.9.1"}
-         metosin/reitit-ring              {:mvn/version "0.9.1"
-                                           :exclusions  [metosin/muuntaja]}
-         exoscale/cloak                   {:mvn/version "1.0.42"}
-         metosin/reitit-middleware        {:mvn/version "0.9.1"
-                                           :exclusions  [metosin/muuntaja]}
-         aero/aero                        {:mvn/version "1.1.6"}
-         party.donut/system               {:mvn/version "1.0.257"
-                                           :exclusions  [tailrecursion/cljs-priority-map]}
-         http-kit/http-kit                {:mvn/version "2.9.0-beta2"}
-         ring/ring-defaults               {:mvn/version "0.7.0"}
-         com.fulcrologic/guardrails       {:mvn/version "1.2.9"}
-         dev.data-star.clojure/http-kit   {:mvn/version "1.0.0-RC3"
-                                           :exclusions  [http-kit/http-kit]}
-         datastar/expressions             {:git/url "https://github.com/ramblurr/datastar-expressions/"
-                                           :git/sha "0cf32202c0c9bef106e8635219259affd874fa00"}
-         org.flatland/ordered             {:mvn/version "1.15.12"}
+ :deps  {com.fulcrologic/guardrails       {:mvn/version "1.2.9"}
          dev.weavejester/medley           {:mvn/version "1.9.0"}
+         http-kit/http-kit                {:mvn/version "2.9.0-beta2"}
+         metosin/reitit-core              {:mvn/version "0.9.1"}
+         metosin/reitit-middleware        {:mvn/version "0.9.1" :exclusions [metosin/muuntaja]}
+         metosin/reitit-ring              {:mvn/version "0.9.1" :exclusions [metosin/muuntaja]}
+         party.donut/system               {:mvn/version "1.0.257" :exclusions [tailrecursion/cljs-priority-map]}
+         ring/ring-defaults               {:mvn/version "0.7.0"}
          hifi/config                      {:local/root "../hifi-config"}
          hifi/error                       {:local/root "../hifi-error"}
-         hifi/engine                      {:local/root "../hifi-engine"}
-         hifi/util                        {:local/root "../hifi-util"}
-         hifi/logging                     {:local/root "../hifi-logging"}
-         hifi/datastar                    {:local/root "../hifi-datastar"}}}
+         hifi/util                        {:local/root "../hifi-util"}}}
