@@ -1,7 +1,8 @@
 {:paths   ["src" "resources"]
  :deps    {org.clojure/clojure {:mvn/version "1.12.2"}
-           hifi/web         {:local/root "/home/ramblurr/src/clojure-playground/hyperlith-is-for-crud/libs/hifi-web"}
-           hifi/repl         {:local/root "/home/ramblurr/src/clojure-playground/hyperlith-is-for-crud/libs/hifi-repl"}
+           hifi/web            {:local/root "/home/ramblurr/src/clojure-playground/hyperlith-is-for-crud/libs/hifi-web"}
+           hifi/logging        {:local/root "/home/ramblurr/src/clojure-playground/hyperlith-is-for-crud/libs/hifi-logging"}
+           hifi/repl           {:local/root "/home/ramblurr/src/clojure-playground/hyperlith-is-for-crud/libs/hifi-repl"}
            hifi/html           {:local/root "/home/ramblurr/src/clojure-playground/hyperlith-is-for-crud/libs/hifi-html"}
            hifi/assets         {:local/root "/home/ramblurr/src/clojure-playground/hyperlith-is-for-crud/libs/hifi-assets"}
            hifi/config         {:local/root "/home/ramblurr/src/clojure-playground/hyperlith-is-for-crud/libs/hifi-config"}
