@@ -1,11 +1,12 @@
 ;; Copyright © 2025 Casey Link <casey@outskirtslabs.com>
 ;; SPDX-License-Identifier: EUPL-1.2
 (ns hifi.datomic.migrations
-  (:require [com.fulcrologic.guardrails.malli.core :refer [=> >defn]]
-            [clojure.tools.logging :as log]
-            [datomic.api :as d]
-            [hifi.datomic.spec :as spec]
-            [dev.gethop.stork :as stork]))
+  (:require
+   [com.fulcrologic.guardrails.malli.core :refer [=> >defn]]
+   [datomic.api :as d]
+   [dev.gethop.stork :as stork]
+   [hifi.datomic.spec :as spec]
+   [taoensso.trove :as trove]))
 
 (>defn install-schema
        "Installs schema migrations into a Datomic database. This function is designed
@@ -49,7 +50,7 @@
                                (stork/read-resource m) m)]
             (when (not= (stork/ensure-installed conn migration)
                         :dev.gethop.stork/already-installed)
-              (log/info "Installed datomic migration: " (:id migration)))
+              (trove/log! {:msg "Installed datomic migration " :data {:migration-id (:id migration)}}))
             (throw (ex-info "Invalid migration data was encountered aborting schema installation."
                             {:migration m}))))
         migrations))

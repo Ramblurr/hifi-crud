@@ -2,18 +2,18 @@
 ;; SPDX-License-Identifier: EUPL-1.2
 (ns hifi.datomic.system
   (:require
-   [clojure.tools.logging :as log]
    [com.fulcrologic.guardrails.malli.core :refer [=> >defn-]]
    [datomic.api :as d]
    [hifi.datomic.migrations :as migrations]
    [hifi.datomic.outbox :as outbox]
    [hifi.datomic.report-queue :as report-queue]
-   [hifi.datomic.spec :as spec]))
+   [hifi.datomic.spec :as spec]
+   [taoensso.trove :as trove]))
 
 (>defn- ensure-and-connect [{:keys [db-uri]}]
         [spec/DatomicConnectionComponentOptions => spec/DatomicConnectionSchema]
         (when (d/create-database db-uri)
-          (log/info "Datomic database created"))
+          (trove/log! {:msg "Datomic database created"}))
         (d/connect db-uri))
 
 (defn DatomicConnectionComponent
@@ -21,13 +21,13 @@
   [options-ref]
   {:donut.system/start      (fn start-db [{config :donut.system/config}]
                               (let [conn (ensure-and-connect (:hifi/options config))]
-                                (log/info "Datomic database started successfully")
+                                (trove/log! {:msg "Datomic database started successfully"})
                                 conn))
    :donut.system/post-start (fn post-start-db [{:donut.system/keys [instance config]}]
-                              (log/info (format "Ensuring %d Datomic schema migrations installed" (count (:migration-data config))))
+                              (trove/log! {:msg (format "Ensuring %d Datomic schema migrations installed" (count (:migration-data config)))})
                               (migrations/install-schema instance (:migration-data config)))
    :donut.system/stop       (fn stop-db [{instance :donut.system/instance}]
-                              (log/info "Shutting down Datomic connection")
+                              (trove/log! {:msg "Shutting down Datomic connection"})
                               (d/release instance)
                               (d/shutdown false))
    :donut.system/config     {:migration-data [:donut.system/local-ref [spec/migration-data-component]]}

@@ -1,13 +1,14 @@
 (ns hifi.datomic.report-queue
   "Multicast the datomic tx-report-queue to consumers using promesa csp"
   (:require
-   [hifi.datomic.spec :as spec]
-   [clojure.tools.logging :as log]
    [datomic.api :as d]
+   [hifi.datomic.spec :as spec]
+   [promesa.core :as pr]
    [promesa.exec.csp :as sp]
-   [promesa.core :as pr])
-  (:import (datomic Connection)
-           (java.util.concurrent BlockingQueue TimeUnit)))
+   [taoensso.trove :as trove])
+  (:import
+   (datomic Connection)
+   (java.util.concurrent BlockingQueue TimeUnit)))
 
 (defn start-report-queue-thread!
   "On a separate thread, take values from the `tx-report-queue` over `conn` and
@@ -16,7 +17,7 @@
   (assert (instance? Connection conn))
   (let [ready? (pr/deferred)]
     (pr/vthread
-     (log/debug "Starting tx-report-queue multicasting")
+     (trove/log! {:level :debug :msg "Starting tx-report-queue multicasting"})
      (try
        (let [input-queue (d/tx-report-queue conn)]
          (loop []
@@ -29,13 +30,13 @@
        (catch InterruptedException _
          (pr/resolve! ready? :interrupted)
          (sp/close! ch)
-         (log/info "Stopping tx-report-queue multicasting"))
+         (trove/log! {:msg "Stopping tx-report-queue multicasting"}))
        (catch Throwable t
          (pr/resolve! ready? :error)
          (tap> [::error t])
-         (log/error t "Unexpected error in tx-report-queue thread"))
+         (trove/log! {:level :error :error t :msg "Unexpected error in tx-report-queue thread"}))
        (finally
-         (log/info "Stopped tx-report-queue multicasting")
+         (trove/log! {:msg "Stopped tx-report-queue multicasting"})
          (d/remove-tx-report-queue conn))))
 
     ready?))
@@ -49,7 +50,7 @@
           (= start-result :error)
           (throw (RuntimeException. "Error during tx-report-queue multicast start"))
           (= start-result :ready)
-          (log/debug "tx-report-queue multicast is ready")
+          (trove/log! {:level :debug :msg "tx-report-queue multicast is ready"})
           :else
           (throw (RuntimeException. (str "Unexpected resuls statuts from tx-report-queue multicast: " start-result))))
     tx-report-mult))

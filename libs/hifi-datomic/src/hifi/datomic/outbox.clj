@@ -2,13 +2,15 @@
 ;; SPDX-License-Identifier: EUPL-1.2
 (ns hifi.datomic.outbox
   "System plumbing for the Datomic outbox a transactional job queue"
-  (:require [com.github.ivarref.yoltq :as yq]
-            [clojure.tools.logging :as log]
-            [hifi.error.iface :as pe]
-            [hifi.datomic.spec :as spec]
-            [promesa.exec.csp :as sp])
-  (:import  [datomic Connection]
-            [java.util.concurrent LinkedBlockingQueue BlockingQueue TimeUnit]))
+  (:require
+   [com.github.ivarref.yoltq :as yq]
+   [hifi.datomic.spec :as spec]
+   [hifi.error.iface :as pe]
+   [promesa.exec.csp :as sp]
+   [taoensso.trove :as trove])
+  (:import
+   [datomic Connection]
+   [java.util.concurrent BlockingQueue LinkedBlockingQueue TimeUnit]))
 
 (defn tx-report-mult->queue [mult <cancel]
   (let [<ch       (sp/tap! mult (sp/chan :buf 32))
@@ -22,7 +24,7 @@
                     (sp/close! <cancel))
           <ch     (let [ok-offer (.offer ^BlockingQueue out-queue report 30 TimeUnit/MINUTES)]
                     (when (false? ok-offer)
-                      (log/error "Failed to offer item in multicaster to yoltq"))
+                      (trove/log! {:level :error :msg "Failed to offer item in multicaster to yoltq"}))
                     (recur)))))
     out-queue))
 
@@ -35,7 +37,7 @@
                 :tx-report-queue (tx-report-mult->queue tx-report-mult <cancel)}))
     (doseq [{:keys [queue-id handler-fn]} consumers]
       (yq/add-consumer! queue-id handler-fn)
-      (log/info (str "Added outbox consumer for " queue-id)))
+      (trove/log! {:msg  (str "Added outbox consumer for " queue-id)}))
     (yq/start!)
     {:<cancel <cancel}))
 
