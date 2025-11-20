@@ -1,27 +1,21 @@
 (ns hifi.cli.terminal
   (:require
    [bling.core :as bling]
+   [clj-commons.format.exceptions :as pretty]
+   [hifi.util.terminal :as t]
    [zprint.core :as z]
-   [clj-commons.ansi :as ansi]
-   [clj-commons.format.exceptions :as pretty]))
+   ;; [clj-commons.ansi :as ansi]
+   ))
 
 (set! *warn-on-reflection* true)
 
 (def ^:dynamic *debug* false)
 
-(defn color? [] ansi/*color-enabled*)
-
-(defn pprint-str [coll & _rest]
-  (let [opts {:style :community}]
-    (if (color?)
-      (apply z/czprint-str coll opts)
-      (apply z/zprint-str coll opts))))
-
 (defn pprint [coll & _rest]
-  (let [opts {:style :community}]
-    (if (color?)
-      (apply z/czprint coll opts)
-      (apply z/zprint coll opts))))
+  (let [opts {:style (t/zprint-style)}]
+    (if (t/color?)
+      (z/czprint coll opts)
+      (z/zprint coll opts))))
 
 (defn print-ex
   ([e] (clojure.core/println (pretty/format-exception e))))

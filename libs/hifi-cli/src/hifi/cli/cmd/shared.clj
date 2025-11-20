@@ -7,15 +7,18 @@
 
 (def bin-name "hifi")
 
-(def shared-specs {:help        {:desc  "Show this help message"
-                                 :alias :h}
-                   :verbose     {:verbose "Verbose output"
-                                 :coerce  :boolean}
-                   :debug       {:verbose "Print additional logs and traces"
-                                 :coerce  :boolean}
-                   :config-file {:desc    "The hifi config file to load"
-                                 :alias   :c
-                                 :default "config/hifi.edn"}})
+(def shared-specs {:help          {:desc  "Show this help message"
+                                   :alias :h}
+                   :verbose       {:verbose "Verbose output"
+                                   :coerce  :boolean}
+                   :config-loader {:desc "The symbol for an optional qualified function (arity-1, receives opts map) in your program that will load the config, example: org.my-app/load-config"}
+                   :debug         {:verbose "Print additional logs and traces"
+                                   :coerce  :boolean}
+                   :profile       {:desc "The profile to load the config with" :coerce :keyword :default :dev}
+                   :unmasked      {:coerce :boolean :desc "If specified, secret values will be displayed"}
+                   :config-file   {:desc    "The hifi config file to load"
+                                   :alias   :c
+                                   :default "config/hifi.edn"}})
 
 (defn with-shared-specs
   ([ks] (with-shared-specs ks {}))

@@ -6,7 +6,8 @@
    [hifi.core :as h]
    [hifi.error.iface :as he]
    [malli.core :as m]
-   [medley.core :as medley]))
+   [medley.core :as medley]
+   [sys-ext.core :as se]))
 
 (defn get-config [system path]
   (get-in system (into [::ds/defs :config] path)))
@@ -162,7 +163,7 @@
    :hifi/after-targets #{:hifi.target/early}})
 
 ;; TODO find a better name for this funciton
-(defn build-system
+(defn apply-plugins
   ;;notes  Given config map and vector of plugins, build a donut.system defs map
   ;; this uses the donut.system apply-plugins mechanism. in vanilla donut.system, applying plugins
   ;; takes place as part of system start. but we want to "expand" our initial system map, which probably consists
@@ -193,3 +194,14 @@
               (throw (ex-info (str "Failed to load plugin" ?plugin) {:plugin ?plugin} e)))))
 
         plugins))
+
+(defn build-system [config]
+  (try
+    (dissoc
+     (->> (or (:hifi/plugins config) [])
+          (resolve-plugins)
+          (apply-plugins config)
+          (se/remove-dead-refs))
+     :donut.system/plugins)
+    (catch Exception e
+      (throw (ex-info "Building the system failed" {} e)))))

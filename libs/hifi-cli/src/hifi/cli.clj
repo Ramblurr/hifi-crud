@@ -1,6 +1,7 @@
 (ns hifi.cli
   (:gen-class)
   (:require
+   [hifi.cli.cmd.system :as cmd.system]
    [hifi.cli.cmd.dev :as cmd.dev]
    [hifi.cli.cmd.new :as cmd.new]
    [hifi.cli.extension :as ext]))
@@ -14,6 +15,7 @@
 (def cmd-tree
   {"help" help-spec
    "dev" cmd.dev/spec
+   "system" cmd.system/spec
    "new" cmd.new/spec
    :spec {:verbose     {:desc "Verbose output"
                         :coerce  :boolean}
@@ -30,7 +32,8 @@
 
 (defn -main [& args]
   (binding [ext/*exit?* true]
-    (apply main args)))
+    (apply main args)
+    (System/exit 0)))
 
 (comment
 
