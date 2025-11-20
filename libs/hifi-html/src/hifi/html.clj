@@ -1,12 +1,12 @@
 (ns hifi.html
   (:refer-clojure :exclude [compile])
   (:require
-   [medley.core :as medley]
-   [hifi.html.impl :as impl]
-   [hifi.core :as h]
-   [hifi.util.codec :as codec]
+   [dev.onionpancakes.chassis.compiler :as cc]
    [dev.onionpancakes.chassis.core :as chassis]
-   [dev.onionpancakes.chassis.compiler :as cc]))
+   [hifi.core :as h]
+   [hifi.html.impl :as impl]
+   [hifi.util.codec :as codec]
+   [medley.core :as medley]))
 
 (when (h/dev?)
   (cc/set-warn-on-ambig-attrs!))
@@ -291,7 +291,7 @@
      [:body ^clojure.lang.IPersistentMap body-attrs
       body]]]))
 
-(def default-on-load-js
+(def default-on-init-js
   ;; Quirk with browsers is that cache settings are per URL not per
   ;; URL + METHOD this means that GET and POST cache headers can
   ;; mess with each other. To get around this an unused query param
@@ -303,16 +303,16 @@
 (defn shim-document [{:keys [body-pre body-post
                              csrf-cookie-js
                              tab-id-js
-                             on-load-js]
-                      :or   {on-load-js     default-on-load-js
+                             on-init-js]
+                      :or   {on-init-js     default-on-init-js
                              tab-id-js      default-tab-id-js
                              csrf-cookie-js csrf-cookie-js-prod}
                       :as   opts}]
   (html-document opts
                  (list
-                  [:div {:data-signals-csrf               csrf-cookie-js
-                         :data-signals-tab-id__case.kebab tab-id-js}]
-                  [:div {:id "hifi-on-load" :data-on-load on-load-js}]
+                  [:div {:data-signals:csrf               csrf-cookie-js
+                         :data-signals:tab-id__case.kebab tab-id-js}]
+                  [:div {:id "hifi-on-init" :data-init on-init-js}]
                   [:noscript "Your browser does not support JavaScript!"]
                   body-pre
                   [:main#morph]
