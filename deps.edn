@@ -37,8 +37,7 @@
                                  "libs/hifi-web/test"
                                  "libs/hifi-util/test"
                                  "examples/hello-world/test"]
-                   :extra-deps  {org.slf4j/slf4j-nop                  {:mvn/version "2.0.17"}
-                                 com.github.seancorfield/expectations {:mvn/version "2.2.214"}
+                   :extra-deps  {com.github.seancorfield/expectations {:mvn/version "2.2.214"}
                                  lambdaisland/kaocha                  {:mvn/version "1.91.1392"}}
                    :jvm-opts    ["-XX:-OmitStackTraceInFastThrow"]
                    :main-opts   ["-m" "kaocha.runner"]}
