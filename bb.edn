@@ -1,10 +1,13 @@
 {:paths ["scripts"]
  :tasks {:requires         ([clojure.string :as str]
-                            [babashka.tasks :refer [shell]])
+                            [babashka.tasks :refer [shell]]
+                            [datastar :as datastar])
          dev               {:doc "Start a local development server" :task (apply clojure "-M:repl/dev:dev" *command-line-args*)}
          test              (apply clojure "-M:dev:test" *command-line-args*)
          fmt               (shell "nix fmt")
          lint.copy-configs (shell "clj-kondo" "--lint" (-> (shell {:out :string} "clojure -Spath -M:test:dev") :out str/trim) "--dependencies" "--copy-configs" "--skip-lint")
          lint              (if (seq *command-line-args*)
                              (apply shell "clj-kondo" "--lint" *command-line-args*)
-                             (shell "clj-kondo" "--lint" "libs" "dev"))}}
+                             (shell "clj-kondo" "--lint" "libs" "dev"))
+         update-datastar   {:doc "Update datastar to latest version from GitHub releases"
+                            :task (datastar/update-datastar)}}}
