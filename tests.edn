@@ -36,8 +36,11 @@
     :kaocha/source-paths ["libs/hifi-assets/src"]
     :kaocha/test-paths ["libs/hifi-assets/test"]}
    {:id :datastar
-    :kaocha/source-paths ["libs/hifi-datastar/src"]
-    :kaocha/test-paths ["libs/hifi-datastar/test"]}
+   :kaocha/source-paths ["libs/hifi-datastar/src"]
+   :kaocha/test-paths ["libs/hifi-datastar/test"]}
+   {:id :cli
+    :kaocha/source-paths ["libs/hifi-cli/src"]
+    :kaocha/test-paths ["libs/hifi-cli/test"]}
    {:id :logging
     :kaocha/source-paths ["libs/hifi-logging/src"]
     :kaocha/test-paths ["libs/hifi-logging/test"]}

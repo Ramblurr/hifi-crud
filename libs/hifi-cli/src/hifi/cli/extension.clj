@@ -348,9 +348,14 @@
                                   spec-for-restrict)
             should-parse-args?  (or (has-parse-opts? m)
                                     (is-option? (first args)))
-            parse-opts          (assoc (deep-merge opts (dissoc parse-keys :spec))
-                                       :spec spec-with-args
-                                       :restrict true)
+            allowed-keys        (set (keys spec-with-args))
+            exec-defaults       (select-keys all-opts allowed-keys)
+            parse-opts          (-> (deep-merge opts (dissoc parse-keys :spec))
+                                    (assoc :spec spec-with-args
+                                           :restrict true)
+                                    (update :exec-args
+                                            (fnil merge {})
+                                            exec-defaults))
             {:keys [args opts]} (if should-parse-args?
                                   (cli/parse-args (vec args) parse-opts)
                                   {:args (vec args) :opts {}})
