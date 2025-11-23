@@ -21,7 +21,7 @@
    :body (:html (html/render req
                              [html/doctype
                               [:head
-                               [::html/stylesheet-link {:href "css/hello.css"}]]
+                               [::html/stylesheet-link {:href "css/app.css"}]]
                               [:body
                                [:h1 "Hello w World"]]]
                              nil))})

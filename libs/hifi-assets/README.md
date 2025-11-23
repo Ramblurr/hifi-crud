@@ -30,8 +30,6 @@ Browsers have evolved with better native capabilities, network speeds have incre
     - [Error Handling](#error-handling)
   - [TODO: HTML Helpers](#todo-html-helpers)
   - [Development Server](#development-server)
-    - [Development Performance](#development-performance)
-    - [No Caching in Development](#no-caching-in-development)
   - [Production Mode](#production-mode)
     - [Production Performance](#production-performance)
     - [Cache Optimization](#cache-optimization)
@@ -306,24 +304,21 @@ Document the HTML helper functions for generating asset tags with automatic dige
 
 ## Development Server
 
-In development mode, hifi-assets provides a Ring middleware that serves assets directly from source directories without pre-compilation.
-The development server automatically processes assets on-demand, applying content transformations and resolving asset references in real-time.
+In development mode, hifi-assets uses a file-watcher to automatically (re-)process asset files on-demand.
 
-### Development Performance
+This is achieved with two pieces:
+
+1. a file-watcher that watches the asset directories for changes, runs the pipeline and produces a new manfiest.
+2. a dev-mode middleware that reloads the manifest file on every request.
 
 Asset existence checks scan the configured paths dynamically, allowing for immediate feedback during development.
 File changes are detected automatically, ensuring the latest versions are always served.
 
 For projects with many assets, you can improve development performance by:
+
 - Using `:hifi.assets/excluded-paths` to skip processing source files used only for build tools
 - Organizing assets in shallow directory structures to reduce filesystem scanning
 - Avoiding deeply nested asset directories when possible
-
-### No Caching in Development
-
-Development mode bypasses asset caching entirely.
-When you modify assets (CSS, JavaScript, images), the server serves the most up-to-date version directly from the filesystem.
-There's no need to worry about cache invalidation during development.
 
 ## Production Mode
 

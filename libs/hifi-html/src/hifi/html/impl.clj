@@ -17,37 +17,6 @@
                   :hifi.html/image
                   :hifi.html/audio})
 
-;; TODO future tags: video, picture, don't forget to update hifi.html.impl/asset-tags
-(defmethod chassis/resolve-alias ::stylesheet-link
-  [_ attrs content]
-  (with-meta
-    [:link attrs content]
-    {::asset-marker {:type ::stylesheet-link}}))
-
-(defmethod chassis/resolve-alias ::preload-link
-  [_ attrs content]
-  (with-meta
-    [:link attrs content]
-    {::asset-marker {:type ::preload-link}}))
-
-(defmethod chassis/resolve-alias ::javascript-include
-  [_ attrs content]
-  (with-meta
-    [:script attrs content]
-    {::asset-marker {:type ::javascript-include}}))
-
-(defmethod chassis/resolve-alias ::image
-  [_ attrs content]
-  (with-meta
-    [:img attrs content]
-    {::asset-marker {:type ::image :opts attrs}}))
-
-(defmethod chassis/resolve-alias ::audio
-  [_ attrs content]
-  (with-meta
-    [:audio attrs content]
-    {::asset-marker {:type ::audio :opts attrs}}))
-
 (defn integrity? [attrs]
   (some? (:integrity attrs)))
 
