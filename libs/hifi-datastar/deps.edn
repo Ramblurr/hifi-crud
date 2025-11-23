@@ -1,6 +1,6 @@
 {:paths ["src" "resources"]
- :deps  {dev.data-star.clojure/sdk    {:mvn/version "1.0.0-RC3"}
-         dev.data-star.clojure/brotli {:mvn/version "1.0.0-RC3"}
+ :deps  {dev.data-star.clojure/sdk    {:mvn/version "1.0.0-RC4"}
+         dev.data-star.clojure/brotli {:mvn/version "1.0.0-RC4"}
          funcool/promesa              {:mvn/version "11.0.678"}
          com.taoensso/trove           {:mvn/version "1.1.0"}
          com.taoensso/nippy           {:mvn/version "3.6.0"}
