@@ -1,8 +1,6 @@
 (ns {{top/ns}}.{{main/ns}}
   (:require
    [hifi.web :as web]
-   [hifi.config :as config]
-   [hifi.assets :as assets]
    [hifi.html :as html]
    [hifi.core :as h]))
 
