@@ -91,11 +91,19 @@
     (binding [*print-namespace-maps* false]
       (pp/pprint x))))
 
-(defn write-initial-secrets [target ^KeyPair keypair initial-secrets]
-  (sops/encrypt-to-file target
-                        (pprint initial-secrets)
-                        {:age (str (.getPublic keypair))
-                         :input-type "binary"}))
+(defn write-initial-secrets
+  [target maybe-keypair-or-initial maybe-initial-or-opts]
+  (let [[initial-secrets {:keys [keypair recipients]}]
+        (if (instance? KeyPair maybe-keypair-or-initial)
+          [maybe-initial-or-opts {:keypair maybe-keypair-or-initial}]
+          [maybe-keypair-or-initial (or maybe-initial-or-opts {})])
+        age (cond
+              keypair (str (.getPublic ^KeyPair keypair))
+              (some? recipients) recipients)]
+    (sops/encrypt-to-file target
+                          (pprint initial-secrets)
+                          (cond-> {:input-type "binary"}
+                            age (assoc :age age)))))
 
 (comment
   (println)

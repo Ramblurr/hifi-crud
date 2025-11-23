@@ -16,8 +16,9 @@
                                  hifi/error             {:local/root "libs/hifi-error"}
                                  hifi/html              {:local/root "libs/hifi-html"}
                                  hifi/logging           {:local/root "libs/hifi-logging"}
-                                 hifi/web            {:local/root "libs/hifi-web"}
+                                 hifi/web               {:local/root "libs/hifi-web"}
                                  hifi/util              {:local/root "libs/hifi-util"}
+                                 dev.weavejester/hashp  {:mvn/version "0.5.1"}
                                  org.clojure/clojure    {:mvn/version "1.12.2"}
                                  org.clojure/tools.deps {:mvn/version "0.24.1523"}}
                    :jvm-opts    ["-Dguardrails.enabled=true"]}
@@ -43,4 +44,11 @@
                    :main-opts   ["-m" "kaocha.runner"]}
            :debug {:extra-deps {com.clojure-goes-fast/clj-async-profiler {:mvn/version "1.6.2"}
                                 com.clojure-goes-fast/clj-memory-meter   {:mvn/version "0.4.0"}
-                                criterium/criterium                      {:mvn/version "0.4.6"}}}}}
+                                criterium/criterium                      {:mvn/version "0.4.6"}}}
+           :mcp
+           {:deps      {org.slf4j/slf4j-nop     {:mvn/version "2.0.17"}
+                        com.bhauman/clojure-mcp {:git/url "https://github.com/bhauman/clojure-mcp.git"
+                                                 :git/tag "v0.1.12"
+                                                 :git/sha "79b9d5a00bad66920ca2f602e018e40adf7546cc"}}
+            :exec-fn   clojure-mcp.main/start-mcp-server
+            :exec-args {:port 46293}}}}

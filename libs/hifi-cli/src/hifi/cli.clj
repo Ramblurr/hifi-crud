@@ -3,10 +3,11 @@
   (:require
    [hifi.cli.cmd.system :as cmd.system]
    [hifi.cli.cmd.dev :as cmd.dev]
+   [hifi.cli.cmd.secrets :as cmd.secrets]
    [hifi.cli.cmd.new :as cmd.new]
    [hifi.cli.extension :as ext]))
 
-(def help-spec {:description "Help about any command"
+(def help-spec {:desc "Help about any command"
                 :doc "This is hifi, the hifi clojure command line interface."
                 :spec {:help {:desc  "Show this help message" :alias :h}}
                 :fn (fn [{:keys [cmd-tree args bin-name]}]
@@ -17,6 +18,7 @@
    "dev" cmd.dev/spec
    "system" cmd.system/spec
    "new" cmd.new/spec
+   "secrets" cmd.secrets/spec
    :spec {:verbose     {:desc "Verbose output"
                         :coerce  :boolean}
           :debug       {:desc "Print additional logs and traces"
@@ -27,7 +29,7 @@
   (ext/with-exception-reporting
     (ext/dispatch cmd-tree args {:middleware ext/default-middleware
                                  :bin-name "hifi"
-                                 :description "This is hifi, the hifi clojure command line interface."
+                                 :desc "This is hifi, the hifi clojure command line interface."
                                  :error-fn ext/error-fn})))
 
 (defn -main [& args]
@@ -38,7 +40,7 @@
 (comment
 
   (apply main ["new" "--wtf"])
-  (apply main ["help" "new"])
+  (apply main ["system" "--help"])
   ;; rcf
 
 ;;
