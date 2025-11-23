@@ -1,28 +1,31 @@
 (ns hifi.cli.cmd.new
   (:require
-   [hifi.cli.terminal :as term]
    [babashka.fs :as fs]
+   [clojure.string :as str]
    [clojure.tools.build.tasks.copy] ;; require so that it's compiled and native-image can find it
    [hifi.cli.sops :as sops]
+   [hifi.cli.terminal :as term]
    [hifi.util.codec :as codec]
    [hifi.util.crypto :as crypto]
-   [org.corfield.new :as dnew]
-
-   [clojure.string :as str]))
+   [org.corfield.new :as dnew]))
 
 (defn data-fn
+  ;; this function is used by template.edn
   "Example data-fn handler.
 
   Result is merged onto existing options data."
-  [_data]
+  [data]
   ;; (msg "data-fn got ")
   ;; (pp/pprint _data)
   (let [age-keypair (sops/generate-age-key)]
-    {:age-keypair age-keypair
-     :age-keys-txt-path (sops/keys-txt-path)
-     :age-public-key (sops/public-key age-keypair)}))
+    (merge (or data {})
+           {:age-keypair       age-keypair
+            :age-keys-txt-path (sops/keys-txt-path)
+            :age-public-key    (sops/public-key age-keypair)})))
 
+#_{:clj-kondo/ignore [:clojure-lsp/unused-public-var :redundant-ignore]}
 (defn template-fn
+  ;; this function is used by template.edn
   "Example template-fn handler.
 
   Result is used as the EDN for the template."
@@ -33,7 +36,9 @@
 (defn initial-secrets []
   {:hifi/root-key (codec/->hex (crypto/bytes 32))})
 
+#_{:clj-kondo/ignore [:clojure-lsp/unused-public-var]}
 (defn post-process-fn
+  ;; this function is used by template.edn
   "Example post-process-fn handler.
 
   Can programmatically modify files in the generated project."
@@ -91,7 +96,7 @@
            :ref     "<project-name>"}]
    :args->opts [:project-name]
    :examples examples
-   :description "Create a new hifi project in the current directory"
+   :desc "Create a new hifi project in the current directory"
    :doc "Extra docs"
    :cmds ["new"]})
 

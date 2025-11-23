@@ -163,9 +163,9 @@
       (str/join " " (concat cmds ["[flags]"] (map #(str "<" (name %) ">") args->opts))))))
 
 (defn description
-  "Return the :description string for a command path."
+  "Return the :desc string for a command path."
   [cmd-tree cmds]
-  (:description (get-in cmd-tree cmds)))
+  (:desc (get-in cmd-tree cmds)))
 
 (defn doc
   "Return the :doc string for a command path."
@@ -282,7 +282,7 @@
 
 (comment
   (def _tree {"new"
-              {"sub" {:description "Wow much tool"
+              {"sub" {:desc "Wow much tool"
                       :spec {:wow {}}}
                :spec
                {:overwrite
@@ -297,16 +297,16 @@
                  :ref "<project-name>"}],
                :args->opts [:project-name],
                :examples [],
-               :description "Create a new hifi project in the current directory",
+               :desc "Create a new hifi project in the current directory",
                :doc "Extra docs",
                :cmds ["new"]}
 
               "tool"
-              {:description "Tooling commands"
-               "ping" {:fn (fn [{:keys [opts]}] (println "pong")) :description "Ping the tool"}
+              {:desc "Tooling commands"
+               "ping" {:fn (fn [{:keys [opts]}] (println "pong")) :desc "Ping the tool"}
                "echo" {:fn (fn [{:keys [args]}] (println (str/join " " args)))
                        :spec {:upper {:alias :u :coerce :boolean :desc "Uppercase output"}}
-                       :description "Echo args"}}})
+                       :desc "Echo args"}}})
 
   (help {:cmd-tree _tree :args ["new" "wtf"]})
   ;; rcf
@@ -486,8 +486,8 @@
          (term/print-error e#)
          (exit)))))
 
-(defn print-program-info [cmd-tree {:keys [bin-name description doc]}]
-  (println description)
+(defn print-program-info [cmd-tree {:keys [bin-name desc doc]}]
+  (println desc)
   (println)
   (when doc
     (println doc)

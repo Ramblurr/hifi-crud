@@ -6,7 +6,7 @@
 
 (def examples [])
 
-(def format-spec {:coerce :keyword :default-desc "portal" :validate (fn [v] (contains? #{:print :portal} v))})
+(def format-spec {:coerce :keyword :default-desc "portal" :validate #{:print :portal}})
 
 (defn system-inspect-handler  [{:keys [opts _args]}]
   (let [{:keys [config-loader profile format]} opts
@@ -22,10 +22,10 @@
 
 (def spec {:fn          (fn [_])
            :examples    examples
-           :description "Explore your application's system map"
+           :desc        "Explore your application's system map"
            :cmds        ["system"]
            "inspect"    {:spec        (shared/with-shared-specs [:help :config-file :config-loader :profile :unmasked]
                                         {:format format-spec})
-                         :description "Inspect your application's system map"
+                         :desc        "Inspect your application's system map"
                          :fn          system-inspect-handler
                          :cmds        ["inspect"]}})

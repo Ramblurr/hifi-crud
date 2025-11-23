@@ -23,5 +23,5 @@
                               :coerce :keyword
                               :default :dev}})
            :examples examples
-           :description "Start a dev repl"
+           :desc "Start a dev repl"
            :cmds ["dev"]})
